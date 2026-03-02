@@ -4,6 +4,20 @@ import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { useEffect, useState, useRef } from "react";
 
+const getVideoMimeType = (fileName = "") => {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+
+  if (ext === "mkv") return "video/x-matroska";
+  if (ext === "webm") return "video/webm";
+  return "video/mp4";
+};
+
+const buildVideoSource = (baseUrl, video) => ({
+  src: `${baseUrl}/dl/${video.id}/${encodeURIComponent(video.name)}`,
+  type: getVideoMimeType(video.name),
+  size: parseInt(video.quality?.replace("p", ""), 10),
+});
+
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
@@ -20,11 +34,7 @@ export default function WatchTrailer(props) {
           let selectedPoster = "";
 
           if (props.popUpType === "movie") {
-            videoSources = props.id.telegram.map((q) => ({
-              src: `${BASE}/dl/${q.id}/${q.name}`,
-              type: "video/mp4",
-              size: parseInt(q.quality.replace("p", ""), 10),
-            }));
+            videoSources = props.id.telegram.map((q) => buildVideoSource(BASE, q));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
@@ -37,11 +47,7 @@ export default function WatchTrailer(props) {
               );
 
               if (episode) {
-                videoSources = episode.telegram.map((q) => ({
-                  src: `${BASE}/dl/${q.id}/${q.name}`,
-                  type: "video/mp4",
-                  size: parseInt(q.quality.replace("p", ""), 10),
-                }));
+                videoSources = episode.telegram.map((q) => buildVideoSource(BASE, q));
                 selectedPoster = episode.episode_backdrop;
               }
             }
