@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
-import axios from "axios";
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
@@ -13,7 +11,6 @@ export default function WatchTrailer(props) {
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,9 +122,14 @@ export default function WatchTrailer(props) {
             animate={{ scale: 1 }}
             exit={{ scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+            className="netflix-player-shell w-[94vw] max-w-6xl rounded-xl overflow-hidden shadow-2xl relative"
           >
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            <Plyr
+              ref={playerRef}
+              {...plyrProps}
+              id="player"
+              className="netflix-player"
+            />
           </motion.div>
         </motion.div>
       )}
