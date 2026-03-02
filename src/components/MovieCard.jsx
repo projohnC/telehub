@@ -4,121 +4,74 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/black-and-white.css";
 import { PiStarFill } from "react-icons/pi";
-
-import { BsPlayFill } from "react-icons/bs";
+import { BsPlayFill, BsPlusLg } from "react-icons/bs";
+import { BiLike } from "react-icons/bi";
+import { IoChevronDown } from "react-icons/io5";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
 
 const MovieCard = ({ movie }) => {
   const [showPlayBtn, setShowPlayBtn] = useState(false);
-  const [openId, setOpenId] = useState();
 
-  const showPlay = () => {
-    setOpenId(movie.tmdb_id);
-    setShowPlayBtn(true);
-  };
-
-  const hidePlay = () => {
-    setOpenId(movie.tmdb_id);
-    setShowPlayBtn(false);
-  };
+  const detailPath = movie.media_type === "movie" ? `/mov/${movie.tmdb_id}` : `/ser/${movie.tmdb_id}`;
 
   return (
-    <div className="relative">
-      <Link
-        to={
-          movie.media_type === "movie"
-            ? `/mov/${movie.tmdb_id}`
-            : `/ser/${movie.tmdb_id}`
-        }
-        className="rounded-t-2xl"
-      >
-        <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl ">
+    <div className="relative" onMouseEnter={() => setShowPlayBtn(true)} onMouseLeave={() => setShowPlayBtn(false)}>
+      <Link to={detailPath} className="block rounded-md overflow-hidden">
+        <div className="flex items-center justify-center aspect-video w-full object-cover rounded-md overflow-hidden bg-zinc-900">
           <LazyLoadImage
-            src={movie.poster ? movie.poster : posterPlaceholder}
+            src={movie.backdrop || movie.poster || posterPlaceholder}
             width="100%"
             effect="black-and-white"
             alt={movie.title}
-            className="aspect-[9/13.5] w-full object-cover rounded-2xl "
-            onMouseEnter={showPlay}
-            onMouseLeave={hidePlay}
+            className="aspect-video w-full object-cover rounded-md transition-transform duration-300 hover:scale-105"
           />
         </div>
       </Link>
 
-      <div className="text-primaryTextColor mt-2">
-        <p className="line-clamp-1 text-md md:text-base ">{movie.title}</p>
-        <div className="flex items-center justify-between text-secondaryTextColor mt-1 uppercase text-[0.6rem] sm:text-xs md:text-sm">
-          {movie.release_year && <p>{movie.release_year}</p>}
-          <div className="uppercase bg-bgColorSecondary text-primaryTextColor py-1 px-3 rounded-full text-[0.5rem] sm:text-[0.6rem]">
-            <p>{movie.media_type}</p>
-          </div>
-        </div>
+      <div className="text-white mt-2">
+        <p className="line-clamp-1 text-sm sm:text-base font-semibold">{movie.title}</p>
       </div>
 
-      {movie.rating ? (
-        <div className="flex items-center gap-1 absolute top-5 left-3 bg-bgColorSecondary text-yellow-300 py-1 px-3 rounded-full font-extrabold text-[0.6rem] sm:text-xs">
-          <PiStarFill />
-          <p>{movie.rating.toFixed(1)}</p>
-        </div>
-      ) : (
-        <div className="flex items-center gap-1 absolute top-5 left-3 bg-primaryBtn text-bgColor py-1 px-3 rounded-full text-xs font-extrabold">
-          <PiStarFill />
-          <p>0.0</p>
-        </div>
-      )}
-
-
-      {movie.languages ? (
-        <div className="flex items-center gap-1 absolute bottom-16 right-3 bg-primaryBtn text-bgColor py-1 px-3 rounded-full font-extrabold text-[0.6rem] sm:text-xs">
-          <p>
-            {movie.languages
-              .map((lang) => lang.charAt(0).toUpperCase() + lang.slice(1)) // Capitalize each language code
-              .join("-")}{" "}
-          </p>
-        </div>
-      ) : (
-        <div className="flex items-center gap-1 absolute bottom-16 right-3 bg-primaryBtn text-bgColor py-1 px-3 rounded-full text-xs font-extrabold">
-          <p>Hi</p>
-        </div>
-      )}
-
-      {movie.rip ? (
-        <div className="flex bg-bgColorSecondary rounded-full items-center gap-1 absolute bottom-16 left-3 text-primaryTextColor py-1 px-3 font-medium text-[0.6rem] sm:text-xs">
-          <p>{movie.rip}</p>
-        </div>
-      ) : (
-        <div className="flex bg-bgColorSecondary rounded-full items-center gap-1 absolute bottom-16 left-3 text-primaryTextColor py-1 px-3 font-medium text-[0.6rem] sm:text-xs">
-          <p>Blu-Ray</p>
-        </div>
-      )}
-
       <AnimatePresence>
-        {openId === movie.tmdb_id && showPlayBtn && (
-          <Link
-            to={
-              movie.media_type === "movie"
-                ? `/mov/${movie.tmdb_id}`
-                : `/ser/${movie.tmdb_id}`
-            }
-            onMouseEnter={showPlay}
-            onMouseLeave={hidePlay}
-            className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primaryBtn sm:block"
+        {showPlayBtn && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="hidden md:block absolute z-20 left-0 right-0 top-0 rounded-lg overflow-hidden bg-[#1a1a1a] border border-white/10 shadow-2xl"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: -20 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{
-                type: "tween",
-                duration: 0.3,
-              }}
-              className="text-3xl p-1 rounded-full border-4 border-primaryBtn"
-            >
-              <BsPlayFill />
-            </motion.div>
-          </Link>
+            <Link to={detailPath}>
+              <LazyLoadImage
+                src={movie.backdrop || movie.poster || posterPlaceholder}
+                width="100%"
+                alt={movie.title}
+                className="aspect-video w-full object-cover"
+              />
+            </Link>
+            <div className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Link to={detailPath} className="bg-white text-black rounded-full p-2 text-xl"><BsPlayFill /></Link>
+                  <button className="rounded-full border border-white/40 p-2"><BsPlusLg /></button>
+                  <button className="rounded-full border border-white/40 p-2"><BiLike /></button>
+                </div>
+                <button className="rounded-full border border-white/40 p-2"><IoChevronDown /></button>
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-xs text-white/90">
+                <span className="text-green-400 font-semibold">{movie.rating ? `${Math.round(movie.rating * 10)}% match` : "New"}</span>
+                {movie.release_year && <span>{movie.release_year}</span>}
+                <span className="uppercase border border-white/30 px-1 rounded">{movie.media_type || "HD"}</span>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="flex items-center gap-1 absolute top-2 left-2 bg-black/70 text-yellow-300 py-1 px-2 rounded-full font-semibold text-[0.65rem]">
+        <PiStarFill />
+        <p>{movie.rating ? movie.rating.toFixed(1) : "0.0"}</p>
+      </div>
     </div>
   );
 };
