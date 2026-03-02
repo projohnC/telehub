@@ -7,16 +7,22 @@ import { useEffect, useState, useRef } from "react";
 const getVideoMimeType = (fileName = "") => {
   const ext = fileName.split(".").pop()?.toLowerCase();
 
+  if (ext === "mov") return "video/quicktime";
   if (ext === "mkv") return "video/x-matroska";
   if (ext === "webm") return "video/webm";
+  if (ext === "m3u8") return "application/x-mpegURL";
   return "video/mp4";
 };
 
-const buildVideoSource = (baseUrl, video) => ({
-  src: `${baseUrl}/dl/${video.id}/${encodeURIComponent(video.name)}`,
-  type: getVideoMimeType(video.name),
-  size: parseInt(video.quality?.replace("p", ""), 10),
-});
+const buildVideoSource = (baseUrl, video) => {
+  const parsedSize = Number.parseInt(video.quality?.replace(/p/i, ""), 10);
+
+  return {
+    src: `${baseUrl}/dl/${video.id}/${encodeURIComponent(video.name)}`,
+    type: getVideoMimeType(video.name),
+    ...(Number.isFinite(parsedSize) ? { size: parsedSize } : {}),
+  };
+};
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
@@ -34,7 +40,9 @@ export default function WatchTrailer(props) {
           let selectedPoster = "";
 
           if (props.popUpType === "movie") {
-            videoSources = props.id.telegram.map((q) => buildVideoSource(BASE, q));
+            videoSources = props.id.telegram
+              .map((q) => buildVideoSource(BASE, q))
+              .filter(({ src }) => Boolean(src));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
@@ -47,7 +55,9 @@ export default function WatchTrailer(props) {
               );
 
               if (episode) {
-                videoSources = episode.telegram.map((q) => buildVideoSource(BASE, q));
+                videoSources = episode.telegram
+                  .map((q) => buildVideoSource(BASE, q))
+                  .filter(({ src }) => Boolean(src));
                 selectedPoster = episode.episode_backdrop;
               }
             }
@@ -131,6 +141,7 @@ export default function WatchTrailer(props) {
             className="netflix-player-shell w-[94vw] max-w-6xl rounded-xl overflow-hidden shadow-2xl relative"
           >
             <Plyr
+              key={sources.map(({ src }) => src).join("|")}
               ref={playerRef}
               {...plyrProps}
               id="player"
