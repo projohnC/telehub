@@ -24,6 +24,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
   const [isWatchMoviePopupOpen, setIsWatchMoviePopupOpen] = useState(false);
   const [isWatchEpisodePopupOpen, setIsWatchEpisodePopupOpen] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
+  const [isPlayerActive, setIsPlayerActive] = useState(false);
 
   return (
     <div className="relative mt-20 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
@@ -32,22 +33,49 @@ export default function MoviesAndSeriesDetailsSections(props) {
           <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
             <div
               onClick={() => {
-                props.detailType === "movie"
-                  ? setIsWatchMoviePopupOpen(true)
-                  : null;
+                if (props.detailType === "movie") {
+                  setIsPlayerActive(true);
+                  setIsWatchMoviePopupOpen(true);
+                }
               }}
-              className="aspect-video w-full relative flex items-center shrink-0 bg-btnColor  rounded-3xl cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 "
+              className="aspect-video w-full relative flex items-center shrink-0 bg-btnColor rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.02]"
             >
-              <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-otherColor  bg-otherColor/50 cursor-pointer rounded-full text-4xl sm:text-5xl">
-                {props.detailType === "movie" ? <BiPlay /> : null}
-              </div>
+              {isPlayerActive ? (
+                <div className="w-full h-full">
+                  {props.detailType === "movie" ? (
+                    <Watch
+                      isWatchMoviePopupOpen={isWatchMoviePopupOpen}
+                      id={props.movieData}
+                      setIsWatchMoviePopupOpen={setIsWatchMoviePopupOpen}
+                      popUpType="movie"
+                      inline={true}
+                    />
+                  ) : (
+                    <Watch
+                      isWatchEpisodePopupOpen={isWatchEpisodePopupOpen}
+                      id={props.movieData}
+                      setIsWatchEpisodePopupOpen={setIsWatchEpisodePopupOpen}
+                      popUpType="episode"
+                      seasonNumber={props.seasonNumber}
+                      episodeNumber={props.episodeNumber}
+                      inline={true}
+                    />
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-otherColor bg-otherColor/50 cursor-pointer rounded-full text-4xl sm:text-5xl">
+                    {props.detailType === "movie" ? <BiPlay /> : null}
+                  </div>
 
-              <LazyLoadImage
-                src={props.movieData.backdrop}
-                effect="black-and-white"
-                alt={props.movieData.title}
-                className=" aspect-video w-full rounded-3xl shrink-0 bg-btnColor"
-              />
+                  <LazyLoadImage
+                    src={props.movieData.backdrop}
+                    effect="black-and-white"
+                    alt={props.movieData.title}
+                    className="aspect-video w-full rounded-3xl shrink-0 bg-btnColor"
+                  />
+                </>
+              )}
             </div>
             <div className="p-5">
               {props.movieData.genres && (
@@ -237,11 +265,12 @@ export default function MoviesAndSeriesDetailsSections(props) {
                           key={index}
                           onClick={() => {
                             props.setEpisodeNumber(eps.episode_number);
+                            setIsPlayerActive(true);
                             setIsWatchEpisodePopupOpen(true);
                           }}
                           className={`flex flex-col items-center justify-center w-24 h-16 rounded-md cursor-pointer transition-all duration-300 ${props.episodeNumber === eps.episode_number
-                              ? "bg-otherColor text-white"
-                              : "bg-bgColorSecondary text-secondaryTextColor hover:bg-bgColorSecondary/80"
+                            ? "bg-otherColor text-white"
+                            : "bg-bgColorSecondary text-secondaryTextColor hover:bg-bgColorSecondary/80"
                             }`}
                         >
                           <span className="text-xs font-bold leading-none">{eps.episode_number}</span>
@@ -264,26 +293,29 @@ export default function MoviesAndSeriesDetailsSections(props) {
         </div>
       )}
 
-      {/* Watch Movie Popup */}
-      {props.detailType === "movie" && (
-        <Watch
-          isWatchMoviePopupOpen={isWatchMoviePopupOpen}
-          id={props.movieData}
-          setIsWatchMoviePopupOpen={setIsWatchMoviePopupOpen}
-          popUpType="movie"
-        />
-      )}
+      {/* Modal Fallbacks (for compatibility if needed, though predominantly inline now) */}
+      {!isPlayerActive && (
+        <>
+          {props.detailType === "movie" && (
+            <Watch
+              isWatchMoviePopupOpen={isWatchMoviePopupOpen}
+              id={props.movieData}
+              setIsWatchMoviePopupOpen={setIsWatchMoviePopupOpen}
+              popUpType="movie"
+            />
+          )}
 
-      {/* Watch Episode Popup */}
-      {props.detailType === "series" && (
-        <Watch
-          isWatchEpisodePopupOpen={isWatchEpisodePopupOpen}
-          id={props.movieData}
-          setIsWatchEpisodePopupOpen={setIsWatchEpisodePopupOpen}
-          popUpType="episode"
-          seasonNumber={props.seasonNumber}
-          episodeNumber={props.episodeNumber}
-        />
+          {props.detailType === "series" && (
+            <Watch
+              isWatchEpisodePopupOpen={isWatchEpisodePopupOpen}
+              id={props.movieData}
+              setIsWatchEpisodePopupOpen={setIsWatchEpisodePopupOpen}
+              popUpType="episode"
+              seasonNumber={props.seasonNumber}
+              episodeNumber={props.episodeNumber}
+            />
+          )}
+        </>
       )}
     </div>
   );

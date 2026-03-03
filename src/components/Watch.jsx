@@ -104,33 +104,47 @@ export default function WatchTrailer(props) {
   };
 
   return (
-    <AnimatePresence>
-      {isModalOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-30 w-full h-screen bg-black/90 backdrop-blur-md flex items-center justify-center"
-        >
-          <button
-            onClick={closeModal}
-            className="absolute top-5 right-5 text-white text-2xl z-50"
-          >
-            <AiOutlineClose />
-          </button>
-
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.9 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
-          >
+    <>
+      {props.inline ? (
+        <div className="w-full h-full rounded-3xl overflow-hidden relative bg-black">
+          {sources.length > 0 ? (
             <Plyr ref={playerRef} {...plyrProps} id="player" />
-          </motion.div>
-        </motion.div>
+          ) : (
+            <div className="flex items-center justify-center w-full h-full">
+              <div className="loader"></div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <AnimatePresence>
+          {isModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-30 w-full h-screen bg-black/90 backdrop-blur-md flex items-center justify-center"
+            >
+              <button
+                onClick={closeModal}
+                className="absolute top-5 right-5 text-white text-2xl z-50"
+              >
+                <AiOutlineClose />
+              </button>
+
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+              >
+                <Plyr ref={playerRef} {...plyrProps} id="player" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
-    </AnimatePresence>
+    </>
   );
 }
