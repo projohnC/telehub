@@ -11,57 +11,59 @@ const DownloadButton = ({ movieData, btnType }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [selectedSeason, setSelectedSeason] = useState("");
-  const [selectedEpisode, setSelectedEpisode] = useState("");
-  const [selectedQuality, setSelectedQuality] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState(new Set([]));
+  const [selectedEpisode, setSelectedEpisode] = useState(new Set([]));
+  const [selectedQuality, setSelectedQuality] = useState(new Set([]));
   const [episodes, setEpisodes] = useState([]);
   const [qualities, setQualities] = useState([]);
   const [loading, setLoading] = useState({});
 
   useEffect(() => {
-    if (selectedSeason) {
+    const seasonVal = Array.from(selectedSeason)[0];
+    if (seasonVal) {
       const season = movieData.seasons.find(
-        (s) => s.season_number === parseInt(selectedSeason)
+        (s) => s.season_number === parseInt(seasonVal)
       );
       if (season) {
         setEpisodes(season.episodes);
-        setSelectedEpisode("");
+        setSelectedEpisode(new Set([]));
         setQualities([]);
       }
     }
   }, [selectedSeason, movieData.seasons]);
 
   useEffect(() => {
-    if (selectedEpisode) {
+    const episodeVal = Array.from(selectedEpisode)[0];
+    if (episodeVal) {
       const episode = episodes.find(
-        (e) => e.episode_number === parseInt(selectedEpisode)
+        (e) => e.episode_number === parseInt(episodeVal)
       );
       if (episode) {
         setQualities(episode.telegram);
-        setSelectedQuality("");
+        setSelectedQuality(new Set([]));
       }
     }
   }, [selectedEpisode, episodes]);
 
   const shortenUrl = async (url) => {
-  try {
-    // Flexible structure for various APIs
-    const response = await axios.get(API_URL, {
-      params: {
-        key: API_KEY,
-        link: url, // Adjust this depending on your API (link/url/etc.)
-      },
-    });
+    try {
+      // Flexible structure for various APIs
+      const response = await axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          link: url, // Adjust this depending on your API (link/url/etc.)
+        },
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    // Adjust this based on expected field in your API response
-    return data?.shortenedUrl || data?.short || data?.url || url;
-  } catch (error) {
-    console.error("Error shortening URL:", error);
-    return url;
-  }
-};
+      // Adjust this based on expected field in your API response
+      return data?.shortenedUrl || data?.short || data?.url || url;
+    } catch (error) {
+      console.error("Error shortening URL:", error);
+      return url;
+    }
+  };
 
 
   const generateUrl = (id, name) => {
@@ -100,13 +102,17 @@ const DownloadButton = ({ movieData, btnType }) => {
         aria-label="Select season"
         placeholder="Select season"
         className="w-40 mb-2"
-        onChange={(e) => setSelectedSeason(e.target.value)}
-        value={selectedSeason}
+        classNames={{
+          value: "text-white",
+          trigger: "border-white/20",
+        }}
+        onSelectionChange={setSelectedSeason}
+        selectedKeys={selectedSeason}
       >
         {movieData.seasons
           .sort((a, b) => a.season_number - b.season_number)
           .map((s) => (
-            <SelectItem key={s.season_number} value={s.season_number}>
+            <SelectItem key={s.season_number} textValue={`Season ${s.season_number}`}>
               Season {s.season_number}
             </SelectItem>
           ))}
@@ -117,14 +123,18 @@ const DownloadButton = ({ movieData, btnType }) => {
         aria-label="Select episode"
         placeholder="Select episode"
         className="w-40 mb-2"
-        onChange={(e) => setSelectedEpisode(e.target.value)}
-        value={selectedEpisode}
-        disabled={!selectedSeason}
+        classNames={{
+          value: "text-white",
+          trigger: "border-white/20",
+        }}
+        onSelectionChange={setSelectedEpisode}
+        selectedKeys={selectedEpisode}
+        isDisabled={selectedSeason.size === 0}
       >
         {episodes
           .sort((a, b) => a.episode_number - b.episode_number)
           .map((e) => (
-            <SelectItem key={e.episode_number} value={e.episode_number}>
+            <SelectItem key={e.episode_number} textValue={`Episode ${e.episode_number}`}>
               Episode {e.episode_number}
             </SelectItem>
           ))}
@@ -135,25 +145,30 @@ const DownloadButton = ({ movieData, btnType }) => {
         aria-label="Select quality"
         placeholder="Select quality"
         className="w-40 mb-2"
-        onChange={(e) => setSelectedQuality(e.target.value)}
-        value={selectedQuality}
-        disabled={!selectedEpisode}
+        classNames={{
+          value: "text-white",
+          trigger: "border-white/20",
+        }}
+        onSelectionChange={setSelectedQuality}
+        selectedKeys={selectedQuality}
+        isDisabled={selectedEpisode.size === 0}
       >
         {qualities?.map((q) => (
-          <SelectItem key={q.quality} value={q.quality}>
+          <SelectItem key={q.quality} textValue={q.quality}>
             {q.quality}
           </SelectItem>
         ))}
       </Select>
       <Button
         onClick={() => {
-          const q = qualities.find((q) => q.quality === selectedQuality);
+          const qualityVal = Array.from(selectedQuality)[0];
+          const q = qualities.find((q) => q.quality === qualityVal);
           if (q) handleButtonClick(q.id, q.name, q.quality);
         }}
         size="sm"
         className="bg-primaryBtn rounded-full"
-        disabled={!selectedQuality}
-        isLoading={loading[selectedQuality]}
+        isDisabled={selectedQuality.size === 0}
+        isLoading={loading[Array.from(selectedQuality)[0]]}
         spinner={<Spinner />}
       >
         {btnType === "Download" ? "Download" : "Open in Player"}
