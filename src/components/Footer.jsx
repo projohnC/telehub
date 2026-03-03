@@ -50,7 +50,7 @@ export default function Footer() {
             </div>
             <p className="text-sm text-secondaryTextColor lg:text-md leading-relaxed">
               <strong className="text-white block mb-2">
-                HubStream does not host, upload, or store any media content on its servers.
+                (HubStream does not host, upload, or store any media content on its servers.)
               </strong>
               All content available on this platform is sourced from publicly accessible third-party services.
               HubStream simply indexes and provides links to media files that are hosted externally,
@@ -98,4 +98,3 @@ export default function Footer() {
     </>
   );
 }
-

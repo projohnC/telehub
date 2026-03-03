@@ -11,7 +11,34 @@
 }
 
 body {
-  background: #000000;
+  background: #050614;
+  color: white;
+}
+
+/* Premium Gradients and Button Styles */
+.bg-purple-gradient {
+  background: linear-gradient(90deg, #6366F1 0%, #A855F7 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.bg-orange-gradient {
+  background: linear-gradient(90deg, #F97316 0%, #EF4444 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+}
+
+.bg-dark-premium {
+  background: rgba(31, 41, 55, 0.5) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-hover-effect:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
 }
 
 /* Mask */

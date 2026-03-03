@@ -4,36 +4,33 @@ import { PiTelegramLogo } from "react-icons/pi";
 import axios from "axios";
 import { Button } from "@nextui-org/button";
 import Spinner from "./svg/Spinner";
-import { useLocation } from "react-router-dom";
 
 const TelegramButton = ({ movieData }) => {
   const USERNAME = import.meta.env.VITE_TG_USERNAME;
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [shortenedUrls, setShortenedUrls] = useState({});
   const [loading, setLoading] = useState({});
-  const location = useLocation();
 
   const shortenUrl = async (url) => {
-  try {
-    // Flexible structure for various APIs
-    const response = await axios.get(API_URL, {
-      params: {
-        key: API_KEY,
-        link: url, // Adjust this depending on your API (link/url/etc.)
-      },
-    });
+    try {
+      // Flexible structure for various APIs
+      const response = await axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          link: url, // Adjust this depending on your API (link/url/etc.)
+        },
+      });
 
-    const data = response.data;
+      const data = response.data;
 
-    // Adjust this based on expected field in your API response
-    return data?.shortenedUrl || data?.short || data?.url || url;
-  } catch (error) {
-    console.error("Error shortening URL:", error);
-    return url;
-  }
-};
+      // Adjust this based on expected field in your API response
+      return data?.shortenedUrl || data?.short || data?.url || url;
+    } catch (error) {
+      console.error("Error shortening URL:", error);
+      return url;
+    }
+  };
 
 
   const handleButtonClick = async (originalUrl, quality) => {
@@ -62,7 +59,7 @@ const TelegramButton = ({ movieData }) => {
           )
         }
         size="sm"
-        className="bg-primaryBtn rounded-full"
+        className="bg-orange-gradient btn-hover-effect text-white rounded-xl shadow-lg font-bold"
         isLoading={loading[quality]}
         spinner={<Spinner />}
       >
@@ -87,7 +84,7 @@ const TelegramButton = ({ movieData }) => {
           offset={20}
         >
           <PopoverTrigger>
-            <button className="text-left bg-otherColor text-bgColor py-1 px-3 rounded-full border-2 border-otherColor">
+            <button className="text-left bg-orange-gradient btn-hover-effect text-white py-2 px-5 rounded-xl shadow-md font-bold text-sm w-full">
               Season {season.season_number}
             </button>
           </PopoverTrigger>
@@ -103,7 +100,7 @@ const TelegramButton = ({ movieData }) => {
                     )
                   }
                   size="sm"
-                  className="bg-primaryBtn rounded-full"
+                  className="bg-orange-gradient btn-hover-effect text-white rounded-xl shadow-lg font-bold"
                   isLoading={loading[quality]}
                   spinner={<Spinner />}
                 >
@@ -119,8 +116,8 @@ const TelegramButton = ({ movieData }) => {
   return (
     <Popover placement="bottom" showArrow={true}>
       <PopoverTrigger>
-        <button className="uppercase flex items-center justify-center gap-2 bg-otherColor max-w-full grow text-bgColor text-xs rounded-full border-2 border-otherColor py-1 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-2">
-          <PiTelegramLogo className="text-lg" /> Telegram
+        <button className="uppercase flex items-center justify-center gap-2 bg-orange-gradient btn-hover-effect max-w-full grow text-white text-xs rounded-2xl py-2 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-3 font-bold shadow-lg">
+          <PiTelegramLogo className="text-xl" /> Telegram
         </button>
       </PopoverTrigger>
       <PopoverContent className="bg-btnColor">

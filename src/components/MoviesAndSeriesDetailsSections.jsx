@@ -15,7 +15,6 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FiCalendar } from "react-icons/fi";
 import { BsListStars } from "react-icons/bs";
 import { PiStarFill } from "react-icons/pi";
-import { LuLanguages } from "react-icons/lu";
 import TelegramButton from "./TelegramButtons";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
@@ -27,11 +26,11 @@ export default function MoviesAndSeriesDetailsSections(props) {
   const [isPlayerActive, setIsPlayerActive] = useState(false);
 
   return (
-    <div className="relative mt-20 bg-btnColor/40 rounded-3xl overflow-hidden ">
+    <div className="relative mt-20 bg-dark-premium rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
       <div className="p-3 md:p-10">
         {!props.isMovieDataLoading ? (
           <>
-            <div className={`grid ${isPlayerActive ? "grid-cols-1" : "lg:grid-cols-2"} content-center items-center gap-5 `}>
+            <div className={`grid ${isPlayerActive ? "grid-cols-1" : "lg:grid-cols-2"} content-center items-center gap-8 `}>
               <div
                 onClick={() => {
                   if (props.detailType === "movie") {
@@ -39,7 +38,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     setIsWatchMoviePopupOpen(true);
                   }
                 }}
-                className={`w-full relative flex items-center shrink-0 bg-btnColor rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.01] ${!isPlayerActive ? "aspect-video" : ""}`}
+                className={`w-full relative flex items-center shrink-0 bg-black/40 rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.01] border border-white/10 ${!isPlayerActive ? "aspect-video" : ""}`}
               >
                 {isPlayerActive ? (
                   <div className="w-full h-full">
@@ -65,7 +64,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   </div>
                 ) : (
                   <>
-                    <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-otherColor bg-otherColor/50 cursor-pointer rounded-full text-4xl sm:text-5xl">
+                    <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-purple-gradient/80 p-4 cursor-pointer rounded-full text-4xl sm:text-5xl shadow-lg btn-hover-effect">
                       {props.detailType === "movie" ? <BiPlay /> : null}
                     </div>
 
@@ -73,112 +72,92 @@ export default function MoviesAndSeriesDetailsSections(props) {
                       src={props.movieData.backdrop}
                       effect="black-and-white"
                       alt={props.movieData.title}
-                      className="aspect-video w-full rounded-3xl shrink-0 bg-btnColor"
+                      className="aspect-video w-full rounded-3xl shrink-0 object-cover"
                     />
                   </>
                 )}
               </div>
-              <div className="p-5">
+              <div className="p-2 sm:p-5 flex flex-col gap-4">
                 {props.movieData.genres && (
-                  <div className="text-otherColor flex gap-2 flex-wrap text-sm xl:text-md">
+                  <div className="flex gap-2 flex-wrap text-sm">
                     {props.movieData.genres.map((genre, index) => {
-                      return <p key={index}>{genre}</p>;
+                      return <p key={index} className="bg-white/10 px-3 py-1 rounded-full text-secondaryTextColor text-xs">{genre}</p>;
                     })}
                   </div>
                 )}
-                <h1 className="text-primaryTextColor font-bold text-2xl sm:text-3xl mt-2">
+                <h1 className="text-white font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-tight">
                   {props.movieData.title}
                 </h1>
 
                 {props.movieData.media_type == "tv" ? (
-                  <p className="bg-otherColor/40 text-otherColor px-5 rounded-full w-fit line-clamp-1 text-sm xl:text-md">
+                  <p className="bg-orange-gradient text-white px-4 py-1 rounded-full w-fit text-xs font-bold uppercase tracking-wider">
                     {props.movieData.status}
                   </p>
                 ) : null}
-                <p className="text-secondaryTextColor  line-clamp-2 mt-2 text-xs xl:text-sm">
+
+                <p className="text-secondaryTextColor line-clamp-3 text-sm leading-relaxed opacity-80">
                   {props.movieData.description}
                 </p>
-                <div className="flex gap-2 text-primaryTextColor flex-wrap mt-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Media Type Icon and Info */}
+
+                <div className="flex flex-col gap-4 mt-2">
+                  <div className="flex flex-wrap items-center gap-4 text-secondaryTextColor border-y border-white/5 py-3">
+                    {/* Runtime/Seasons */}
                     <div className="flex items-center gap-2">
                       {props.movieData.media_type === "movie" ? (
-                        <BiTime className="text-secondaryTextColor text-xl xl:text-2xl" />
+                        <BiTime className="text-xl" />
                       ) : (
-                        <BsListStars className="text-secondaryTextColor text-xl xl:text-2xl" />
+                        <BsListStars className="text-xl" />
                       )}
-                      {props.movieData.media_type === "movie" ? (
-                        <p className="text-xs xl:text-sm">
-                          {props.movieData.runtime} min
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-xs xl:text-sm">
-                            {props.movieData.total_seasons} Seasons
-                          </p>
-                          <span className="text-xs xl:text-sm mx-2">|</span>
-                          <p className="text-xs xl:text-sm">
-                            {props.movieData.total_episodes} Eps
-                          </p>
-                        </>
-                      )}
+                      <p className="text-xs font-medium">
+                        {props.movieData.media_type === "movie"
+                          ? `${props.movieData.runtime} min`
+                          : `${props.movieData.total_seasons} Seasons`
+                        }
+                      </p>
                     </div>
 
-                    {/* Release Year */}
-                    {props.movieData.media_type === "movie" &&
-                      props.movieData.release_year && (
-                        <div className="flex items-center gap-2">
-                          <FiCalendar className="text-secondaryTextColor text-lg xl:text-xl" />
-                          <p className="text-xs xl:text-sm">
-                            {props.movieData.release_year}
-                          </p>
-                        </div>
-                      )}
+                    <span className="opacity-20">|</span>
 
-                    {/* Languages */}
-                    {props.movieData.languages && (
+                    {/* Release Year */}
+                    {props.movieData.release_year && (
                       <div className="flex items-center gap-2">
-                        <LuLanguages className="text-lg xl:text-xl" />
-                        <p className="text-xs xl:text-sm">
-                          {props.movieData.languages
-                            .map(
-                              (lang) =>
-                                lang.charAt(0).toUpperCase() + lang.slice(1)
-                            )
-                            .join("-")}
-                        </p>
+                        <FiCalendar className="text-lg" />
+                        <p className="text-xs font-medium">{props.movieData.release_year}</p>
                       </div>
                     )}
+
+                    <span className="opacity-20 hidden sm:inline">|</span>
+
                     {/* Quality */}
                     {props.movieData.rip && (
                       <div className="flex items-center gap-2">
-                        <MdOutlineHighQuality className="text-lg xl:text-xl" />
-                        <p className="text-xs xl:text-sm">
-                          {props.movieData.rip}
-                        </p>
+                        <MdOutlineHighQuality className="text-xl" />
+                        <p className="text-xs font-medium uppercase">{props.movieData.rip}</p>
                       </div>
                     )}
+                  </div>
 
+                  <div className="flex items-center gap-3">
                     {/* Media Type Label */}
-                    <div className="flex items-center gap-2 bg-bgColorSecondary/50 px-3 py-0.5 rounded-full">
-                      <p className="text-xs xl:text-sm text-secondaryTextColor capitalize">
+                    <div className="flex items-center gap-2 bg-white/5 px-4 py-1 rounded-full border border-white/10">
+                      <p className="text-xs text-white/70 font-bold uppercase tracking-widest">
                         {props.movieData.media_type === "tv" ? "Series" : "Movie"}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center flex-wrap gap-2 text-primaryTextColor mt-3">
 
-                  <TelegramButton movieData={props.movieData} />
+                <div className="flex flex-col gap-3 mt-4 w-full sm:max-w-md">
+                  <div className="flex gap-3 w-full">
+                    <TelegramButton movieData={props.movieData} />
+                    <DownloadButton
+                      movieData={props.movieData}
+                      btnType="Download"
+                    />
+                  </div>
                   <DownloadButton
                     movieData={props.movieData}
-                    btnType="Download"
-                  />
-                </div>
-                <div className="mt-3 flex">
-                  <DownloadButton
-                    movieData={props.movieData}
-                    btnType="MX Player"
+                    btnType="Player"
                   />
                 </div>
               </div>

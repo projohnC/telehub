@@ -86,7 +86,7 @@ const DownloadButton = ({ movieData, btnType }) => {
         key={i}
         onClick={() => handleButtonClick(q.id, q.name, q.quality)}
         size="sm"
-        className="bg-primaryBtn rounded-full"
+        className={`${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold`}
         isLoading={loading[q.quality]}
         spinner={<Spinner />}
       >
@@ -166,12 +166,12 @@ const DownloadButton = ({ movieData, btnType }) => {
           if (q) handleButtonClick(q.id, q.name, q.quality);
         }}
         size="sm"
-        className="bg-primaryBtn rounded-full"
+        className={`${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold`}
         isDisabled={selectedQuality.size === 0}
         isLoading={loading[Array.from(selectedQuality)[0]]}
         spinner={<Spinner />}
       >
-        {btnType === "Download" ? "Download" : "Open in Player"}
+        {btnType === "Download" ? "Download Now" : "Play in Player"}
       </Button>
     </div>
   );
@@ -179,14 +179,14 @@ const DownloadButton = ({ movieData, btnType }) => {
   return (
     <Popover placement="bottom" showArrow={true}>
       <PopoverTrigger>
-        <button className="flex justify-center items-center gap-2 uppercase text-otherColor max-w-full grow text-xs rounded-full border-2 border-otherColor py-1 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-2">
+        <button className={`uppercase flex items-center justify-center gap-2 max-w-full grow text-white text-xs rounded-2xl py-2 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-3 font-bold shadow-lg btn-hover-effect ${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"}`}>
           {btnType === "Download" ? (
             <>
-              <FaCloudDownloadAlt className="text-lg" /> Download
+              <FaCloudDownloadAlt className="text-xl" /> Download
             </>
           ) : (
             <>
-              <FaPlay className="text-lg" /> Player
+              <FaPlay className="text-xl" /> Player
             </>
           )}
         </button>
