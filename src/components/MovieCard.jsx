@@ -48,13 +48,9 @@ const MovieCard = ({ movie }) => {
             </div>
           </div>
           <div className="absolute bottom-3 left-3 z-10">
-            {movie.media_type === "tv" ? (
+            {movie.media_type === "tv" && (
               <div className="bg-black/60 backdrop-blur-sm text-white text-[0.63rem] font-bold px-2 py-0.5 rounded shadow-sm">
                 {movie.total_episodes || "7"} EP
-              </div>
-            ) : (
-              <div className="bg-black/60 backdrop-blur-sm text-white text-[0.63rem] font-bold px-2 py-0.5 rounded shadow-sm">
-                {movie.duration || "1:51:24"}
               </div>
             )}
           </div>
