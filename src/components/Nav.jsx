@@ -235,7 +235,7 @@ export default function Nav() {
           onSubmit={(e) => {
             e.preventDefault();
           }}
-          className="relative flex items-center justify-end"
+          className="relative flex items-center justify-end flex-grow-0 sm:flex-grow-0"
           ref={closeSearchResultsDropDown}
         >
           <div className="relative flex items-center justify-end w-full">
@@ -243,19 +243,20 @@ export default function Nav() {
               {searchOpen && (
                 <motion.div
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: "100%", opacity: 1 }}
+                  animate={{ width: window.innerWidth < 640 ? "160px" : "100%", opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
-                  className="absolute right-12 md:static md:w-full overflow-hidden"
+                  className="absolute right-12 md:static md:w-full overflow-hidden flex items-center"
                 >
                   <input
                     type="text"
                     name="search"
+                    autoFocus
                     value={query}
                     onChange={(e) => {
                       setQuery(e.target.value);
                     }}
                     placeholder="Search"
-                    className="py-1.5 px-4 pr-10 outline-0 text-sm bg-bgColorSecondary/50 border border-secondaryTextColor/20 rounded-lg w-full sm:text-base placeholder:text-secondaryTextColor/50"
+                    className="py-1.5 px-4 pr-10 outline-0 text-sm bg-bgColorSecondary/80 border border-secondaryTextColor/20 rounded-lg w-full sm:text-base placeholder:text-secondaryTextColor/50 backdrop-blur-sm"
                   />
                 </motion.div>
               )}
@@ -263,15 +264,15 @@ export default function Nav() {
 
             <div
               onClick={toggleSearch}
-              className="flex items-center justify-center p-2 bg-bgColorSecondary rounded-lg border border-secondaryTextColor/20 cursor-pointer hover:bg-bgColorSecondary/80 transition-all ml-2"
+              className="flex items-center justify-center p-2 bg-bgColorSecondary rounded-lg border border-secondaryTextColor/20 cursor-pointer hover:bg-bgColorSecondary/80 transition-all ml-2 z-10"
             >
               <FiSearch className="text-secondaryTextColor" />
             </div>
           </div>
 
           {/* SEARCH RESULTS CONTAINER */}
-          {debouncedVal && (
-            <div className="absolute flex flex-col items-center py-8 z-20 bg-btnColor w-[120%] -left-10 right-5 xs:w-full xs:left-0 max-h-[70dvh] justify-start overflow-y-scroll top-14 rounded-xl ">
+          {debouncedVal && searchOpen && (
+            <div className="absolute flex flex-col items-center py-6 z-20 bg-btnColor w-[90vw] -right-2 sm:right-0 sm:w-full max-h-[70dvh] justify-start overflow-y-scroll top-14 rounded-2xl shadow-2xl border border-secondaryTextColor/10">
               {/* Results Found Element */}
               {searcResult.length > 0 && !isLoading
                 ? searcResult.map((result) => {
