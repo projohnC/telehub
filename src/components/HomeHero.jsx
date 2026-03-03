@@ -56,7 +56,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                         {movie.title}
                       </h1>
                     )}
-                    <div className="hidden items-center gap-2 -mt-2  sm:flex">
+                    <div className="flex items-center gap-2 -mt-2">
                       {movie.release_year && (
                         <p className="text-[0.6rem] lg:text-[0.7rem] xl:text-[0.9rem] ">
                           {movie.release_year}
@@ -76,7 +76,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                         {movie.rip}
                       </p>
                     </div>
-                    <div className="flex-col gap-3 text-sm  text-bgColor hidden md:flex">
+                    <div className="flex flex-col gap-3 text-sm text-bgColor">
                       <div className="flex items-center gap-1 capitalize flex-wrap">
                         {movie.genres.map((genreId, index) => (
                           <div

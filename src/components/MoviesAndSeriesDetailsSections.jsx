@@ -159,12 +159,8 @@ export default function MoviesAndSeriesDetailsSections(props) {
                       </div>
                     )}
 
-                    {/* View Count Mockup */}
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs xl:text-sm text-secondaryTextColor">
-                        4.5M views
-                      </p>
-                      <span className="text-secondaryTextColor">•</span>
+                    {/* Media Type Label */}
+                    <div className="flex items-center gap-2 bg-bgColorSecondary/50 px-3 py-0.5 rounded-full">
                       <p className="text-xs xl:text-sm text-secondaryTextColor capitalize">
                         {props.movieData.media_type === "tv" ? "Series" : "Movie"}
                       </p>
