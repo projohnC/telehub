@@ -31,7 +31,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
       <div className="p-3 md:p-10">
         {!props.isMovieDataLoading ? (
           <>
-            <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
+            <div className={`grid ${isPlayerActive ? "grid-cols-1" : "lg:grid-cols-2"} content-center items-center gap-5 `}>
               <div
                 onClick={() => {
                   if (props.detailType === "movie") {

@@ -98,7 +98,6 @@ export default function WatchTrailer(props) {
         "current-time",
         "duration",
         "mute",
-        "volume",
         "captions",
         "settings",
         "fullscreen",
