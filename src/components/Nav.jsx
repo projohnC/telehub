@@ -115,86 +115,127 @@ export default function Nav() {
   return (
     <>
 
-      <div className="fixed flex items-center gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10 text-white">
-        {/* navigation Small Screen */}
-        <div className="relative block md:hidden">
-          <div
-            onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col gap-1 cursor-pointer"
-          >
-            <div className="h-[0.1rem] w-6 bg-secondaryTextColor"></div>
-            <div className="h-[0.1rem] w-4 bg-secondaryTextColor"></div>
-            <div className="h-[0.1rem] w-2 bg-secondaryTextColor"></div>
+      <div className="fixed flex items-center justify-between gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10 text-white">
+        <div className="flex items-center gap-3">
+          {/* navigation Small Screen */}
+          <div className="relative block md:hidden">
+            <div
+              onClick={() => setMobileMenuOpen(true)}
+              className="flex flex-col gap-1 cursor-pointer"
+            >
+              <div className="h-[0.1rem] w-6 bg-secondaryTextColor"></div>
+              <div className="h-[0.1rem] w-4 bg-secondaryTextColor"></div>
+              <div className="h-[0.1rem] w-2 bg-secondaryTextColor"></div>
+            </div>
+            <AnimatePresence>
+              {mobileMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 50 }}
+                  transition={{
+                    type: "tween",
+                    duration: 0.3,
+                  }}
+                  className="absolute w-52 sm:w-60 top-12 rounded-3xl -left-2 bg-btnColor p-8 max-h-[50dvh]"
+                  ref={closeMobileMenu}
+                >
+                  {[
+                    { icon: BiHomeAlt2, name: "Home" },
+                    { icon: BiSolidMovie, name: "Movies" },
+                    { icon: BsTv, name: "Series" },
+                  ].map((navItem, index) => {
+                    return (
+                      <Link
+                        key={index}
+                        to={navItem.name === "Home" ? "/" : navItem.name}
+                        className={
+                          navStatus === navItem.name
+                            ? "flex flex-col items-start p-3 transition-all duration-300 ease-in-out text-otherColor scale-105"
+                            : "flex flex-col items-start p-3 transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
+                        }
+                        onClick={() => {
+                          setNavStatus(navItem.name);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <li className="text-2xl list-none">
+                            <navItem.icon />
+                          </li>
+                          <p className="text-md text-secondaryTextColor">
+                            {navItem.name}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                  <VscClose
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="absolute text-4xl p-2 bg-transparent rounded-md top-3 right-3 cursor-pointer"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                transition={{
-                  type: "tween",
-                  duration: 0.3,
-                }}
-                className="absolute w-52 sm:w-60 top-12 rounded-3xl -left-2 bg-btnColor p-8 max-h-[50dvh]"
-                ref={closeMobileMenu}
-              >
-                {[
-                  { icon: BiHomeAlt2, name: "Home" },
-                  { icon: BiSolidMovie, name: "Movies" },
-                  { icon: BsTv, name: "Series" },
-                ].map((navItem, index) => {
-                  return (
-                    <Link
-                      key={index}
-                      to={navItem.name === "Home" ? "/" : navItem.name}
-                      className={
-                        navStatus === navItem.name
-                          ? "flex flex-col items-start p-3 transition-all duration-300 ease-in-out text-otherColor scale-105"
-                          : "flex flex-col items-start p-3 transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
-                      }
-                      onClick={() => {
-                        setNavStatus(navItem.name);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <li className="text-2xl list-none">
-                          <navItem.icon />
-                        </li>
-                        <p className="text-md text-secondaryTextColor">
-                          {navItem.name}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-                <VscClose
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="absolute text-4xl p-2 bg-transparent rounded-md top-3 right-3 cursor-pointer"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+          <Link
+            to="/"
+            className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl"
+          >
+            <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
+              <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
+            </div>
+            <p className="tracking-tighter">{SITENAME}</p>
+          </Link>
         </div>
 
-        <Link
-          to="/"
-          className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl flex-grow md:flex-grow-0"
-        >
-          <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
-            <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
-          </div>
-          <p className="tracking-tighter">{SITENAME}</p>
-        </Link>
-
         {/* Navigations Large Screen*/}
+        <nav className="hidden md:block">
+          <ul className="flex items-center gap-8">
+            {[
+              { icon: BiHomeAlt2, name: "Home" },
+              { icon: BiSolidMovie, name: "Movies" },
+              { icon: BsTv, name: "Series" },
+            ].map((navItem, index) => {
+              return (
+                <Link
+                  key={index}
+                  to={navItem.name === "Home" ? "/" : navItem.name}
+                  className={
+                    navStatus === navItem.name
+                      ? "flex flex-col items-center transition-all duration-300 ease-in-out text-otherColor scale-105"
+                      : "flex flex-col items-center transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
+                  }
+                  onClick={() => setNavStatus(navItem.name)}
+                >
+                  <li className="text-2xl list-none">
+                    <navItem.icon />
+                  </li>
+                  <p className={
+                    navStatus === navItem.name
+                      ? "text-sm text-white font-semibold"
+                      : "text-sm text-secondaryTextColor hover:text-white transition-colors"
+                  }>
+                    {navItem.name}
+                  </p>
+                </Link>
+              );
+            })}
+            <li className="list-none">
+              <Link to="/dmca" className="text-sm text-secondaryTextColor hover:text-white transition-colors px-2">
+                DMCA
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
         {/* Search Form */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
           }}
-          className="relative flex items-center w-full md:w-1/2"
+          className="relative flex items-center justify-end"
           ref={closeSearchResultsDropDown}
         >
           <div className="relative flex items-center justify-end w-full">
