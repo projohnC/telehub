@@ -57,7 +57,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   })}
                 </div>
               )}
-              <h1 className="text-primaryTextColor  font-extrabold line-clamp-1 text-2xl xl:text-3xl">
+              <h1 className="text-primaryTextColor font-bold text-2xl sm:text-3xl mt-2">
                 {props.movieData.title}
               </h1>
 
@@ -130,15 +130,30 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     </div>
                   )}
 
-                  {/* Rating */}
-                  {props.movieData.rating && (
-                    <div className="flex items-center gap-2">
-                      <PiStarFill className="text-yellow-300 text-lg xl:text-xl" />
-                      <p className="text-xs xl:text-sm">
-                        {props.movieData.rating.toFixed(1)}
-                      </p>
-                    </div>
-                  )}
+                  {/* View Count Mockup */}
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs xl:text-sm text-secondaryTextColor">
+                      4.5M views
+                    </p>
+                    <span className="text-secondaryTextColor">•</span>
+                    <p className="text-xs xl:text-sm text-secondaryTextColor capitalize">
+                      {props.movieData.media_type === "tv" ? "Series" : "Movie"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between w-full mt-4">
+                <div className="flex items-center gap-4 text-white/80">
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors">
+                    <PiStarFill className="text-xl text-white" />
+                    <span className="text-sm font-bold">120.0K</span>
+                  </div>
+                  <div className="cursor-pointer hover:text-white transition-colors">
+                    <BiTime className="text-2xl" />
+                  </div>
+                </div>
+                <div className="text-white/80 cursor-pointer hover:text-white transition-colors">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 </div>
               </div>
               <div className="flex items-center flex-wrap gap-2 text-primaryTextColor mt-3">
@@ -207,34 +222,38 @@ export default function MoviesAndSeriesDetailsSections(props) {
                 </div>
               </div>
 
-              <div className="relative grid content-center items-center w-full  p-5 gap-1 bg-btnColor/70 rounded-xl overflow-y-scroll grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {!props.isEpisodesLoading ? (
-                  props.episodes &&
-                  props.episodes
-                    .sort((a, b) => a.episode_number - b.episode_number)
-                    .map((eps, index) => (
-                      <div
-                        key={index} // Unique key for episodes
-                        onClick={() => {
-                          props.setEpisodeNumber(eps.episode_number);
-                          setIsWatchEpisodePopupOpen(true);
-                        }}
-                        className="flex items-center gap-2 text-sm px-3 py-1 bg-btnColor rounded-full transition-all duration-300 ease-in-out hover:bg-otherColor/20 cursor-pointer sm:text-md"
-                      >
-                        <BiPlay className="text-secondaryTextColor shrink-0" />
-                        <span className="shrink-0">
-                          Eps {eps.episode_number}:
-                        </span>
-                        <span className="line-clamp-1 text-sm text-secondaryTextColor">
-                          {eps.title}
-                        </span>
-                      </div>
-                    ))
-                ) : (
-                  <div className="grid p-10">
-                    <div className="loader-episode"></div>
-                  </div>
-                )}
+              <div className="w-full mt-4 p-5 bg-bgColorSecondary/30 border border-white/5 rounded-2xl shadow-xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-bold text-white">Total Episodes</h2>
+                  <span className="text-sm text-secondaryTextColor">({props.episodes ? props.episodes.length : 0})</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {!props.isEpisodesLoading ? (
+                    props.episodes &&
+                    props.episodes
+                      .sort((a, b) => a.episode_number - b.episode_number)
+                      .map((eps, index) => (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            props.setEpisodeNumber(eps.episode_number);
+                            setIsWatchEpisodePopupOpen(true);
+                          }}
+                          className={`flex flex-col items-center justify-center w-24 h-16 rounded-md cursor-pointer transition-all duration-300 ${props.episodeNumber === eps.episode_number
+                              ? "bg-otherColor text-white"
+                              : "bg-bgColorSecondary text-secondaryTextColor hover:bg-bgColorSecondary/80"
+                            }`}
+                        >
+                          <span className="text-xs font-bold leading-none">{eps.episode_number}</span>
+                          <span className="text-[0.6rem] mt-1 line-clamp-1 px-1 text-center font-medium opacity-80">{eps.title}</span>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="w-full flex justify-center py-10">
+                      <div className="loader-episode"></div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

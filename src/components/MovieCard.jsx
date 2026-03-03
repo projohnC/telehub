@@ -4,74 +4,126 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/black-and-white.css";
 import { PiStarFill } from "react-icons/pi";
-import { BsPlayFill, BsPlusLg } from "react-icons/bs";
-import { BiLike } from "react-icons/bi";
-import { IoChevronDown } from "react-icons/io5";
+
+import { BsPlayFill } from "react-icons/bs";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
 
 const MovieCard = ({ movie }) => {
   const [showPlayBtn, setShowPlayBtn] = useState(false);
+  const [openId, setOpenId] = useState();
 
-  const detailPath = movie.media_type === "movie" ? `/mov/${movie.tmdb_id}` : `/ser/${movie.tmdb_id}`;
+  const showPlay = () => {
+    setOpenId(movie.tmdb_id);
+    setShowPlayBtn(true);
+  };
+
+  const hidePlay = () => {
+    setOpenId(movie.tmdb_id);
+    setShowPlayBtn(false);
+  };
 
   return (
-    <div className="relative" onMouseEnter={() => setShowPlayBtn(true)} onMouseLeave={() => setShowPlayBtn(false)}>
-      <Link to={detailPath} className="block rounded-md overflow-hidden">
-        <div className="flex items-center justify-center aspect-video w-full object-cover rounded-md overflow-hidden bg-zinc-900">
+    <div className="relative">
+      <Link
+        to={
+          movie.media_type === "movie"
+            ? `/mov/${movie.tmdb_id}`
+            : `/ser/${movie.tmdb_id}`
+        }
+        className="rounded-t-2xl"
+      >
+        <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl ">
           <LazyLoadImage
-            src={movie.backdrop || movie.poster || posterPlaceholder}
+            src={movie.poster ? movie.poster : posterPlaceholder}
             width="100%"
             effect="black-and-white"
             alt={movie.title}
-            className="aspect-video w-full object-cover rounded-md transition-transform duration-300 hover:scale-105"
+            className="aspect-[9/13.5] w-full object-cover rounded-2xl "
+            onMouseEnter={showPlay}
+            onMouseLeave={hidePlay}
           />
         </div>
       </Link>
 
-      <div className="text-white mt-2">
-        <p className="line-clamp-1 text-sm sm:text-base font-semibold">{movie.title}</p>
+      <div className="mt-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-otherColor flex items-center justify-center text-white font-bold text-xs shrink-0">
+            {movie.title ? movie.title.charAt(0).toUpperCase() : "M"}
+          </div>
+          <div className="flex flex-col">
+            <p className="line-clamp-1 text-sm font-bold text-primaryTextColor">{movie.title}</p>
+            <p className="text-[0.7rem] text-secondaryTextColor uppercase">
+              {movie.release_year} {movie.media_type === "movie" ? "• Movie" : "• Series"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute top-3 left-3 flex flex-col gap-1">
+        <div className="bg-otherColor text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">
+          {movie.media_type === "tv" ? "Series" : "Movies"}
+        </div>
+        {movie.media_type === "tv" && movie.recently_added && (
+          <div className="bg-otherColor text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">
+            Recently Added
+          </div>
+        )}
+      </div>
+
+
+      <div className="absolute bottom-3 left-3">
+        {movie.media_type === "tv" ? (
+          <div className="bg-black/60 backdrop-blur-sm text-white text-[0.6rem] font-bold px-2 py-0.5 rounded">
+            {movie.total_episodes || "7"} EP
+          </div>
+        ) : (
+          <div className="bg-black/60 backdrop-blur-sm text-white text-[0.6rem] font-bold px-2 py-0.5 rounded">
+            {movie.duration || "1:51:24"}
+          </div>
+        )}
+      </div>
+
+      <div className="absolute bottom-3 right-3">
+        {movie.media_type === "tv" ? (
+          <div className="bg-black/60 backdrop-blur-sm text-white text-[0.6rem] font-bold px-2 py-0.5 rounded">
+            {movie.total_episodes_info || "62"} Episodes
+          </div>
+        ) : (
+          movie.recently_added && (
+            <div className="bg-otherColor text-white text-[0.6rem] font-bold px-2 py-0.5 rounded uppercase">
+              Recently Added
+            </div>
+          )
+        )}
       </div>
 
       <AnimatePresence>
-        {showPlayBtn && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            transition={{ duration: 0.2 }}
-            className="hidden md:block absolute z-20 left-0 right-0 top-0 rounded-lg overflow-hidden bg-[#1a1a1a] border border-white/10 shadow-2xl"
+        {openId === movie.tmdb_id && showPlayBtn && (
+          <Link
+            to={
+              movie.media_type === "movie"
+                ? `/mov/${movie.tmdb_id}`
+                : `/ser/${movie.tmdb_id}`
+            }
+            onMouseEnter={showPlay}
+            onMouseLeave={hidePlay}
+            className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primaryBtn sm:block"
           >
-            <Link to={detailPath}>
-              <LazyLoadImage
-                src={movie.backdrop || movie.poster || posterPlaceholder}
-                width="100%"
-                alt={movie.title}
-                className="aspect-video w-full object-cover"
-              />
-            </Link>
-            <div className="p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Link to={detailPath} className="bg-white text-black rounded-full p-2 text-xl"><BsPlayFill /></Link>
-                  <button className="rounded-full border border-white/40 p-2"><BsPlusLg /></button>
-                  <button className="rounded-full border border-white/40 p-2"><BiLike /></button>
-                </div>
-                <button className="rounded-full border border-white/40 p-2"><IoChevronDown /></button>
-              </div>
-              <div className="mt-2 flex items-center gap-2 text-xs text-white/90">
-                <span className="text-green-400 font-semibold">{movie.rating ? `${Math.round(movie.rating * 10)}% match` : "New"}</span>
-                {movie.release_year && <span>{movie.release_year}</span>}
-                <span className="uppercase border border-white/30 px-1 rounded">{movie.media_type || "HD"}</span>
-              </div>
-            </div>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: -20 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{
+                type: "tween",
+                duration: 0.3,
+              }}
+              className="text-3xl p-1 rounded-full border-4 border-primaryBtn"
+            >
+              <BsPlayFill />
+            </motion.div>
+          </Link>
         )}
       </AnimatePresence>
-
-      <div className="flex items-center gap-1 absolute top-2 left-2 bg-black/70 text-yellow-300 py-1 px-2 rounded-full font-semibold text-[0.65rem]">
-        <PiStarFill />
-        <p>{movie.rating ? movie.rating.toFixed(1) : "0.0"}</p>
-      </div>
     </div>
   );
 };

@@ -28,12 +28,12 @@ export default {
       colors: {
         primaryTextColor: "#ffffff",
         secondaryTextColor: "#FFFFFFB2",
-        primaryBtn: "#50B498",
-        primaryBtnHower: "#2ca0a0",
+        primaryBtn: "#e50914",
+        primaryBtnHower: "#b20710",
         bgColor: "#000000",
         bgColorSecondary: "#333333",
         btnColor: "#1f1f1f",
-        otherColor: "#50B498",
+        otherColor: "#e50914",
       },
       aspectRatio: {
         "9/13": "9/13",

@@ -1,40 +1,65 @@
-import { React } from "react";
+import { React, useState } from "react";
 import { Link } from "react-router-dom";
 import MovieCard from "./MovieCard";
 
+
 import "react-lazy-load-image-component/src/effects/black-and-white.css";
+import { BiArrowFromLeft } from "react-icons/bi";
 import MovieCardSkeleton from "./MovieCardSkeleton";
 
 export default function HomeSection(props) {
+  // States
+  const [showPlayBtn, setShowPlayBtn] = useState(false);
+  const [openId, setOpenId] = useState();
+
+  // PLAY Button Show/hide Function
+  const showPlay = (i) => {
+    setOpenId(i);
+    setShowPlayBtn(true);
+  };
+  const hidePlay = (i) => {
+    setOpenId(i);
+    setShowPlayBtn(false);
+  };
+
   return (
     <>
-      <div className="mt-8 flex items-center justify-between gap-3 text-white pb-4 md:mt-10">
-        <h2 className="text-2xl md:text-4xl font-bold">{props.sectionTitle}</h2>
+      {/* Title */}
+      <div className="mt-[2.5rem] flex items-center flex-wrap gap-5 text-primaryTextColor pb-[1.5rem] md:mt-[5rem]">
+        <div className="pl-[1rem] border-l-2 border-primaryBtn">
+          <p className="text-[0.8rem] uppercase font-bold sm:text-[1rem]">
+            {props.sectionTitle}
+          </p>
+        </div>
 
+        {/* See All Button */}
         <Link
           to={props.sectionSeeMoreButtonLink}
-          className="text-sm text-white/70 hover:text-white"
+          className="flex gap-3 items-center py-[0.5rem] px-[1rem] text-[0.7rem] rounded-sm transition-all duration-300 ease-in-out text-primaryBtn hover:text-primaryBtnHower"
           style={{ textDecoration: "none" }}
         >
-          See more
+          <p>See more</p>
+          <BiArrowFromLeft style={{ fontSize: "1rem" }} />
         </Link>
       </div>
 
-      <div>
+      {/* Home Sections */}
+      <div className="">
         {!props.isMovieDataLoading ? (
-          <div className="flex gap-3 overflow-x-auto pb-2 md:gap-4">
-            {props.movieData.map((movie, index) => {
-              return (
-                <div key={index} className="w-[46vw] sm:w-[34vw] md:w-[24vw] lg:w-[18vw] xl:w-[16vw] shrink-0">
-                  <MovieCard movie={movie} />
-                </div>
-              );
-            })}
+          <div className="relative ">
+            <div className="grid  gap-x-2 gap-y-6 grid-cols-2 md:grid-cols-3 bsmmd:grid-cols-4  lg:grid-cols-5 blgxl:grid-cols-6 xl:grid-cols-7">
+              {props.movieData.map((movie, index) => {
+                return <MovieCard key={index} movie={movie} />;
+              })}
+            </div>
           </div>
         ) : (
-          <MovieCardSkeleton />
+          <>
+            <MovieCardSkeleton />
+          </>
         )}
       </div>
     </>
   );
 }
+
