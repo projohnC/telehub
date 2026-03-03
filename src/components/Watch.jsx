@@ -89,6 +89,13 @@ export default function WatchTrailer(props) {
     options: {
       poster: poster,
       settings: ["captions", "quality", "speed"],
+      speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+      quality: {
+        default: 720,
+        options: [1080, 720, 480],
+        forced: true,
+        onChange: (e) => console.log('Quality changed', e),
+      },
       controls: [
         "play-large",
         "rewind",

@@ -13,11 +13,9 @@ export default function Home() {
 
   // States
   const [heroPopularMovies, setHeroPopularMovies] = useState([]);
-  const [trendingMovies, setTrendingMovies] = useState([]);
-  const [trendingTv, setTrendingTv] = useState([]);
+  const [latestContent, setLatestContent] = useState([]);
   const [isHeroLoading, setIsHeroLoading] = useState(true);
-  const [isTrendingMoviesLoading, setIsTrendingMoviesLoading] = useState(true);
-  const [isTrendingTvLoading, setIsTrendingTvLoading] = useState(true);
+  const [isLatestLoading, setIsLatestLoading] = useState(true);
 
   useEffect(() => {
     setIsHeroLoading(true);
@@ -41,43 +39,36 @@ export default function Home() {
   }, [BASE]);
 
   useEffect(() => {
-    setIsTrendingMoviesLoading(true);
-    axios
-      .get(`${BASE}/api/movies`, {
-        params: {
-          sort_by: "updated_on:desc",
-          page: 1,
-          page_size: 20,
-        },
-      })
-      .then((response) => {
-        setTrendingMovies(response.data.movies);
-        setIsTrendingMoviesLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching trending movies:", error);
-        setIsTrendingMoviesLoading(false);
-      });
-  }, [BASE]);
+    setIsLatestLoading(true);
 
-  useEffect(() => {
-    setIsTrendingTvLoading(true);
-    axios
-      .get(`${BASE}/api/tvshows`, {
-        params: {
-          sort_by: "updated_on:desc",
-          page: 1,
-          page_size: 20,
-        },
-      })
-      .then((response) => {
-        setTrendingTv(response.data.tv_shows);
-        setIsTrendingTvLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching trending TV shows:", error);
-        setIsTrendingTvLoading(false);
-      });
+    const fetchLatest = async () => {
+      try {
+        const [moviesRes, tvRes] = await Promise.all([
+          axios.get(`${BASE}/api/movies`, {
+            params: { sort_by: "updated_on:desc", page: 1, page_size: 20 },
+          }),
+          axios.get(`${BASE}/api/tvshows`, {
+            params: { sort_by: "updated_on:desc", page: 1, page_size: 20 },
+          })
+        ]);
+
+        const combined = [
+          ...moviesRes.data.movies.map(m => ({ ...m, type: 'movie' })),
+          ...tvRes.data.tv_shows.map(t => ({ ...t, type: 'tv' }))
+        ];
+
+        // Sort by updated_on descending
+        combined.sort((a, b) => new Date(b.updated_on) - new Date(a.updated_on));
+
+        setLatestContent(combined.slice(0, 24));
+        setIsLatestLoading(false);
+      } catch (error) {
+        console.error("Error fetching latest content:", error);
+        setIsLatestLoading(false);
+      }
+    };
+
+    fetchLatest();
   }, [BASE]);
 
   return (
@@ -103,22 +94,14 @@ export default function Home() {
           sliderTypeNext="slideHeroTrendingMovies-next"
         />
       </div>
-      {/* Home Announcements */}
-      {/* Trending Movies Section */}
+
+      {/* Combined Latest Releases Section */}
       <HomeSections
-        movieData={trendingMovies}
-        isMovieDataLoading={isTrendingMoviesLoading}
-        sectionTitle="Latest Movies"
+        movieData={latestContent}
+        isMovieDataLoading={isLatestLoading}
+        sectionTitle="Latest Releases"
         sectionSeeMoreButtonLink="/Movies"
-        dataType="latestMovies"
-      />
-      {/* Trending TV SHOWS Section */}
-      <HomeSections
-        movieData={trendingTv}
-        isMovieDataLoading={isTrendingTvLoading}
-        sectionTitle="Latest Series"
-        sectionSeeMoreButtonLink="/Series"
-        dataType="latestTv"
+        dataType="latestContent"
       />
     </div>
   );
