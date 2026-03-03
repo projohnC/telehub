@@ -10,10 +10,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 
-import { BiListUl, BiPlay, BiTime } from "react-icons/bi";
+import { BiListUl, BiPlay } from "react-icons/bi";
 import { IoIosArrowDown } from "react-icons/io";
 import { FiCalendar } from "react-icons/fi";
-import { BsListStars } from "react-icons/bs";
 import { PiStarFill } from "react-icons/pi";
 import TelegramButton from "./TelegramButtons";
 import DownloadButton from "./Buttons";
@@ -101,23 +100,6 @@ export default function MoviesAndSeriesDetailsSections(props) {
 
                 <div className="flex flex-col gap-4 mt-2">
                   <div className="flex flex-wrap items-center gap-4 text-secondaryTextColor border-y border-white/5 py-3">
-                    {/* Runtime/Seasons */}
-                    <div className="flex items-center gap-2">
-                      {props.movieData.media_type === "movie" ? (
-                        <BiTime className="text-xl" />
-                      ) : (
-                        <BsListStars className="text-xl" />
-                      )}
-                      <p className="text-xs font-medium">
-                        {props.movieData.media_type === "movie"
-                          ? `${props.movieData.runtime} min`
-                          : `${props.movieData.total_seasons} Seasons`
-                        }
-                      </p>
-                    </div>
-
-                    <span className="opacity-20">|</span>
-
                     {/* Release Year */}
                     {props.movieData.release_year && (
                       <div className="flex items-center gap-2">
