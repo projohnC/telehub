@@ -123,7 +123,7 @@ export default function WatchTrailer(props) {
   return (
     <>
       {props.inline ? (
-        <div className="w-full h-full rounded-3xl overflow-hidden relative bg-black">
+        <div className="w-full rounded-3xl overflow-hidden relative bg-black">
           {sources.length > 0 ? (
             <Plyr ref={playerRef} {...plyrProps} id="player" />
           ) : (

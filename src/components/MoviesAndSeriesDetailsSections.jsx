@@ -39,7 +39,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     setIsWatchMoviePopupOpen(true);
                   }
                 }}
-                className="aspect-video w-full relative flex items-center shrink-0 bg-btnColor rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.02]"
+                className={`w-full relative flex items-center shrink-0 bg-btnColor rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.01] ${!isPlayerActive ? "aspect-video" : ""}`}
               >
                 {isPlayerActive ? (
                   <div className="w-full h-full">
