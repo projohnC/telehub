@@ -17,7 +17,7 @@ import { BsListStars } from "react-icons/bs";
 import { PiStarFill } from "react-icons/pi";
 import TelegramButton from "./TelegramButtons";
 import DownloadButton from "./Buttons";
-import { MdOutlineHighQuality } from "react-icons/md";
+import { MdOutlineHighQuality, MdLanguage } from "react-icons/md";
 
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isWatchMoviePopupOpen, setIsWatchMoviePopupOpen] = useState(false);
@@ -135,15 +135,22 @@ export default function MoviesAndSeriesDetailsSections(props) {
                         <p className="text-xs font-medium uppercase">{props.movieData.rip}</p>
                       </div>
                     )}
-                  </div>
+                    <span className="opacity-20 hidden sm:inline">|</span>
 
-                  <div className="flex items-center gap-3">
-                    {/* Media Type Label */}
-                    <div className="flex items-center gap-2 bg-white/5 px-4 py-1 rounded-full border border-white/10">
-                      <p className="text-xs text-white/70 font-bold uppercase tracking-widest">
-                        {props.movieData.media_type === "tv" ? "Series" : "Movie"}
-                      </p>
-                    </div>
+                    {/* Languages */}
+                    {props.movieData.languages && (
+                      <div className="flex items-center gap-2">
+                        <MdLanguage className="text-xl" />
+                        <p className="text-xs font-medium">
+                          {props.movieData.languages
+                            .map(
+                              (lang) =>
+                                lang.charAt(0).toUpperCase() + lang.slice(1)
+                            )
+                            .join(" - ")}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
