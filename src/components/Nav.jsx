@@ -115,60 +115,12 @@ export default function Nav() {
   return (
     <>
 
-      <div className="fixed flex items-center justify-between gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10  text-white">
-        <Link
-          to="/"
-          className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl"
-        >
-          <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
-            <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
-          </div>
-          <p className="tracking-tighter">{SITENAME}</p>
-        </Link>
-        {/* Navigations Large Screen*/}
-        <nav className="hidden md:block">
-          <ul className="flex items-center gap-8">
-            {[
-              { icon: BiHomeAlt2, name: "Home" },
-              { icon: BiSolidMovie, name: "Movies" },
-              { icon: BsTv, name: "Series" },
-            ].map((navItem, index) => {
-              return (
-                <Link
-                  key={index}
-                  to={navItem.name === "Home" ? "/" : navItem.name}
-                  className={
-                    navStatus === navItem.name
-                      ? "flex flex-col items-center transition-all duration-300 ease-in-out text-otherColor scale-105"
-                      : "flex flex-col items-center transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
-                  }
-                  onClick={() => setNavStatus(navItem.name)}
-                >
-                  <li className="text-2xl">
-                    <navItem.icon />
-                  </li>
-                  <p className={
-                    navStatus === navItem.name
-                      ? "text-sm text-white font-semibold"
-                      : "text-sm text-secondaryTextColor hover:text-white transition-colors"
-                  }>
-                    {navItem.name}
-                  </p>
-                </Link>
-              );
-            })}
-            <li className="list-none">
-              <Link to="/dmca" className="text-sm text-secondaryTextColor hover:text-white transition-colors px-2">
-                DMCA
-              </Link>
-            </li>
-          </ul>
-        </nav>
+      <div className="fixed flex items-center gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10 text-white">
         {/* navigation Small Screen */}
         <div className="relative block md:hidden">
           <div
             onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col gap-1"
+            className="flex flex-col gap-1 cursor-pointer"
           >
             <div className="h-[0.1rem] w-6 bg-secondaryTextColor"></div>
             <div className="h-[0.1rem] w-4 bg-secondaryTextColor"></div>
@@ -184,7 +136,7 @@ export default function Nav() {
                   type: "tween",
                   duration: 0.3,
                 }}
-                className="absolute w-52 sm:w-60 top-12 rounded-3xl right-0 left-0 bg-btnColor p-8 max-h-[50dvh]"
+                className="absolute w-52 sm:w-60 top-12 rounded-3xl -left-2 bg-btnColor p-8 max-h-[50dvh]"
                 ref={closeMobileMenu}
               >
                 {[
@@ -219,12 +171,24 @@ export default function Nav() {
                 })}
                 <VscClose
                   onClick={() => setMobileMenuOpen(false)}
-                  className="absolute text-4xl p-2 bg-transparent rounded-md top-3 right-3"
+                  className="absolute text-4xl p-2 bg-transparent rounded-md top-3 right-3 cursor-pointer"
                 />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+
+        <Link
+          to="/"
+          className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl flex-grow md:flex-grow-0"
+        >
+          <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
+            <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
+          </div>
+          <p className="tracking-tighter">{SITENAME}</p>
+        </Link>
+
+        {/* Navigations Large Screen*/}
         {/* Search Form */}
         <form
           onSubmit={(e) => {

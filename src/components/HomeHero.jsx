@@ -103,12 +103,6 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                         <FaPlay className="text-xs" />
                         Play Now
                       </Link>
-                      <button
-                        className="flex items-center gap-2 bg-bgColorSecondary text-white text-sm font-bold py-2.5 px-8 rounded-full sm:text-lg transition-all duration-300 ease-in-out hover:bg-bgColorSecondary/80"
-                      >
-                        <BiTime className="text-xl" />
-                        Watch Later
-                      </button>
                     </div>
                   </div>
                 </div>
