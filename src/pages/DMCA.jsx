@@ -24,7 +24,7 @@ export default function DMCA() {
                 <div className="bg-bgColorSecondary/30 p-8 rounded-3xl border border-secondaryTextColor/10 shadow-xl">
                     <p className="text-lg lg:text-xl leading-relaxed mb-8">
                         <strong className="text-white">
-                            (HubStream does not host, upload, or store any media content on its servers.)
+                            HubStream does not host, upload, or store any media content on its servers.
                         </strong>
                     </p>
 
@@ -37,11 +37,6 @@ export default function DMCA() {
 
                 <div className="mt-12 text-secondaryTextColor space-y-6">
                     <p>
-                        If you are a copyright owner or an agent thereof and believe that any content indexed on this site
-                        infringes upon your copyrights, you may submit a notification pursuant to the Digital Millennium
-                        Copyright Act ("DMCA") by providing our Copyright Agent with the necessary information in writing.
-                    </p>
-                    <p>
                         Please note that HubStream operates as a search engine/index and does not have control over the
                         files hosted on third-party platforms. Removing a link from our site does not remove the
                         actual content from the source server.
@@ -51,3 +46,4 @@ export default function DMCA() {
         </div>
     );
 }
+
