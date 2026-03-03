@@ -207,3 +207,14 @@ body {
   padding: 10px 15px !important;
   background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)) !important;
 }
+
+/* Scrollable Settings Menu */
+.plyr__menu__container [role=menu] {
+  max-height: 180px !important;
+  overflow-y: auto !important;
+}
+
+.plyr__menu__container {
+  max-height: 220px !important;
+  overflow-y: auto !important;
+}
