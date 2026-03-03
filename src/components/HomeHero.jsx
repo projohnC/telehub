@@ -13,6 +13,8 @@ import { PiStarFill } from "react-icons/pi";
 import { BiTime } from "react-icons/bi";
 
 export default function HeroSlider({ movieData, isMovieDataLoading }) {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
   return (
     <div className="pt-20">
       {!isMovieDataLoading ? (
@@ -22,6 +24,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
             grabCursor={true}
             lazy="true"
             loop={true}
+            onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
             navigation={{
               prevEl: ".heroSlidePrev",
               nextEl: ".heroSlideNext",
@@ -116,7 +119,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
             {movieData.map((_, i) => (
               <div
                 key={i}
-                className={`h-1 rounded-full transition-all duration-300 ${i === 0 ? "w-8 bg-otherColor" : "w-4 bg-gray-600"
+                className={`h-1 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-otherColor" : "w-4 bg-gray-600"
                   }`}
               ></div>
             ))}

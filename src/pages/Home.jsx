@@ -25,8 +25,7 @@ export default function Home() {
     axios
       .get(`${BASE}/api/movies`, {
         params: {
-          sort_by: "rating:desc",
-          sort_by: "release_year:desc",
+          sort_by: "updated_on:desc",
           page: 1,
           page_size: 10,
         },

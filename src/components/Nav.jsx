@@ -262,10 +262,6 @@ export default function Nav() {
             >
               <FiSearch className="text-secondaryTextColor" />
             </div>
-
-            <div className="hidden md:flex items-center ml-4 cursor-pointer">
-              <BiTime className="text-2xl text-secondaryTextColor hover:text-white transition-colors" />
-            </div>
           </div>
 
           {/* SEARCH RESULTS CONTAINER */}
