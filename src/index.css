@@ -9,16 +9,21 @@
   font-family: sans-serif;
   scroll-behavior: smooth;
 }
+
 body {
   background: #000000;
 }
+
 /* Mask */
 .mask {
   mask-image: linear-gradient(to top, transparent, #121212);
 }
+
 .modal {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-} /* Default video player style */
+}
+
+/* Default video player style */
 
 #player {
   transition: transform 0.3s ease;
@@ -31,17 +36,20 @@ body {
     transform-origin: center center;
   }
 }
+
 /* Landscape mode */
 @media (orientation: landscape) {
   #player {
     transform: none;
   }
 }
+
 ::-webkit-scrollbar {
   width: 1px;
   height: 1px;
   background-color: transparent;
 }
+
 /* Track */
 ::-webkit-scrollbar-track {
   background-color: transparent;
@@ -69,6 +77,7 @@ body {
   animation: l2 1.5s infinite linear;
   position: relative;
 }
+
 .loader:before,
 .loader:after {
   content: "";
@@ -79,9 +88,11 @@ body {
   animation: inherit;
   animation-delay: -0.5s;
 }
+
 .loader:after {
   animation-delay: -1s;
 }
+
 @keyframes l2 {
   100% {
     box-shadow: 0 0 0 40px #e509142f;
@@ -98,6 +109,7 @@ body {
   animation: l3 1.5s infinite linear;
   position: relative;
 }
+
 .loader-search:before,
 .loader-search:after {
   content: "";
@@ -108,9 +120,11 @@ body {
   animation: inherit;
   animation-delay: -0.5s;
 }
+
 .loader-search:after {
   animation-delay: -1s;
 }
+
 @keyframes l3 {
   100% {
     box-shadow: 0 0 0 30px #e509142f;
@@ -129,7 +143,9 @@ body {
   background-repeat: no-repeat;
   animation: l4 1s infinite alternate;
 }
+
 @keyframes l4 {
+
   0%,
   25% {
     background-size: 8px 0, 8px 4px, 8px 4px, 8px 0, 8px 4px, 8px 4px, 8px 0,
@@ -138,6 +154,7 @@ body {
       50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
+
   50% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 0, 8px 4px, 8px 4px, 8px 0,
       8px 4px, 8px 4px;
@@ -145,6 +162,7 @@ body {
       50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
+
   75% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 100%, 8px 4px, 8px 4px,
       8px 0, 8px 4px, 8px 4px;
@@ -152,6 +170,7 @@ body {
       50% calc(0% - 2px), 50% calc(100% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
+
   95%,
   100% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 100%, 8px 4px, 8px 4px,
@@ -160,4 +179,31 @@ body {
       50% calc(0% - 2px), 50% calc(100% + 2px), 100% 50%, 100% calc(0% - 2px),
       100% calc(100% + 2px);
   }
+}
+
+/* Premium Plyr Customization */
+:root {
+  --plyr-color-main: #e50914;
+  --plyr-video-background: #000;
+  --plyr-control-radius: 8px;
+  --plyr-range-thumb-height: 12px;
+  --plyr-range-track-height: 4px;
+}
+
+.plyr--full-ui input[type=range] {
+  color: #e50914 !important;
+}
+
+.plyr__control--overlaid {
+  background: rgba(229, 9, 20, 0.6) !important;
+}
+
+.plyr__control:hover {
+  background: #e50914 !important;
+  color: white !important;
+}
+
+.plyr__controls {
+  padding: 10px 15px !important;
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)) !important;
 }

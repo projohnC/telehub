@@ -91,17 +91,34 @@ export default function WatchTrailer(props) {
       settings: ["captions", "quality", "speed"],
       controls: [
         "play-large",
+        "rewind",
         "play",
+        "fast-forward",
         "progress",
         "current-time",
+        "duration",
         "mute",
         "volume",
         "captions",
         "settings",
         "fullscreen",
       ],
+      seekTime: 10,
     },
   };
+
+  useEffect(() => {
+    const handleFullscreen = () => {
+      if (document.fullscreenElement && window.screen.orientation && window.screen.orientation.lock) {
+        window.screen.orientation.lock("landscape").catch(err => console.log("Orientation lock failed:", err));
+      } else if (window.screen.orientation && window.screen.orientation.unlock) {
+        window.screen.orientation.unlock();
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreen);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreen);
+  }, []);
 
   return (
     <>
