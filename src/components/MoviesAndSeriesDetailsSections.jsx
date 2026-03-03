@@ -256,7 +256,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     <h2 className="text-lg font-bold text-white">Total Episodes</h2>
                     <span className="text-sm text-secondaryTextColor">({props.episodes ? props.episodes.length : 0})</span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2">
                     {!props.isEpisodesLoading ? (
                       props.episodes &&
                       props.episodes
@@ -269,7 +269,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                               setIsPlayerActive(true);
                               setIsWatchEpisodePopupOpen(true);
                             }}
-                            className={`flex flex-col items-center justify-center w-24 h-16 rounded-md cursor-pointer transition-all duration-300 ${props.episodeNumber === eps.episode_number
+                            className={`flex flex-col items-center justify-center w-full sm:w-24 h-16 rounded-md cursor-pointer transition-all duration-300 ${props.episodeNumber === eps.episode_number
                               ? "bg-otherColor text-white"
                               : "bg-bgColorSecondary text-secondaryTextColor hover:bg-bgColorSecondary/80"
                               }`}
