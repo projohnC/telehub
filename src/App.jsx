@@ -12,6 +12,7 @@ import NotFoundPage from "./pages/NotFound";
 
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
+import DMCA from "./pages/DMCA";
 // import PrivateRoute from "./components/PrivateRoute";
 
 // import { AuthProvider } from "./context/AuthContext";
@@ -55,6 +56,10 @@ function App() {
           <Route
             path="*"
             element={<NotFoundPage />}
+          />
+          <Route
+            path="/dmca"
+            element={<DMCA />}
           />
           <Route
             path="/similarMov/:movieID"
