@@ -101,7 +101,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                         Play Now
                       </Link>
                       <button
-                        className="flex items-center gap-2 bg-bgColorSecondary/50 border border-white/20 text-white text-sm font-bold py-2.5 px-8 rounded-full sm:text-lg transition-all duration-300 ease-in-out hover:bg-bgColorSecondary"
+                        className="flex items-center gap-2 bg-bgColorSecondary text-white text-sm font-bold py-2.5 px-8 rounded-full sm:text-lg transition-all duration-300 ease-in-out hover:bg-bgColorSecondary/80"
                       >
                         <BiTime className="text-xl" />
                         Watch Later

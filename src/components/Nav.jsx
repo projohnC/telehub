@@ -26,7 +26,10 @@ export default function Nav() {
   const [isLoading, setIsLoading] = useState(true);
   const [navStatus, setNavStatus] = useState("Home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+
+  const toggleSearch = () => setSearchOpen(!searchOpen);
 
   // Update navStatus based on the current path
   useEffect(() => {
@@ -77,6 +80,7 @@ export default function Nav() {
         !closeSearchResultsDropDown.current.contains(event.target)
       ) {
         setDebouncedVal("");
+        setSearchOpen(false);
       }
     };
     document.addEventListener("mousedown", closeSearchResultsDropdownHandler);
@@ -114,10 +118,10 @@ export default function Nav() {
       <div className="fixed flex items-center justify-between gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10  text-white">
         <Link
           to="/"
-          className="hidden items-center gap-2 uppercase text-white font-extrabold text-2xl md:flex"
+          className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl"
         >
           <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
-            <FaPlay className="text-white text-xs ml-0.5" />
+            <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
           </div>
           <p className="tracking-tighter">{SITENAME}</p>
         </Link>
@@ -153,9 +157,11 @@ export default function Nav() {
                 </Link>
               );
             })}
-            <Link to="/dmca" className="text-sm text-secondaryTextColor hover:text-white transition-colors">
-              DMCA
-            </Link>
+            <li className="list-none">
+              <Link to="/dmca" className="text-sm text-secondaryTextColor hover:text-white transition-colors px-2">
+                DMCA
+              </Link>
+            </li>
           </ul>
         </nav>
         {/* navigation Small Screen */}
@@ -227,23 +233,39 @@ export default function Nav() {
           className="relative flex items-center w-full md:w-1/2"
           ref={closeSearchResultsDropDown}
         >
-          <div className="relative w-full">
-            <input
-              type="text"
-              name="search"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-              }}
-              placeholder="Search"
-              className="py-1.5 px-4 pr-10 outline-0 text-sm bg-bgColorSecondary/50 border border-secondaryTextColor/20 rounded-lg w-full sm:text-base placeholder:text-secondaryTextColor/50"
-            />
-            <div className="absolute right-0 top-0 bottom-0 px-3 flex items-center bg-bgColorSecondary rounded-r-lg border-l border-secondaryTextColor/20">
+          <div className="relative flex items-center justify-end w-full">
+            <AnimatePresence>
+              {searchOpen && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "100%", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  className="absolute right-12 md:static md:w-full overflow-hidden"
+                >
+                  <input
+                    type="text"
+                    name="search"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                    }}
+                    placeholder="Search"
+                    className="py-1.5 px-4 pr-10 outline-0 text-sm bg-bgColorSecondary/50 border border-secondaryTextColor/20 rounded-lg w-full sm:text-base placeholder:text-secondaryTextColor/50"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div
+              onClick={toggleSearch}
+              className="flex items-center justify-center p-2 bg-bgColorSecondary rounded-lg border border-secondaryTextColor/20 cursor-pointer hover:bg-bgColorSecondary/80 transition-all ml-2"
+            >
               <FiSearch className="text-secondaryTextColor" />
             </div>
-          </div>
-          <div className="hidden md:flex items-center ml-4 cursor-pointer">
-            <BiTime className="text-2xl text-secondaryTextColor hover:text-white transition-colors" />
+
+            <div className="hidden md:flex items-center ml-4 cursor-pointer">
+              <BiTime className="text-2xl text-secondaryTextColor hover:text-white transition-colors" />
+            </div>
           </div>
 
           {/* SEARCH RESULTS CONTAINER */}
