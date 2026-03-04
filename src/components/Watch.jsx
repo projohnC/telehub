@@ -105,12 +105,11 @@ export default function WatchTrailer(props) {
   const plyrProps = useMemo(() => ({
     source: {
       type: "video",
-      // Reorder sources so the selected quality is always at the top of the list for Plyr
-      sources: [...sources].sort((a, b) => {
-        if (a.size === currentQuality) return -1;
-        if (b.size === currentQuality) return 1;
-        return b.size - a.size; // Otherwise highest quality first
-      }),
+      sources: sources.map(s => ({
+        src: s.src,
+        type: s.type,
+        size: s.size,
+      })),
     },
     options: {
       poster: poster,
@@ -124,8 +123,29 @@ export default function WatchTrailer(props) {
           const size = parseInt(newSize, 10);
           if (isNaN(size) || size === currentQuality) return;
 
-          // Update state to trigger re-rendering with new source order and quality default
-          setCurrentQuality(size);
+          if (playerRef.current && playerRef.current.plyr) {
+            const currentTime = playerRef.current.plyr.currentTime;
+            const isPlaying = !playerRef.current.plyr.paused;
+
+            // Update state for persistence
+            setCurrentQuality(size);
+
+            // Manual source drive to force media reload
+            playerRef.current.plyr.source = {
+              type: "video",
+              sources: sources.map(s => ({
+                src: s.src,
+                type: s.type,
+                size: s.size,
+              })),
+            };
+            playerRef.current.plyr.quality = size;
+
+            playerRef.current.plyr.once('canplay', () => {
+              playerRef.current.plyr.currentTime = currentTime;
+              if (isPlaying) playerRef.current.plyr.play();
+            });
+          }
         },
       },
       controls: [
@@ -145,6 +165,24 @@ export default function WatchTrailer(props) {
       seekTime: 10,
     },
   }), [sources, poster, currentQuality]);
+
+  // Ensure initial source is loaded when player is ready
+  useEffect(() => {
+    if (playerRef.current?.plyr && sources.length > 0 && currentQuality !== 0) {
+      const plyr = playerRef.current.plyr;
+      if (!plyr.source || plyr.source.sources.length === 0) {
+        plyr.source = {
+          type: "video",
+          sources: sources.map(s => ({
+            src: s.src,
+            type: s.type,
+            size: s.size,
+          })),
+        };
+        plyr.quality = currentQuality;
+      }
+    }
+  }, [sources, currentQuality]);
 
   useEffect(() => {
     const handleFullscreen = () => {
