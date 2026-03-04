@@ -10,6 +10,7 @@ export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentQuality, setCurrentQuality] = useState(0); // 0 means not yet initialized
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
@@ -70,6 +71,14 @@ export default function WatchTrailer(props) {
     BASE,
   ]);
 
+  // Handle initial quality selection once sources are loaded
+  useEffect(() => {
+    if (sources.length > 0 && currentQuality === 0) {
+      const defaultQuality = [1080, 720, 480].find(q => sources.some(s => s.size === q)) || (sources[0]?.size || 720);
+      setCurrentQuality(defaultQuality);
+    }
+  }, [sources, currentQuality]);
+
   const closeModal = () => {
     setIsModalOpen(false);
     if (props.popUpType === "trailer") {
@@ -91,15 +100,21 @@ export default function WatchTrailer(props) {
       settings: ["captions", "quality", "speed"],
       speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
       quality: {
-        default: [1080, 720, 480].find(q => sources.some(s => s.size === q)) || (sources[0]?.size || 720),
+        default: currentQuality || 720,
         options: [...new Set(sources.map(s => s.size))].sort((a, b) => b - a),
         forced: true,
         onChange: (newSize) => {
+          const size = parseInt(newSize, 10);
+          if (isNaN(size)) return;
+
           if (playerRef.current && playerRef.current.plyr) {
-            const newSource = sources.find(s => s.size === newSize);
+            const newSource = sources.find(s => s.size === size);
             if (newSource) {
               const currentTime = playerRef.current.plyr.currentTime;
               const isPlaying = !playerRef.current.plyr.paused;
+
+              // Update the state so the next render uses the correct default
+              setCurrentQuality(size);
 
               playerRef.current.plyr.source = {
                 type: "video",
@@ -110,8 +125,8 @@ export default function WatchTrailer(props) {
                 })),
               };
 
-              // Ensure the selected quality is applied
-              playerRef.current.plyr.quality = newSize;
+              // Ensure the selected quality is applied immediately
+              playerRef.current.plyr.quality = size;
 
               // Restore state after source change
               playerRef.current.plyr.once('canplay', () => {
