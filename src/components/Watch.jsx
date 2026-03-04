@@ -2,18 +2,17 @@ import { AiOutlineClose } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentQuality, setCurrentQuality] = useState(0); // 0 means not yet initialized
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
-  const loadedIdRef = useRef(null); // Tracks the ID of the currently loaded video content
   const location = useLocation();
 
   useEffect(() => {
@@ -23,52 +22,37 @@ export default function WatchTrailer(props) {
           let videoSources = [];
           let selectedPoster = "";
 
-          if (props.popUpType === "movie" && props.id?.telegram) {
+          if (props.popUpType === "movie") {
             videoSources = props.id.telegram.map((q) => ({
               src: `${BASE}/dl/${q.id}/${q.name}`,
               type: "video/mp4",
-              size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
+              size: parseInt(q.quality.replace("p", ""), 10),
             }));
-            selectedPoster = props.id.backdrop || "";
-          } else if (props.popUpType === "episode" && props.id?.seasons) {
+            selectedPoster = props.id.backdrop;
+          } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
               (season) => season.season_number === props.seasonNumber
             );
 
-            if (season?.episodes) {
+            if (season) {
               const episode = season.episodes.find(
                 (ep) => ep.episode_number === props.episodeNumber
               );
 
-              if (episode?.telegram) {
+              if (episode) {
                 videoSources = episode.telegram.map((q) => ({
                   src: `${BASE}/dl/${q.id}/${q.name}`,
                   type: "video/mp4",
-                  size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
+                  size: parseInt(q.quality.replace("p", ""), 10),
                 }));
-                selectedPoster = episode.episode_backdrop || "";
+                selectedPoster = episode.episode_backdrop;
               }
             }
           }
 
-          if (videoSources.length > 0) {
-            setSources(videoSources);
-            setPoster(selectedPoster);
-
-            // Generate a unique content ID
-            const contentId = props.popUpType === "movie"
-              ? props.id?.id
-              : `${props.id?.id}-${props.seasonNumber}-${props.episodeNumber}`;
-
-            // Reset quality to default ONLY on new content
-            if (loadedIdRef.current !== contentId) {
-              const defaultQuality = [1080, 720, 480].find(q => videoSources.some(s => s.size === q)) || (videoSources[0]?.size || 720);
-              setCurrentQuality(defaultQuality);
-              loadedIdRef.current = contentId;
-            }
-
-            setIsModalOpen(true);
-          }
+          setSources(videoSources);
+          setPoster(selectedPoster);
+          setIsModalOpen(true);
         } catch (error) {
           console.error("Error processing data:", error);
         }
@@ -97,51 +81,20 @@ export default function WatchTrailer(props) {
     }
   };
 
-  const plyrProps = useMemo(() => ({
+  const plyrProps = {
     source: {
       type: "video",
-      sources: sources.map(s => ({
-        src: s.src,
-        type: s.type,
-        size: s.size,
-      })),
+      sources: sources,
     },
     options: {
       poster: poster,
       settings: ["captions", "quality", "speed"],
       speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
       quality: {
-        default: currentQuality || 720,
-        options: [...new Set(sources.map(s => s.size))].sort((a, b) => b - a),
+        default: 720,
+        options: [1080, 720, 480],
         forced: true,
-        onChange: (newSize) => {
-          const size = parseInt(newSize, 10);
-          if (isNaN(size) || size === currentQuality) return;
-
-          if (playerRef.current?.plyr) {
-            const plyr = playerRef.current.plyr;
-            const currentTime = plyr.currentTime;
-            const isPlaying = !plyr.paused;
-
-            setCurrentQuality(size);
-
-            // Update with ALL sources to keep the quality menu intact
-            plyr.source = {
-              type: "video",
-              sources: sources.map(s => ({
-                src: s.src,
-                type: s.type,
-                size: s.size,
-              })),
-            };
-            plyr.quality = size;
-
-            plyr.once('canplay', () => {
-              plyr.currentTime = currentTime;
-              if (isPlaying) plyr.play();
-            });
-          }
-        },
+        onChange: (e) => console.log('Quality changed', e),
       },
       controls: [
         "play-large",
@@ -154,30 +107,11 @@ export default function WatchTrailer(props) {
         "mute",
         "captions",
         "settings",
-        "quality",
         "fullscreen",
       ],
       seekTime: 10,
     },
-  }), [sources, poster, currentQuality]);
-
-  // Handle initialization on first load
-  useEffect(() => {
-    if (playerRef.current?.plyr && sources.length > 0 && currentQuality !== 0) {
-      const plyr = playerRef.current.plyr;
-      if (!plyr.source || plyr.source.sources.length === 0) {
-        plyr.source = {
-          type: "video",
-          sources: sources.map(s => ({
-            src: s.src,
-            type: s.type,
-            size: s.size,
-          })),
-        };
-        plyr.quality = currentQuality;
-      }
-    }
-  }, [sources, currentQuality]);
+  };
 
   useEffect(() => {
     const handleFullscreen = () => {
@@ -192,18 +126,14 @@ export default function WatchTrailer(props) {
     return () => document.removeEventListener("fullscreenchange", handleFullscreen);
   }, []);
 
-  const PlayerContent = (
-    <Plyr key={JSON.stringify(sources)} ref={playerRef} {...plyrProps} />
-  );
-
   return (
     <>
       {props.inline ? (
-        <div className="w-full aspect-video rounded-3xl overflow-hidden relative bg-black">
+        <div className="w-full rounded-3xl overflow-hidden relative bg-black">
           {sources.length > 0 ? (
-            PlayerContent
+            <Plyr ref={playerRef} {...plyrProps} id="player" />
           ) : (
-            <div className="flex items-center justify-center w-full aspect-video">
+            <div className="flex items-center justify-center w-full h-full">
               <div className="loader"></div>
             </div>
           )}
@@ -230,9 +160,9 @@ export default function WatchTrailer(props) {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-lg relative"
+                className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
               >
-                {PlayerContent}
+                <Plyr ref={playerRef} {...plyrProps} id="player" />
               </motion.div>
             </motion.div>
           )}

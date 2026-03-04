@@ -51,9 +51,24 @@ body {
 }
 
 /* Default video player style */
-.plyr {
-  width: 100% !important;
-  max-width: 100% !important;
+
+#player {
+  transition: transform 0.3s ease;
+}
+
+/* Portrait mode */
+@media (orientation: portrait) {
+  #player {
+    transform: rotate(90deg) scale(1.75);
+    transform-origin: center center;
+  }
+}
+
+/* Landscape mode */
+@media (orientation: landscape) {
+  #player {
+    transform: none;
+  }
 }
 
 ::-webkit-scrollbar {
