@@ -95,16 +95,13 @@ const DownloadButton = ({ movieData, btnType }) => {
     ));
 
   const renderShowSelectors = () => (
-    <div className="px-1 py-2 flex flex-col gap-2 min-w-[12rem] sm:min-w-[15rem]">
+    <div className="px-1 py-2 flex flex-col gap-2">
       <Select
         isRequired
         variant="bordered"
         aria-label="Select season"
         placeholder="Select season"
-        className="w-full mb-2"
-        popoverProps={{
-          className: "dark bg-btnColor text-white border border-white/10",
-        }}
+        className="w-40 mb-2"
         classNames={{
           value: "text-white",
           trigger: "border-white/20",
@@ -125,10 +122,7 @@ const DownloadButton = ({ movieData, btnType }) => {
         variant="bordered"
         aria-label="Select episode"
         placeholder="Select episode"
-        className="w-full mb-2"
-        popoverProps={{
-          className: "dark bg-btnColor text-white border border-white/10",
-        }}
+        className="w-40 mb-2"
         classNames={{
           value: "text-white",
           trigger: "border-white/20",
@@ -150,10 +144,7 @@ const DownloadButton = ({ movieData, btnType }) => {
         variant="bordered"
         aria-label="Select quality"
         placeholder="Select quality"
-        className="w-full mb-2"
-        popoverProps={{
-          className: "dark bg-btnColor text-white border border-white/10",
-        }}
+        className="w-40 mb-2"
         classNames={{
           value: "text-white",
           trigger: "border-white/20",
@@ -175,7 +166,7 @@ const DownloadButton = ({ movieData, btnType }) => {
           if (q) handleButtonClick(q.id, q.name, q.quality);
         }}
         size="sm"
-        className={`w-full ${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold py-5`}
+        className={`${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold`}
         isDisabled={selectedQuality.size === 0}
         isLoading={loading[Array.from(selectedQuality)[0]]}
         spinner={<Spinner />}
@@ -186,7 +177,7 @@ const DownloadButton = ({ movieData, btnType }) => {
   );
 
   return (
-    <Popover placement="bottom" showArrow={true} backdrop="blur">
+    <Popover placement="bottom" showArrow={true}>
       <PopoverTrigger>
         <button className={`uppercase flex items-center justify-center gap-2 max-w-full grow text-white text-xs rounded-2xl py-2 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-3 font-bold shadow-lg btn-hover-effect ${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"}`}>
           {btnType === "Download" ? (
@@ -200,7 +191,7 @@ const DownloadButton = ({ movieData, btnType }) => {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="bg-btnColor dark text-white border border-white/10 shadow-2xl rounded-2xl">
+      <PopoverContent className="bg-btnColor">
         {movieData.media_type === "movie"
           ? <div className="px-1 py-2 flex gap-1 flex-wrap">{renderMovieButtons()}</div>
           : renderShowSelectors()}
