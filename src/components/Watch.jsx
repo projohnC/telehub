@@ -26,7 +26,7 @@ export default function WatchTrailer(props) {
             videoSources = props.id.telegram.map((q) => ({
               src: `${BASE}/dl/${q.id}/${q.name}`,
               type: "video/mp4",
-              size: parseInt(q.quality.replace("p", ""), 10),
+              size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
             }));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
@@ -43,7 +43,7 @@ export default function WatchTrailer(props) {
                 videoSources = episode.telegram.map((q) => ({
                   src: `${BASE}/dl/${q.id}/${q.name}`,
                   type: "video/mp4",
-                  size: parseInt(q.quality.replace("p", ""), 10),
+                  size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
                 }));
                 selectedPoster = episode.episode_backdrop;
               }
@@ -91,10 +91,36 @@ export default function WatchTrailer(props) {
       settings: ["captions", "quality", "speed"],
       speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
       quality: {
-        default: 720,
-        options: [1080, 720, 480],
+        default: [1080, 720, 480].find(q => sources.some(s => s.size === q)) || (sources[0]?.size || 720),
+        options: [...new Set(sources.map(s => s.size))].sort((a, b) => b - a),
         forced: true,
-        onChange: (e) => console.log('Quality changed', e),
+        onChange: (newSize) => {
+          if (playerRef.current && playerRef.current.plyr) {
+            const newSource = sources.find(s => s.size === newSize);
+            if (newSource) {
+              const currentTime = playerRef.current.plyr.currentTime;
+              const isPlaying = !playerRef.current.plyr.paused;
+
+              playerRef.current.plyr.source = {
+                type: "video",
+                sources: sources.map((s) => ({
+                  src: s.src,
+                  type: s.type,
+                  size: s.size,
+                })),
+              };
+
+              // Ensure the selected quality is applied
+              playerRef.current.plyr.quality = newSize;
+
+              // Restore state after source change
+              playerRef.current.plyr.once('canplay', () => {
+                playerRef.current.plyr.currentTime = currentTime;
+                if (isPlaying) playerRef.current.plyr.play();
+              });
+            }
+          }
+        },
       },
       controls: [
         "play-large",
@@ -107,6 +133,7 @@ export default function WatchTrailer(props) {
         "mute",
         "captions",
         "settings",
+        "quality",
         "fullscreen",
       ],
       seekTime: 10,
@@ -129,11 +156,11 @@ export default function WatchTrailer(props) {
   return (
     <>
       {props.inline ? (
-        <div className="w-full rounded-3xl overflow-hidden relative bg-black">
+        <div className="w-full aspect-video rounded-3xl overflow-hidden relative bg-black">
           {sources.length > 0 ? (
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            <Plyr key={JSON.stringify(sources)} ref={playerRef} {...plyrProps} />
           ) : (
-            <div className="flex items-center justify-center w-full h-full">
+            <div className="flex items-center justify-center w-full aspect-video">
               <div className="loader"></div>
             </div>
           )}
@@ -160,9 +187,9 @@ export default function WatchTrailer(props) {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+                className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-lg relative"
               >
-                <Plyr ref={playerRef} {...plyrProps} id="player" />
+                <Plyr key={JSON.stringify(sources)} ref={playerRef} {...plyrProps} />
               </motion.div>
             </motion.div>
           )}

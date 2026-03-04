@@ -13,6 +13,7 @@ import NotFoundPage from "./pages/NotFound";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import DMCA from "./pages/DMCA";
+import AdBlockDetector from "./components/AdBlockDetector";
 // import PrivateRoute from "./components/PrivateRoute";
 
 // import { AuthProvider } from "./context/AuthContext";
@@ -32,51 +33,53 @@ function App() {
   return (
 
     <BrowserRouter>
-      <Nav />
-      <div className="p-3 md:p-10">
+      <AdBlockDetector>
+        <Nav />
+        <div className="p-3 md:p-10">
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="mov/:movieID"
-            element={<MovieDetails />}
-          />
-          <Route
-            path="ser/:seriesID"
-            element={<TvDetails />}
-          />
-          <Route
-            path="/Movies"
-            element={<Movies />}
-          />
-          <Route
-            path="/Series"
-            element={<Series />}
-          />
-          <Route
-            path="*"
-            element={<NotFoundPage />}
-          />
-          <Route
-            path="/dmca"
-            element={<DMCA />}
-          />
-          <Route
-            path="/similarMov/:movieID"
-            element={<SimilarMov />}
-          />
-          <Route
-            path="/similarSeries/:seriesID"
-            element={<SimilarSeries />}
-          />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="mov/:movieID"
+              element={<MovieDetails />}
+            />
+            <Route
+              path="ser/:seriesID"
+              element={<TvDetails />}
+            />
+            <Route
+              path="/Movies"
+              element={<Movies />}
+            />
+            <Route
+              path="/Series"
+              element={<Series />}
+            />
+            <Route
+              path="*"
+              element={<NotFoundPage />}
+            />
+            <Route
+              path="/dmca"
+              element={<DMCA />}
+            />
+            <Route
+              path="/similarMov/:movieID"
+              element={<SimilarMov />}
+            />
+            <Route
+              path="/similarSeries/:seriesID"
+              element={<SimilarSeries />}
+            />
 
-          <Route
-            path="/search/:searchResult"
-            element={<SearResults />}
-          />
-        </Routes>
-      </div>
-      <Footer />
+            <Route
+              path="/search/:searchResult"
+              element={<SearResults />}
+            />
+          </Routes>
+        </div>
+        <Footer />
+      </AdBlockDetector>
     </BrowserRouter>
   );
 }

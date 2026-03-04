@@ -4,6 +4,7 @@ import { PiTelegramLogo } from "react-icons/pi";
 import axios from "axios";
 import { Button } from "@nextui-org/button";
 import Spinner from "./svg/Spinner";
+import { handleAdRedirect } from "../utils/adUtils";
 
 const TelegramButton = ({ movieData }) => {
   const USERNAME = import.meta.env.VITE_TG_USERNAME;
@@ -35,11 +36,14 @@ const TelegramButton = ({ movieData }) => {
 
   const handleButtonClick = async (originalUrl, quality) => {
     setLoading((prev) => ({ ...prev, [quality]: true }));
-    let shortUrl = originalUrl;
 
+    // Open Direct Link Ad with frequency capping
+    const adLink = import.meta.env.VITE_AD_DIRECT_LINK;
+    handleAdRedirect(adLink);
+
+    let shortUrl = originalUrl;
     try {
       shortUrl = await shortenUrl(originalUrl);
-      setShortenedUrls((prev) => ({ ...prev, [originalUrl]: shortUrl }));
     } catch (error) {
       console.error("Error processing URL:", error);
     } finally {
