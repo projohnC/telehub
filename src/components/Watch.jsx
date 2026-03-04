@@ -14,6 +14,7 @@ export default function WatchTrailer(props) {
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
+  const loadedIdRef = useRef(null); // Tracks the ID of the currently loaded video content
   const location = useLocation();
 
   useEffect(() => {
@@ -59,9 +60,17 @@ export default function WatchTrailer(props) {
             setSources(videoSources);
             setPoster(selectedPoster);
 
-            // Initialize quality on first load
-            const defaultQuality = [1080, 720, 480].find(q => videoSources.some(s => s.size === q)) || (videoSources[0]?.size || 720);
-            setCurrentQuality(defaultQuality);
+            // Generate a unique content ID (movie ID or episode ID)
+            const contentId = props.popUpType === "movie"
+              ? props.id?.id
+              : `${props.id?.id}-${props.seasonNumber}-${props.episodeNumber}`;
+
+            // Only reset to default quality if a DIFFERENT video is being loaded
+            if (loadedIdRef.current !== contentId) {
+              const defaultQuality = [1080, 720, 480].find(q => videoSources.some(s => s.size === q)) || (videoSources[0]?.size || 720);
+              setCurrentQuality(defaultQuality);
+              loadedIdRef.current = contentId;
+            }
 
             setIsModalOpen(true);
           }
@@ -96,7 +105,12 @@ export default function WatchTrailer(props) {
   const plyrProps = useMemo(() => ({
     source: {
       type: "video",
-      sources: sources,
+      // Reorder sources so the selected quality is always at the top of the list for Plyr
+      sources: [...sources].sort((a, b) => {
+        if (a.size === currentQuality) return -1;
+        if (b.size === currentQuality) return 1;
+        return b.size - a.size; // Otherwise highest quality first
+      }),
     },
     options: {
       poster: poster,
@@ -110,35 +124,8 @@ export default function WatchTrailer(props) {
           const size = parseInt(newSize, 10);
           if (isNaN(size) || size === currentQuality) return;
 
-          if (playerRef.current && playerRef.current.plyr) {
-            const newSource = sources.find(s => s.size === size);
-            if (newSource) {
-              const currentTime = playerRef.current.plyr.currentTime;
-              const isPlaying = !playerRef.current.plyr.paused;
-
-              // Update state to persist across re-renders
-              setCurrentQuality(size);
-
-              // Manual source update to ensure menu persists
-              playerRef.current.plyr.source = {
-                type: "video",
-                sources: sources.map((s) => ({
-                  src: s.src,
-                  type: s.type,
-                  size: s.size,
-                })),
-              };
-
-              // Force quality apply
-              playerRef.current.plyr.quality = size;
-
-              // Restore position and play state
-              playerRef.current.plyr.once('canplay', () => {
-                playerRef.current.plyr.currentTime = currentTime;
-                if (isPlaying) playerRef.current.plyr.play();
-              });
-            }
-          }
+          // Update state to trigger re-rendering with new source order and quality default
+          setCurrentQuality(size);
         },
       },
       controls: [
