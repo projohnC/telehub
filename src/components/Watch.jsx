@@ -2,7 +2,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 
@@ -20,40 +20,51 @@ export default function WatchTrailer(props) {
     const fetchData = async () => {
       if (props.isWatchMoviePopupOpen || props.isWatchEpisodePopupOpen) {
         try {
-          let videoSources = [];
+          const videoSources = [];
           let selectedPoster = "";
 
-          if (props.popUpType === "movie") {
-            videoSources = props.id.telegram.map((q) => ({
-              src: `${BASE}/dl/${q.id}/${q.name}`,
-              type: "video/mp4",
-              size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
-            }));
-            selectedPoster = props.id.backdrop;
-          } else if (props.popUpType === "episode") {
+          if (props.popUpType === "movie" && props.id?.telegram) {
+            props.id.telegram.forEach((q) => {
+              videoSources.push({
+                src: `${BASE}/dl/${q.id}/${q.name}`,
+                type: "video/mp4",
+                size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
+              });
+            });
+            selectedPoster = props.id.backdrop || "";
+          } else if (props.popUpType === "episode" && props.id?.seasons) {
             const season = props.id.seasons.find(
               (season) => season.season_number === props.seasonNumber
             );
 
-            if (season) {
+            if (season?.episodes) {
               const episode = season.episodes.find(
                 (ep) => ep.episode_number === props.episodeNumber
               );
 
-              if (episode) {
-                videoSources = episode.telegram.map((q) => ({
-                  src: `${BASE}/dl/${q.id}/${q.name}`,
-                  type: "video/mp4",
-                  size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
-                }));
-                selectedPoster = episode.episode_backdrop;
+              if (episode?.telegram) {
+                episode.telegram.forEach((q) => {
+                  videoSources.push({
+                    src: `${BASE}/dl/${q.id}/${q.name}`,
+                    type: "video/mp4",
+                    size: q.quality ? parseInt(q.quality.match(/\d+/)?.[0] || "720", 10) : 720,
+                  });
+                });
+                selectedPoster = episode.episode_backdrop || "";
               }
             }
           }
 
-          setSources(videoSources);
-          setPoster(selectedPoster);
-          setIsModalOpen(true);
+          if (videoSources.length > 0) {
+            setSources(videoSources);
+            setPoster(selectedPoster);
+
+            // Initialize quality on first load
+            const defaultQuality = [1080, 720, 480].find(q => videoSources.some(s => s.size === q)) || (videoSources[0]?.size || 720);
+            setCurrentQuality(defaultQuality);
+
+            setIsModalOpen(true);
+          }
         } catch (error) {
           console.error("Error processing data:", error);
         }
@@ -71,14 +82,6 @@ export default function WatchTrailer(props) {
     BASE,
   ]);
 
-  // Handle initial quality selection once sources are loaded
-  useEffect(() => {
-    if (sources.length > 0 && currentQuality === 0) {
-      const defaultQuality = [1080, 720, 480].find(q => sources.some(s => s.size === q)) || (sources[0]?.size || 720);
-      setCurrentQuality(defaultQuality);
-    }
-  }, [sources, currentQuality]);
-
   const closeModal = () => {
     setIsModalOpen(false);
     if (props.popUpType === "trailer") {
@@ -90,7 +93,7 @@ export default function WatchTrailer(props) {
     }
   };
 
-  const plyrProps = {
+  const plyrProps = useMemo(() => ({
     source: {
       type: "video",
       sources: sources,
@@ -105,7 +108,7 @@ export default function WatchTrailer(props) {
         forced: true,
         onChange: (newSize) => {
           const size = parseInt(newSize, 10);
-          if (isNaN(size)) return;
+          if (isNaN(size) || size === currentQuality) return;
 
           if (playerRef.current && playerRef.current.plyr) {
             const newSource = sources.find(s => s.size === size);
@@ -113,9 +116,10 @@ export default function WatchTrailer(props) {
               const currentTime = playerRef.current.plyr.currentTime;
               const isPlaying = !playerRef.current.plyr.paused;
 
-              // Update the state so the next render uses the correct default
+              // Update state to persist across re-renders
               setCurrentQuality(size);
 
+              // Manual source update to ensure menu persists
               playerRef.current.plyr.source = {
                 type: "video",
                 sources: sources.map((s) => ({
@@ -125,10 +129,10 @@ export default function WatchTrailer(props) {
                 })),
               };
 
-              // Ensure the selected quality is applied immediately
+              // Force quality apply
               playerRef.current.plyr.quality = size;
 
-              // Restore state after source change
+              // Restore position and play state
               playerRef.current.plyr.once('canplay', () => {
                 playerRef.current.plyr.currentTime = currentTime;
                 if (isPlaying) playerRef.current.plyr.play();
@@ -153,7 +157,7 @@ export default function WatchTrailer(props) {
       ],
       seekTime: 10,
     },
-  };
+  }), [sources, poster, currentQuality]);
 
   useEffect(() => {
     const handleFullscreen = () => {
