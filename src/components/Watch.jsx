@@ -2,16 +2,18 @@ import { AiOutlineClose } from "react-icons/ai";
 import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentQuality, setCurrentQuality] = useState(0); // 0 means not yet initialized
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
+  const loadedIdRef = useRef(null); // Tracks the ID of the currently loaded video content
   const location = useLocation();
 
   useEffect(() => {
@@ -52,6 +54,19 @@ export default function WatchTrailer(props) {
           if (videoSources.length > 0) {
             setSources(videoSources);
             setPoster(selectedPoster);
+
+            // Generate a unique content ID
+            const contentId = props.popUpType === "movie"
+              ? props.id?.id
+              : `${props.id?.id}-${props.seasonNumber}-${props.episodeNumber}`;
+
+            // Reset quality to default ONLY on new content
+            if (loadedIdRef.current !== contentId) {
+              const defaultQuality = [1080, 720, 480].find(q => videoSources.some(s => s.size === q)) || (videoSources[0]?.size || 720);
+              setCurrentQuality(defaultQuality);
+              loadedIdRef.current = contentId;
+            }
+
             setIsModalOpen(true);
           }
         } catch (error) {
@@ -82,30 +97,103 @@ export default function WatchTrailer(props) {
     }
   };
 
-  const plyrProps = {
+  const plyrProps = useMemo(() => ({
     source: {
       type: "video",
-      sources: sources,
+      sources: sources.map(s => ({
+        src: s.src,
+        type: s.type,
+        size: s.size,
+      })),
     },
     options: {
       poster: poster,
       settings: ["captions", "quality", "speed"],
+      speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
+      quality: {
+        default: currentQuality || 720,
+        options: [...new Set(sources.map(s => s.size))].sort((a, b) => b - a),
+        forced: true,
+        onChange: (newSize) => {
+          const size = parseInt(newSize, 10);
+          if (isNaN(size) || size === currentQuality) return;
+
+          if (playerRef.current?.plyr) {
+            const plyr = playerRef.current.plyr;
+            const currentTime = plyr.currentTime;
+            const isPlaying = !plyr.paused;
+
+            setCurrentQuality(size);
+
+            // Update with ALL sources to keep the quality menu intact
+            plyr.source = {
+              type: "video",
+              sources: sources.map(s => ({
+                src: s.src,
+                type: s.type,
+                size: s.size,
+              })),
+            };
+            plyr.quality = size;
+
+            plyr.once('canplay', () => {
+              plyr.currentTime = currentTime;
+              if (isPlaying) plyr.play();
+            });
+          }
+        },
+      },
       controls: [
         "play-large",
+        "rewind",
         "play",
+        "fast-forward",
         "progress",
         "current-time",
+        "duration",
         "mute",
-        "volume",
         "captions",
         "settings",
+        "quality",
         "fullscreen",
       ],
+      seekTime: 10,
     },
-  };
+  }), [sources, poster, currentQuality]);
+
+  // Handle initialization on first load
+  useEffect(() => {
+    if (playerRef.current?.plyr && sources.length > 0 && currentQuality !== 0) {
+      const plyr = playerRef.current.plyr;
+      if (!plyr.source || plyr.source.sources.length === 0) {
+        plyr.source = {
+          type: "video",
+          sources: sources.map(s => ({
+            src: s.src,
+            type: s.type,
+            size: s.size,
+          })),
+        };
+        plyr.quality = currentQuality;
+      }
+    }
+  }, [sources, currentQuality]);
+
+  useEffect(() => {
+    const handleFullscreen = () => {
+      if (document.fullscreenElement && window.screen.orientation && window.screen.orientation.lock) {
+        window.screen.orientation.lock("landscape").catch(err => console.log("Orientation lock failed:", err));
+      } else if (window.screen.orientation && window.screen.orientation.unlock) {
+        window.screen.orientation.unlock();
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreen);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreen);
+  }, []);
 
   const PlayerContent = (
-    <Plyr key={JSON.stringify(sources)} ref={playerRef} {...plyrProps} id="player" />
+    <Plyr key={JSON.stringify(sources)} ref={playerRef} {...plyrProps} />
   );
 
   return (
@@ -142,7 +230,7 @@ export default function WatchTrailer(props) {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.9 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+                className="w-full max-w-4xl aspect-video rounded-lg overflow-hidden shadow-lg relative"
               >
                 {PlayerContent}
               </motion.div>
