@@ -7,6 +7,7 @@ import SimilarMov from "./pages/SimilarMov";
 import SimilarSeries from "./pages/SimilarSeries";
 import SearResults from "./pages/SearchResults";
 import Tg from "./pages/Tg";
+import ActionPage from "./pages/ActionPage";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
 // import Login from "./pages/Login";
@@ -77,6 +78,14 @@ function App() {
           <Route
             path="/tg"
             element={<Tg />}
+          />
+          <Route
+            path="/dow"
+            element={<ActionPage actionType="Download" />}
+          />
+          <Route
+            path="/plyr"
+            element={<ActionPage actionType="Player" />}
           />
         </Routes>
       </div>
