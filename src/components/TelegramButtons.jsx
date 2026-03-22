@@ -1,51 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { PiTelegramLogo } from "react-icons/pi";
-import axios from "axios";
 import { Button } from "@nextui-org/button";
-import Spinner from "./svg/Spinner";
 
 const TelegramButton = ({ movieData }) => {
   const USERNAME = import.meta.env.VITE_TG_USERNAME;
-  const API_URL = import.meta.env.VITE_API_URL;
-  const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [loading, setLoading] = useState({});
-
-  const shortenUrl = async (url) => {
-    try {
-      // Flexible structure for various APIs
-      const response = await axios.get(API_URL, {
-        params: {
-          key: API_KEY,
-          link: url, // Adjust this depending on your API (link/url/etc.)
-        },
-      });
-
-      const data = response.data;
-
-      // Adjust this based on expected field in your API response
-      return data?.shortenedUrl || data?.short || data?.url || url;
-    } catch (error) {
-      console.error("Error shortening URL:", error);
-      return url;
-    }
-  };
-
-
-  const handleButtonClick = async (originalUrl, quality) => {
-    setLoading((prev) => ({ ...prev, [quality]: true }));
-    let shortUrl = originalUrl;
-
-    try {
-      shortUrl = await shortenUrl(originalUrl);
-      setShortenedUrls((prev) => ({ ...prev, [originalUrl]: shortUrl }));
-    } catch (error) {
-      console.error("Error processing URL:", error);
-    } finally {
-      setLoading((prev) => ({ ...prev, [quality]: false }));
-      window.open(shortUrl, "_blank", "noopener noreferrer");
-    }
+  const handleButtonClick = (originalUrl) => {
+    const encodedUrl = encodeURIComponent(originalUrl);
+    window.open(`/tg?url=${encodedUrl}`, "_blank", "noopener noreferrer");
   };
 
   const renderQualityButtons = (qualityDetails) =>
@@ -54,14 +17,11 @@ const TelegramButton = ({ movieData }) => {
         key={index}
         onClick={() =>
           handleButtonClick(
-            `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${quality}`,
-            quality
+            `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${quality}`
           )
         }
         size="sm"
-        className="bg-orange-gradient btn-hover-effect text-white rounded-xl shadow-lg font-bold"
-        isLoading={loading[quality]}
-        spinner={<Spinner />}
+        className="bg-primaryBtn rounded-full"
       >
         {quality}
       </Button>
@@ -84,7 +44,7 @@ const TelegramButton = ({ movieData }) => {
           offset={20}
         >
           <PopoverTrigger>
-            <button className="text-left bg-orange-gradient btn-hover-effect text-white py-2 px-5 rounded-xl shadow-md font-bold text-sm w-full">
+            <button className="text-left bg-otherColor text-bgColor py-1 px-3 rounded-full border-2 border-otherColor">
               Season {season.season_number}
             </button>
           </PopoverTrigger>
@@ -95,14 +55,11 @@ const TelegramButton = ({ movieData }) => {
                   key={qualityIndex}
                   onClick={() =>
                     handleButtonClick(
-                      `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`,
-                      quality
+                      `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`
                     )
                   }
                   size="sm"
-                  className="bg-orange-gradient btn-hover-effect text-white rounded-xl shadow-lg font-bold"
-                  isLoading={loading[quality]}
-                  spinner={<Spinner />}
+                  className="bg-primaryBtn rounded-full"
                 >
                   {quality}
                 </Button>
@@ -115,9 +72,9 @@ const TelegramButton = ({ movieData }) => {
 
   return (
     <Popover placement="bottom" showArrow={true}>
-      <PopoverTrigger>
-        <button className="uppercase flex items-center justify-center gap-2 bg-orange-gradient btn-hover-effect max-w-full grow text-white text-xs rounded-2xl py-2 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-3 font-bold shadow-lg">
-          <PiTelegramLogo className="text-xl" /> Telegram
+      <PopoverTrigger className="w-full">
+        <button className="w-full uppercase flex items-center justify-center gap-2 bg-telegramColor text-white font-bold text-xs rounded-xl py-3 px-6 lg:text-sm shadow-lg transition-transform hover:scale-105 active:scale-95">
+          <PiTelegramLogo className="text-xl" /> TELEGRAM
         </button>
       </PopoverTrigger>
       <PopoverContent className="bg-btnColor">

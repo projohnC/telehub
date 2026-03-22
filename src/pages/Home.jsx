@@ -13,9 +13,11 @@ export default function Home() {
 
   // States
   const [heroPopularMovies, setHeroPopularMovies] = useState([]);
-  const [latestContent, setLatestContent] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingTv, setTrendingTv] = useState([]);
   const [isHeroLoading, setIsHeroLoading] = useState(true);
-  const [isLatestLoading, setIsLatestLoading] = useState(true);
+  const [isTrendingMoviesLoading, setIsTrendingMoviesLoading] = useState(true);
+  const [isTrendingTvLoading, setIsTrendingTvLoading] = useState(true);
 
   useEffect(() => {
     setIsHeroLoading(true);
@@ -23,7 +25,7 @@ export default function Home() {
     axios
       .get(`${BASE}/api/movies`, {
         params: {
-          sort_by: "updated_on:desc",
+          sort_by: "rating:desc",
           page: 1,
           page_size: 10,
         },
@@ -39,37 +41,60 @@ export default function Home() {
   }, [BASE]);
 
   useEffect(() => {
-    setIsLatestLoading(true);
-
-    const fetchLatest = async () => {
-      try {
-        const [moviesRes, tvRes] = await Promise.all([
-          axios.get(`${BASE}/api/movies`, {
-            params: { sort_by: "updated_on:desc", page: 1, page_size: 20 },
-          }),
-          axios.get(`${BASE}/api/tvshows`, {
-            params: { sort_by: "updated_on:desc", page: 1, page_size: 20 },
-          })
-        ]);
-
-        const combined = [
-          ...moviesRes.data.movies.map(m => ({ ...m, type: 'movie' })),
-          ...tvRes.data.tv_shows.map(t => ({ ...t, type: 'tv' }))
-        ];
-
-        // Sort by updated_on descending
-        combined.sort((a, b) => new Date(b.updated_on) - new Date(a.updated_on));
-
-        setLatestContent(combined.slice(0, 24));
-        setIsLatestLoading(false);
-      } catch (error) {
-        console.error("Error fetching latest content:", error);
-        setIsLatestLoading(false);
-      }
-    };
-
-    fetchLatest();
+    setIsTrendingMoviesLoading(true);
+    axios
+      .get(`${BASE}/api/movies`, {
+        params: {
+          sort_by: "updated_on:desc",
+          page: 1,
+          page_size: 20,
+        },
+      })
+      .then((response) => {
+        setTrendingMovies(response.data.movies);
+        setIsTrendingMoviesLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching trending movies:", error);
+        setIsTrendingMoviesLoading(false);
+      });
   }, [BASE]);
+
+  useEffect(() => {
+    setIsTrendingTvLoading(true);
+    axios
+      .get(`${BASE}/api/tvshows`, {
+        params: {
+          sort_by: "updated_on:desc",
+          page: 1,
+          page_size: 20,
+        },
+      })
+      .then((response) => {
+        setTrendingTv(response.data.tv_shows);
+        setIsTrendingTvLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching trending TV shows:", error);
+        setIsTrendingTvLoading(false);
+      });
+  }, [BASE]);
+
+  // Combined Latest
+  const [combinedLatest, setCombinedLatest] = useState([]);
+  const [isCombinedLoading, setIsCombinedLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isTrendingMoviesLoading && !isTrendingTvLoading) {
+      const merged = [...trendingMovies, ...trendingTv].sort((a, b) => {
+        return new Date(b.updated_on) - new Date(a.updated_on);
+      });
+      setCombinedLatest(merged.slice(0, 24)); // Show top 24 mixed items
+      setIsCombinedLoading(false);
+    } else {
+      setIsCombinedLoading(true);
+    }
+  }, [trendingMovies, trendingTv, isTrendingMoviesLoading, isTrendingTvLoading]);
 
   return (
     <div>
@@ -95,12 +120,12 @@ export default function Home() {
         />
       </div>
 
-      {/* Combined Latest Releases Section */}
+      {/* Combined Latest Section */}
       <HomeSections
-        movieData={latestContent}
-        isMovieDataLoading={isLatestLoading}
-        sectionTitle="Latest Releases"
-        sectionSeeMoreButtonLink="/Movies"
+        movieData={combinedLatest}
+        isMovieDataLoading={isCombinedLoading}
+        sectionTitle="Recently Added"
+        sectionSeeMoreButtonLink="/Movies" // Could point to a combined page if available
         dataType="latestContent"
       />
     </div>

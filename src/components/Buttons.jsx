@@ -11,36 +11,34 @@ const DownloadButton = ({ movieData, btnType }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [selectedSeason, setSelectedSeason] = useState(new Set([]));
-  const [selectedEpisode, setSelectedEpisode] = useState(new Set([]));
-  const [selectedQuality, setSelectedQuality] = useState(new Set([]));
+  const [selectedSeason, setSelectedSeason] = useState("");
+  const [selectedEpisode, setSelectedEpisode] = useState("");
+  const [selectedQuality, setSelectedQuality] = useState("");
   const [episodes, setEpisodes] = useState([]);
   const [qualities, setQualities] = useState([]);
   const [loading, setLoading] = useState({});
 
   useEffect(() => {
-    const seasonVal = Array.from(selectedSeason)[0];
-    if (seasonVal) {
+    if (selectedSeason) {
       const season = movieData.seasons.find(
-        (s) => s.season_number === parseInt(seasonVal)
+        (s) => s.season_number === parseInt(selectedSeason)
       );
       if (season) {
         setEpisodes(season.episodes);
-        setSelectedEpisode(new Set([]));
+        setSelectedEpisode("");
         setQualities([]);
       }
     }
   }, [selectedSeason, movieData.seasons]);
 
   useEffect(() => {
-    const episodeVal = Array.from(selectedEpisode)[0];
-    if (episodeVal) {
+    if (selectedEpisode) {
       const episode = episodes.find(
-        (e) => e.episode_number === parseInt(episodeVal)
+        (e) => e.episode_number === parseInt(selectedEpisode)
       );
       if (episode) {
         setQualities(episode.telegram);
-        setSelectedQuality(new Set([]));
+        setSelectedQuality("");
       }
     }
   }, [selectedEpisode, episodes]);
@@ -86,7 +84,7 @@ const DownloadButton = ({ movieData, btnType }) => {
         key={i}
         onClick={() => handleButtonClick(q.id, q.name, q.quality)}
         size="sm"
-        className={`${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold`}
+        className="bg-black/40 hover:bg-black/60 text-white font-bold border border-white/10 rounded-lg min-w-[80px]"
         isLoading={loading[q.quality]}
         spinner={<Spinner />}
       >
@@ -95,105 +93,118 @@ const DownloadButton = ({ movieData, btnType }) => {
     ));
 
   const renderShowSelectors = () => (
-    <div className="px-1 py-2 flex flex-col gap-2">
-      <Select
-        isRequired
-        variant="bordered"
-        aria-label="Select season"
-        placeholder="Select season"
-        className="w-40 mb-2"
-        classNames={{
-          value: "text-white",
-          trigger: "border-white/20",
-        }}
-        onSelectionChange={setSelectedSeason}
-        selectedKeys={selectedSeason}
-      >
-        {movieData.seasons
-          .sort((a, b) => a.season_number - b.season_number)
-          .map((s) => (
-            <SelectItem key={s.season_number} textValue={`Season ${s.season_number}`}>
-              Season {s.season_number}
-            </SelectItem>
-          ))}
-      </Select>
-      <Select
-        isRequired
-        variant="bordered"
-        aria-label="Select episode"
-        placeholder="Select episode"
-        className="w-40 mb-2"
-        classNames={{
-          value: "text-white",
-          trigger: "border-white/20",
-        }}
-        onSelectionChange={setSelectedEpisode}
-        selectedKeys={selectedEpisode}
-        isDisabled={selectedSeason.size === 0}
-      >
-        {episodes
-          .sort((a, b) => a.episode_number - b.episode_number)
-          .map((e) => (
-            <SelectItem key={e.episode_number} textValue={`Episode ${e.episode_number}`}>
-              Episode {e.episode_number}
-            </SelectItem>
-          ))}
-      </Select>
-      <Select
-        isRequired
-        variant="bordered"
-        aria-label="Select quality"
-        placeholder="Select quality"
-        className="w-40 mb-2"
-        classNames={{
-          value: "text-white",
-          trigger: "border-white/20",
-        }}
-        onSelectionChange={setSelectedQuality}
-        selectedKeys={selectedQuality}
-        isDisabled={selectedEpisode.size === 0}
-      >
-        {qualities?.map((q) => (
-          <SelectItem key={q.quality} textValue={q.quality}>
-            {q.quality}
-          </SelectItem>
-        ))}
-      </Select>
-      <Button
+    <div className="p-3 flex flex-col gap-3 min-w-[200px]">
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase font-bold text-white/40 ml-1">Season</label>
+        <div className="relative">
+          <select
+            className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 outline-none appearance-none cursor-pointer focus:border-primaryBtn/50 transition-all font-bold"
+            onChange={(e) => setSelectedSeason(e.target.value)}
+            value={selectedSeason}
+          >
+            <option value="" disabled className="bg-[#08090b]">Select season</option>
+            {movieData.seasons
+              .sort((a, b) => a.season_number - b.season_number)
+              .map((s) => (
+                <option key={s.season_number} value={s.season_number} className="bg-[#08090b]">
+                  Season {s.season_number}
+                </option>
+              ))}
+          </select>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase font-bold text-white/40 ml-1">Episode</label>
+        <div className="relative">
+          <select
+            className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 outline-none appearance-none cursor-pointer focus:border-primaryBtn/50 transition-all font-bold disabled:opacity-30"
+            onChange={(e) => setSelectedEpisode(e.target.value)}
+            value={selectedEpisode}
+            disabled={!selectedSeason}
+          >
+            <option value="" disabled className="bg-[#08090b]">Select episode</option>
+            {episodes
+              .sort((a, b) => a.episode_number - b.episode_number)
+              .map((e) => (
+                <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
+                  Episode {e.episode_number}
+                </option>
+              ))}
+          </select>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] uppercase font-bold text-white/40 ml-1">Quality</label>
+        <div className="relative">
+          <select
+            className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 outline-none appearance-none cursor-pointer focus:border-primaryBtn/50 transition-all font-bold disabled:opacity-30"
+            onChange={(e) => setSelectedQuality(e.target.value)}
+            value={selectedQuality}
+            disabled={!selectedEpisode}
+          >
+            <option value="" disabled className="bg-[#08090b]">Select quality</option>
+            {qualities?.map((q) => (
+              <option key={q.quality} value={q.quality} className="bg-[#08090b]">
+                {q.quality}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <button
         onClick={() => {
-          const qualityVal = Array.from(selectedQuality)[0];
-          const q = qualities.find((q) => q.quality === qualityVal);
+          const q = qualities.find((q) => q.quality === selectedQuality);
           if (q) handleButtonClick(q.id, q.name, q.quality);
         }}
-        size="sm"
-        className={`${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"} btn-hover-effect text-white rounded-xl shadow-lg font-bold`}
-        isDisabled={selectedQuality.size === 0}
-        isLoading={loading[Array.from(selectedQuality)[0]]}
-        spinner={<Spinner />}
+        disabled={!selectedQuality}
+        className="w-full mt-2 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-white font-bold py-3 rounded-xl transition-all active:scale-95 border border-white/5 shadow-xl flex justify-center items-center"
       >
-        {btnType === "Download" ? "Download Now" : "Play in Player"}
-      </Button>
+        {loading[selectedQuality] ? <Spinner /> : (btnType === "Download" ? "Download Now" : "Play in Player")}
+      </button>
     </div>
   );
 
   return (
-    <Popover placement="bottom" showArrow={true}>
-      <PopoverTrigger>
-        <button className={`uppercase flex items-center justify-center gap-2 max-w-full grow text-white text-xs rounded-2xl py-2 px-3 lg:text-sm sm:px-5 sm:max-w-[15rem] sm:py-3 font-bold shadow-lg btn-hover-effect ${btnType === "Download" ? "bg-purple-gradient" : "bg-dark-premium"}`}>
+    <Popover placement="top" offset={10} showArrow={true}>
+      <PopoverTrigger className="w-full">
+        <button
+          className={`w-full flex justify-center items-center gap-2 uppercase font-bold text-white text-xs rounded-xl py-3 px-6 lg:text-sm shadow-xl transition-transform hover:scale-105 active:scale-95 ${btnType === "Download"
+            ? "bg-gradient-to-r from-[#E50914] to-[#B20710]"
+            : "bg-btnColor border border-white/10"
+            }`}
+        >
           {btnType === "Download" ? (
             <>
-              <FaCloudDownloadAlt className="text-xl" /> Download
+              <FaCloudDownloadAlt className="text-xl" /> DOWNLOAD
             </>
           ) : (
             <>
-              <FaPlay className="text-xl" /> Player
+              <FaPlay className="text-xl" /> PLAYER
             </>
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="bg-btnColor">
+      <PopoverContent className="bg-[#121418] border border-white/10 shadow-2xl rounded-2xl p-1">
         {movieData.media_type === "movie"
-          ? <div className="px-1 py-2 flex gap-1 flex-wrap">{renderMovieButtons()}</div>
+          ? <div className="px-2 py-3 flex gap-2 flex-wrap items-center justify-center max-w-[300px]">{renderMovieButtons()}</div>
           : renderShowSelectors()}
       </PopoverContent>
     </Popover>

@@ -24,6 +24,12 @@ const MovieCard = ({ movie }) => {
 
   return (
     <div className="relative">
+      <div className="absolute top-2 left-2 z-10">
+        <div className="bg-primaryBtn text-white text-[0.6rem] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
+          {movie.media_type === "movie" ? "Movies" : "Series"}
+        </div>
+      </div>
+
       <Link
         to={
           movie.media_type === "movie"
@@ -32,39 +38,29 @@ const MovieCard = ({ movie }) => {
         }
         className="rounded-t-2xl"
       >
-        <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl ">
+        <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl overflow-hidden">
           <LazyLoadImage
             src={movie.poster ? movie.poster : posterPlaceholder}
             width="100%"
             effect="black-and-white"
             alt={movie.title}
-            className="aspect-[9/13.5] w-full object-cover rounded-2xl "
+            className="aspect-[9/13.5] w-full object-cover rounded-2xl transition-transform duration-500 hover:scale-110"
             onMouseEnter={showPlay}
             onMouseLeave={hidePlay}
           />
-          <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-            <div className="bg-otherColor text-white text-[0.63rem] font-bold px-2 py-0.5 rounded shadow-sm uppercase">
-              {movie.media_type === "tv" ? "Series" : "Movies"}
-            </div>
-          </div>
-          <div className="absolute bottom-3 left-3 z-10">
-          </div>
-          <div className="absolute bottom-3 right-3 z-10">
-          </div>
         </div>
       </Link>
 
-      <div className="mt-2.5 px-1 pb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-otherColor flex items-center justify-center text-white font-black text-xs shrink-0 shadow-md">
-            {movie.title ? movie.title.charAt(0).toUpperCase() : "M"}
-          </div>
-          <div className="flex flex-col min-w-0">
-            <p className="line-clamp-1 text-[0.85rem] font-bold text-primaryTextColor leading-snug">{movie.title}</p>
-            <p className="text-[0.65rem] text-secondaryTextColor uppercase font-medium tracking-wide">
-              {movie.release_year} • {movie.media_type === "tv" ? "Series" : "Movie"}
-            </p>
-          </div>
+      <div className="text-primaryTextColor mt-2">
+        <p className="line-clamp-1 text-xs md:text-sm font-semibold">{movie.title}</p>
+        <div className="flex items-center justify-between text-secondaryTextColor mt-1 text-[0.65rem]">
+          {movie.release_year && <p>{movie.release_year}</p>}
+          {movie.rating && (
+            <div className="flex items-center gap-1 text-yellow-500">
+              <PiStarFill />
+              <p>{movie.rating.toFixed(1)}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -95,7 +91,7 @@ const MovieCard = ({ movie }) => {
           </Link>
         )}
       </AnimatePresence>
-    </div>
+    </div >
   );
 };
 

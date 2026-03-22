@@ -25,9 +25,9 @@ export default function HomeSection(props) {
   return (
     <>
       {/* Title */}
-      <div className="mt-[2.5rem] flex items-center flex-wrap gap-5 text-primaryTextColor pb-[1.5rem] md:mt-[5rem]">
-        <div className="pl-[1rem] border-l-2 border-primaryBtn">
-          <p className="text-[0.8rem] uppercase font-bold sm:text-[1rem]">
+      <div className="mt-[1.5rem] flex items-center justify-between flex-wrap gap-5 text-primaryTextColor pb-[0.8rem] md:mt-[3rem]">
+        <div className="pl-[1rem] border-l-4 border-primaryBtn">
+          <p className="text-[0.9rem] uppercase font-extrabold sm:text-[1.1rem] tracking-wider">
             {props.sectionTitle}
           </p>
         </div>
@@ -35,11 +35,11 @@ export default function HomeSection(props) {
         {/* See All Button */}
         <Link
           to={props.sectionSeeMoreButtonLink}
-          className="flex gap-3 items-center py-[0.5rem] px-[1rem] text-[0.7rem] rounded-sm transition-all duration-300 ease-in-out text-primaryBtn hover:text-primaryBtnHower"
+          className="flex gap-2 items-center py-[0.5rem] px-[1rem] text-[0.7rem] transition-all duration-300 ease-in-out text-primaryBtn hover:text-primaryBtnHower font-bold"
           style={{ textDecoration: "none" }}
         >
           <p>See more</p>
-          <BiArrowFromLeft style={{ fontSize: "1rem" }} />
+          <BiArrowFromLeft className="text-xl" />
         </Link>
       </div>
 

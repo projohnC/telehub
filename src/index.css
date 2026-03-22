@@ -9,51 +9,41 @@
   font-family: sans-serif;
   scroll-behavior: smooth;
 }
-
 body {
-  background: #050614;
-  color: white;
+  background: #000000;
 }
-
-/* Premium Gradients and Button Styles */
-.bg-purple-gradient {
-  background: linear-gradient(90deg, #6366F1 0%, #A855F7 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-}
-
-.bg-orange-gradient {
-  background: linear-gradient(90deg, #F97316 0%, #EF4444 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
-}
-
-.bg-dark-premium {
-  background: rgba(31, 41, 55, 0.5) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.btn-hover-effect:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  transition: all 0.3s ease;
-}
-
 /* Mask */
 .mask {
   mask-image: linear-gradient(to top, transparent, #121212);
 }
-
 .modal {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-}
-
-/* Default video player style */
+} /* Default video player style */
 
 #player {
   transition: transform 0.3s ease;
+  --plyr-color-main: #E50914;
+}
+
+/* Custom Red Overlaid Play Button */
+.plyr--video .plyr__control--overlaid {
+  background: rgba(229, 9, 20, 0.8) !important;
+}
+
+.plyr--video .plyr__control--overlaid:hover {
+  background: #E50914 !important;
+}
+
+/* Rounded circular look for central play button */
+.plyr__control--overlaid svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Spacing and margins for controls */
+.plyr__controls__item {
+  margin-left: 2px !important;
+  margin-right: 2px !important;
 }
 
 /* Portrait mode */
@@ -63,20 +53,17 @@ body {
     transform-origin: center center;
   }
 }
-
 /* Landscape mode */
 @media (orientation: landscape) {
   #player {
     transform: none;
   }
 }
-
 ::-webkit-scrollbar {
   width: 1px;
   height: 1px;
   background-color: transparent;
 }
-
 /* Track */
 ::-webkit-scrollbar-track {
   background-color: transparent;
@@ -99,30 +86,27 @@ body {
   width: 20px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: #e50914;
-  box-shadow: 0 0 0 0 #e50914;
+  background: #50b498;
+  box-shadow: 0 0 0 0 #50b498;
   animation: l2 1.5s infinite linear;
   position: relative;
 }
-
 .loader:before,
 .loader:after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 0 0 #e50914;
+  box-shadow: 0 0 0 0 #50b498;
   animation: inherit;
   animation-delay: -0.5s;
 }
-
 .loader:after {
   animation-delay: -1s;
 }
-
 @keyframes l2 {
   100% {
-    box-shadow: 0 0 0 40px #e509142f;
+    box-shadow: 0 0 0 40px #50b4982f;
   }
 }
 
@@ -131,30 +115,27 @@ body {
   width: 10px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: #e50914;
-  box-shadow: 0 0 0 0 #e50914;
+  background: #50b498;
+  box-shadow: 0 0 0 0 #50b498;
   animation: l3 1.5s infinite linear;
   position: relative;
 }
-
 .loader-search:before,
 .loader-search:after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 0 0 #e50914;
+  box-shadow: 0 0 0 0 #50b498;
   animation: inherit;
   animation-delay: -0.5s;
 }
-
 .loader-search:after {
   animation-delay: -1s;
 }
-
 @keyframes l3 {
   100% {
-    box-shadow: 0 0 0 30px #e509142f;
+    box-shadow: 0 0 0 30px #50b4982f;
   }
 }
 
@@ -162,17 +143,15 @@ body {
 .loader-episode {
   width: 40px;
   aspect-ratio: 1;
-  --c: linear-gradient(#e50914 0 0);
-  --r1: radial-gradient(farthest-side at bottom, #e50914 93%, #e50914);
-  --r2: radial-gradient(farthest-side at top, #e50914 93%, #e50914);
+  --c: linear-gradient(#50b498 0 0);
+  --r1: radial-gradient(farthest-side at bottom, #50b498 93%, #50b498);
+  --r2: radial-gradient(farthest-side at top, #50b498 93%, #50b498);
   background: var(--c), var(--r1), var(--r2), var(--c), var(--r1), var(--r2),
     var(--c), var(--r1), var(--r2);
   background-repeat: no-repeat;
   animation: l4 1s infinite alternate;
 }
-
 @keyframes l4 {
-
   0%,
   25% {
     background-size: 8px 0, 8px 4px, 8px 4px, 8px 0, 8px 4px, 8px 4px, 8px 0,
@@ -181,7 +160,6 @@ body {
       50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
-
   50% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 0, 8px 4px, 8px 4px, 8px 0,
       8px 4px, 8px 4px;
@@ -189,7 +167,6 @@ body {
       50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
-
   75% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 100%, 8px 4px, 8px 4px,
       8px 0, 8px 4px, 8px 4px;
@@ -197,7 +174,6 @@ body {
       50% calc(0% - 2px), 50% calc(100% + 2px), 100% 50%, 100% calc(50% - 2px),
       100% calc(50% + 2px);
   }
-
   95%,
   100% {
     background-size: 8px 100%, 8px 4px, 8px 4px, 8px 100%, 8px 4px, 8px 4px,
@@ -206,42 +182,4 @@ body {
       50% calc(0% - 2px), 50% calc(100% + 2px), 100% 50%, 100% calc(0% - 2px),
       100% calc(100% + 2px);
   }
-}
-
-/* Premium Plyr Customization */
-:root {
-  --plyr-color-main: #e50914;
-  --plyr-video-background: #000;
-  --plyr-control-radius: 8px;
-  --plyr-range-thumb-height: 12px;
-  --plyr-range-track-height: 4px;
-}
-
-.plyr--full-ui input[type=range] {
-  color: #e50914 !important;
-}
-
-.plyr__control--overlaid {
-  background: rgba(229, 9, 20, 0.6) !important;
-}
-
-.plyr__control:hover {
-  background: #e50914 !important;
-  color: white !important;
-}
-
-.plyr__controls {
-  padding: 10px 15px !important;
-  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)) !important;
-}
-
-/* Scrollable Settings Menu */
-.plyr__menu__container [role=menu] {
-  max-height: 180px !important;
-  overflow-y: auto !important;
-}
-
-.plyr__menu__container {
-  max-height: 220px !important;
-  overflow-y: auto !important;
 }

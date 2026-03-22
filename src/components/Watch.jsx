@@ -17,7 +17,9 @@ export default function WatchTrailer(props) {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (props.isWatchMoviePopupOpen || props.isWatchEpisodePopupOpen) {
+      // For inline usage, we might already have sources if they are passed down, 
+      // but let's keep the logic consistent for now.
+      if (props.isWatchMoviePopupOpen || props.isWatchEpisodePopupOpen || props.isInline) {
         try {
           let videoSources = [];
           let selectedPoster = "";
@@ -52,7 +54,9 @@ export default function WatchTrailer(props) {
 
           setSources(videoSources);
           setPoster(selectedPoster);
-          setIsModalOpen(true);
+          if (!props.isInline) {
+            setIsModalOpen(true);
+          }
         } catch (error) {
           console.error("Error processing data:", error);
         }
@@ -67,6 +71,7 @@ export default function WatchTrailer(props) {
     props.id,
     props.seasonNumber,
     props.episodeNumber,
+    props.isInline,
     BASE,
   ]);
 
@@ -89,13 +94,6 @@ export default function WatchTrailer(props) {
     options: {
       poster: poster,
       settings: ["captions", "quality", "speed"],
-      speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
-      quality: {
-        default: 720,
-        options: [1080, 720, 480],
-        forced: true,
-        onChange: (e) => console.log('Quality changed', e),
-      },
       controls: [
         "play-large",
         "rewind",
@@ -103,71 +101,85 @@ export default function WatchTrailer(props) {
         "fast-forward",
         "progress",
         "current-time",
-        "duration",
         "mute",
-        "captions",
         "settings",
         "fullscreen",
       ],
       seekTime: 10,
+      autoplay: props.isInline && sources.length > 0,
     },
   };
 
   useEffect(() => {
-    const handleFullscreen = () => {
-      if (document.fullscreenElement && window.screen.orientation && window.screen.orientation.lock) {
-        window.screen.orientation.lock("landscape").catch(err => console.log("Orientation lock failed:", err));
-      } else if (window.screen.orientation && window.screen.orientation.unlock) {
-        window.screen.orientation.unlock();
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        // Entered fullscreen
+        if (window.screen.orientation && window.screen.orientation.lock) {
+          window.screen.orientation.lock("landscape").catch((err) => {
+            console.warn("Screen orientation lock failed:", err);
+          });
+        }
+      } else {
+        // Exited fullscreen
+        if (window.screen.orientation && window.screen.orientation.unlock) {
+          window.screen.orientation.unlock();
+        }
       }
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreen);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreen);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("msfullscreenchange", handleFullscreenChange);
+    };
   }, []);
 
-  return (
-    <>
-      {props.inline ? (
-        <div className="w-full rounded-3xl overflow-hidden relative bg-black">
-          {sources.length > 0 ? (
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="loader"></div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <AnimatePresence>
-          {isModalOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-30 w-full h-screen bg-black/90 backdrop-blur-md flex items-center justify-center"
-            >
-              <button
-                onClick={closeModal}
-                className="absolute top-5 right-5 text-white text-2xl z-50"
-              >
-                <AiOutlineClose />
-              </button>
+  if (props.isInline) {
+    return (
+      <div className="w-full h-full bg-black flex items-center justify-center rounded-3xl overflow-hidden shadow-2xl">
+        {sources.length > 0 ? (
+          <Plyr ref={playerRef} {...plyrProps} id="player" />
+        ) : (
+          <div className="loader"></div>
+        )}
+      </div>
+    );
+  }
 
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
-              >
-                <Plyr ref={playerRef} {...plyrProps} id="player" />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  return (
+    <AnimatePresence>
+      {isModalOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-30 w-full h-screen bg-black/90 backdrop-blur-md flex items-center justify-center"
+        >
+          <button
+            onClick={closeModal}
+            className="absolute top-5 right-5 text-white text-2xl z-50"
+          >
+            <AiOutlineClose />
+          </button>
+
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.9 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+          >
+            <Plyr ref={playerRef} {...plyrProps} id="player" />
+          </motion.div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>
   );
 }

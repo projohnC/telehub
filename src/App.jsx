@@ -6,13 +6,15 @@ import Series from "./pages/Series";
 import SimilarMov from "./pages/SimilarMov";
 import SimilarSeries from "./pages/SimilarSeries";
 import SearResults from "./pages/SearchResults";
+import Tg from "./pages/Tg";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
 // import Login from "./pages/Login";
 
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
-import DMCA from "./pages/DMCA";
+import AdManager from "./components/AdManager";
+import AdBlockDetector from "./components/AdBlockDetector";
 // import PrivateRoute from "./components/PrivateRoute";
 
 // import { AuthProvider } from "./context/AuthContext";
@@ -32,6 +34,8 @@ function App() {
   return (
 
     <BrowserRouter>
+      <AdManager />
+      <AdBlockDetector />
       <Nav />
       <div className="p-3 md:p-10">
 
@@ -58,10 +62,6 @@ function App() {
             element={<NotFoundPage />}
           />
           <Route
-            path="/dmca"
-            element={<DMCA />}
-          />
-          <Route
             path="/similarMov/:movieID"
             element={<SimilarMov />}
           />
@@ -73,6 +73,10 @@ function App() {
           <Route
             path="/search/:searchResult"
             element={<SearResults />}
+          />
+          <Route
+            path="/tg"
+            element={<Tg />}
           />
         </Routes>
       </div>

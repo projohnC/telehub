@@ -7,366 +7,266 @@ import "react-lazy-load-image-component/src/effects/black-and-white.css";
 
 import { FiSearch } from "react-icons/fi";
 import { VscClose } from "react-icons/vsc";
-import { BiHomeAlt2, BiSolidMovie, BiStar, BiTime } from "react-icons/bi";
-import { FaPlay } from "react-icons/fa";
+import { BiHomeAlt2, BiSolidMovie, BiStar } from "react-icons/bi";
 
 import { BsTv } from "react-icons/bs";
+import { FaPlay } from "react-icons/fa";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
-// import UserInfoBtn from "./Logout";
 
 export default function Nav() {
-  const BASE = import.meta.env.VITE_BASE_URL; // Base Url for backend
+  const BASE = import.meta.env.VITE_BASE_URL;
   const SITENAME = import.meta.env.VITE_SITENAME;
 
-  // Query State
-  const [query, setQuery] = React.useState("");
-  const [debouncedVal, setDebouncedVal] = React.useState("");
+  const [query, setQuery] = useState("");
+  const [debouncedVal, setDebouncedVal] = useState("");
   const [searcResult, setSearchResult] = useState([]);
-
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [navStatus, setNavStatus] = useState("Home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
 
-  const toggleSearch = () => setSearchOpen(!searchOpen);
-
-  // Update navStatus based on the current path
   useEffect(() => {
     const path = location.pathname;
-    if (path === "/") {
-      setNavStatus("Home");
-    } else if (path.startsWith("/mov") || path.startsWith("/Movies")) {
-      setNavStatus("Movies");
-    } else if (path.startsWith("/ser") || path.startsWith("/Series")) {
-      setNavStatus("Series");
-    }
+    if (path === "/") setNavStatus("Home");
+    else if (path.startsWith("/mov") || path.startsWith("/movie")) setNavStatus("Movies");
+    else if (path.startsWith("/ser") || path.startsWith("/series")) setNavStatus("Series");
   }, [location.pathname]);
 
-  // const isLoginPage = location.pathname === "/login"; 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedVal(query), 500);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  // Query Data Fetcher
-  try {
-    useEffect(() => {
+  useEffect(() => {
+    const fetchSearch = async () => {
+      if (!debouncedVal) {
+        setSearchResult([]);
+        return;
+      }
       setIsLoading(true);
-      fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1`)
-        .then((search_res) => search_res.json())
-        .then((search_data) => {
-          setSearchResult(search_data.results);
-
-          setIsLoading(false);
-        });
-    }, [debouncedVal]);
-  } catch (error) {
-    <p className="main-search-result-container">{error}</p>;
-  }
-
-  // Debouncing Function
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedVal(query);
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [query, 1000]);
-
-  let closeSearchResultsDropDown = useRef();
-  useEffect(() => {
-    let closeSearchResultsDropdownHandler = (event) => {
-      if (
-        closeSearchResultsDropDown.current &&
-        !closeSearchResultsDropDown.current.contains(event.target)
-      ) {
-        setDebouncedVal("");
-        setSearchOpen(false);
+      try {
+        const response = await fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1`);
+        const search_data = await response.json();
+        setSearchResult(search_data.results || []);
+      } catch (error) {
+        console.error("Search error:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    document.addEventListener("mousedown", closeSearchResultsDropdownHandler);
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        closeSearchResultsDropdownHandler
-      );
+    fetchSearch();
+  }, [debouncedVal, BASE]);
+
+  const closeSearchResultsDropDown = useRef();
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (closeSearchResultsDropDown.current && !closeSearchResultsDropDown.current.contains(event.target)) {
+        setDebouncedVal("");
+      }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // for Mobile Menu popup Closing
   const closeMobileMenu = useRef();
   useEffect(() => {
-    let closeMobileMenuHandler = (event) => {
-      if (
-        closeMobileMenu.current &&
-        !closeMobileMenu.current.contains(event.target)
-      ) {
+    const handleClickOutside = (event) => {
+      if (closeMobileMenu.current && !closeMobileMenu.current.contains(event.target)) {
         setMobileMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", closeMobileMenuHandler);
-    document.addEventListener("scroll", closeMobileMenuHandler);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("scroll", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", closeMobileMenuHandler);
-      document.removeEventListener("scroll", closeMobileMenuHandler);
-
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("scroll", handleClickOutside);
     };
   }, []);
 
   return (
-    <>
-
-      <div className="fixed flex items-center justify-between gap-3 z-20 bg-bgColor/60 backdrop-blur-md top-0 left-0 right-0 py-4 px-5 md:px-10 text-white">
-        <div className="flex items-center gap-3">
-          {/* navigation Small Screen */}
-          <div className="relative block md:hidden">
-            <div
-              onClick={() => setMobileMenuOpen(true)}
-              className="flex flex-col gap-1 cursor-pointer"
-            >
-              <div className="h-[0.1rem] w-6 bg-secondaryTextColor"></div>
-              <div className="h-[0.1rem] w-4 bg-secondaryTextColor"></div>
-              <div className="h-[0.1rem] w-2 bg-secondaryTextColor"></div>
-            </div>
-            <AnimatePresence>
-              {mobileMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 50 }}
-                  transition={{
-                    type: "tween",
-                    duration: 0.3,
-                  }}
-                  className="absolute w-52 sm:w-60 top-12 rounded-3xl -left-2 bg-btnColor p-8 max-h-[50dvh]"
-                  ref={closeMobileMenu}
-                >
-                  {[
-                    { icon: BiHomeAlt2, name: "Home" },
-                    { icon: BiSolidMovie, name: "Movies" },
-                    { icon: BsTv, name: "Series" },
-                  ].map((navItem, index) => {
-                    return (
-                      <Link
-                        key={index}
-                        to={navItem.name === "Home" ? "/" : navItem.name}
-                        className={
-                          navStatus === navItem.name
-                            ? "flex flex-col items-start p-3 transition-all duration-300 ease-in-out text-otherColor scale-105"
-                            : "flex flex-col items-start p-3 transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
-                        }
-                        onClick={() => {
-                          setNavStatus(navItem.name);
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <li className="text-2xl list-none">
-                            <navItem.icon />
-                          </li>
-                          <p className="text-md text-secondaryTextColor">
-                            {navItem.name}
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                  <VscClose
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="absolute text-4xl p-2 bg-transparent rounded-md top-3 right-3 cursor-pointer"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <Link
-            to="/"
-            className="flex items-center gap-2 uppercase text-white font-extrabold text-xl md:text-2xl"
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-[#000000]/80 backdrop-blur-2xl border-b border-white/5 py-3 px-5 md:px-10 flex items-center justify-between text-white">
+      {/* Left: Mobile Toggle + Logo */}
+      <div className={`flex items-center gap-4 ${isSearchOpen ? "hidden md:flex" : "flex"}`}>
+        <div className="md:hidden relative" ref={closeMobileMenu}>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex flex-col gap-1.5 p-1"
           >
-            <div className="bg-otherColor p-1 rounded-full flex items-center justify-center">
-              <FaPlay className="text-white text-[10px] md:text-xs ml-0.5" />
-            </div>
-            <p className="tracking-tighter">{SITENAME}</p>
-          </Link>
+            <div className={`h-[2px] w-6 bg-white/70 rounded-full transition-all ${mobileMenuOpen ? "rotate-45 translate-y-[8px]" : ""}`}></div>
+            <div className={`h-[2px] w-4 bg-white/70 rounded-full transition-all ${mobileMenuOpen ? "opacity-0" : ""}`}></div>
+            <div className={`h-[2px] w-5 bg-white/70 rounded-full transition-all ${mobileMenuOpen ? "-rotate-45 -translate-y-[8px]" : ""}`}></div>
+          </button>
+
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: -20, y: 10 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={{ opacity: 0, x: -20, y: 10 }}
+                className="absolute top-12 -left-2 w-64 bg-[#101216] border border-white/10 rounded-[2rem] p-6 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] z-[110]"
+              >
+                <div className="flex flex-col gap-2">
+                  {[
+                    { icon: BiHomeAlt2, name: "Home", path: "/" },
+                    { icon: BiSolidMovie, name: "Movies", path: "/Movies" },
+                    { icon: BsTv, name: "Series", path: "/Series" },
+                  ].map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${navStatus === item.name ? "text-red-500 bg-red-500/10 font-black shadow-inner shadow-red-500/5" : "text-white/40 hover:text-white hover:bg-white/5"}`}
+                      onClick={() => {
+                        setNavStatus(item.name);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <item.icon className={`text-2xl ${navStatus === item.name ? "text-red-500" : "text-white/20"}`} />
+                      <span className="text-sm font-bold tracking-tight">{item.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Navigations Large Screen*/}
-        <nav className="hidden md:block">
-          <ul className="flex items-center gap-8">
-            {[
-              { icon: BiHomeAlt2, name: "Home" },
-              { icon: BiSolidMovie, name: "Movies" },
-              { icon: BsTv, name: "Series" },
-            ].map((navItem, index) => {
-              return (
-                <Link
-                  key={index}
-                  to={navItem.name === "Home" ? "/" : navItem.name}
-                  className={
-                    navStatus === navItem.name
-                      ? "flex flex-col items-center transition-all duration-300 ease-in-out text-otherColor scale-105"
-                      : "flex flex-col items-center transition-all duration-300 ease-in-out hover:text-otherColor hover:scale-105"
-                  }
-                  onClick={() => setNavStatus(navItem.name)}
-                >
-                  <li className="text-2xl list-none">
-                    <navItem.icon />
-                  </li>
-                  <p className={
-                    navStatus === navItem.name
-                      ? "text-sm text-white font-semibold"
-                      : "text-sm text-secondaryTextColor hover:text-white transition-colors"
-                  }>
-                    {navItem.name}
-                  </p>
-                </Link>
-              );
-            })}
-            <li className="list-none">
-              <Link to="/dmca" className="text-sm text-secondaryTextColor hover:text-white transition-colors px-2">
-                DMCA
-              </Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* Search Form */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-          className="relative flex items-center justify-end flex-grow-0 sm:flex-grow-0"
-          ref={closeSearchResultsDropDown}
-        >
-          <div className="relative flex items-center justify-end w-full">
-            <AnimatePresence>
-              {searchOpen && (
-                <motion.div
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: window.innerWidth < 640 ? "160px" : "100%", opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  className="absolute right-12 md:static md:w-full overflow-hidden flex items-center"
-                >
-                  <input
-                    type="text"
-                    name="search"
-                    autoFocus
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                    }}
-                    placeholder="Search"
-                    className="py-1.5 px-4 pr-10 outline-0 text-sm bg-bgColorSecondary/80 border border-secondaryTextColor/20 rounded-lg w-full sm:text-base placeholder:text-secondaryTextColor/50 backdrop-blur-sm"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div
-              onClick={toggleSearch}
-              className="flex items-center justify-center p-2 bg-bgColorSecondary rounded-lg border border-secondaryTextColor/20 cursor-pointer hover:bg-bgColorSecondary/80 transition-all ml-2 z-10"
-            >
-              <FiSearch className="text-secondaryTextColor" />
-            </div>
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="bg-[#E50914] p-1.5 md:p-2 rounded-full text-white text-[10px] md:text-xs shadow-lg shadow-red-600/20 group-hover:scale-110 transition-transform duration-300">
+            <FaPlay />
           </div>
+          <span className="font-black text-lg md:text-2xl tracking-tighter uppercase whitespace-nowrap">{SITENAME}</span>
+        </Link>
+      </div>
 
-          {/* SEARCH RESULTS CONTAINER */}
-          {debouncedVal && searchOpen && (
-            <div className="absolute flex flex-col items-center py-6 z-20 bg-btnColor w-[90vw] -right-2 sm:right-0 sm:w-full max-h-[70dvh] justify-start overflow-y-scroll top-14 rounded-2xl shadow-2xl border border-secondaryTextColor/10">
-              {/* Results Found Element */}
-              {searcResult.length > 0 && !isLoading
-                ? searcResult.map((result) => {
-                  return (
+      {/* Center: Desktop Links */}
+      <nav className="hidden md:block">
+        <ul className="flex items-center gap-10">
+          {[
+            { name: "Home", path: "/" },
+            { name: "Movies", path: "/Movies" },
+            { name: "Series", path: "/Series" },
+          ].map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`text-[10px] uppercase tracking-[0.3em] font-black transition-all duration-300 ${navStatus === item.name ? "text-red-600 translate-y-[-2px]" : "text-white/30 hover:text-white"}`}
+              onClick={() => setNavStatus(item.name)}
+            >
+              <li>{item.name}</li>
+            </Link>
+          ))}
+        </ul>
+      </nav>
+
+      {/* Right: Search Toggle */}
+      <div className={`relative flex items-center gap-3 transition-all duration-300 ${isSearchOpen ? "flex-1 justify-end md:flex-none" : ""}`} ref={closeSearchResultsDropDown}>
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.form
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              className="relative overflow-hidden flex items-center flex-1 md:flex-none"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <input
+                autoFocus
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search titles, actors, genres..."
+                className="bg-white/10 backdrop-blur-md border border-white/10 text-white text-xs rounded-xl px-4 py-2.5 outline-none w-full md:w-[320px] focus:border-red-600/50 transition-all placeholder:text-white/30 font-medium shadow-inner"
+              />
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => {
+            setIsSearchOpen(!isSearchOpen);
+            if (!isSearchOpen) setQuery("");
+          }}
+          className={`p-2.5 md:p-3 rounded-xl transition-all active:scale-95 border duration-500 shrink-0 ${isSearchOpen ? "bg-red-600 border-red-600 text-white rotate-0 shadow-[0_0_20px_rgba(229,9,20,0.4)]" : "bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20"}`}
+        >
+          {isSearchOpen ? <VscClose className="text-xl" /> : <FiSearch className="text-xl" />}
+        </button>
+
+        {/* Search Results Dropdown */}
+        <AnimatePresence>
+          {isSearchOpen && debouncedVal && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 15 }}
+              className="absolute top-[calc(100%+0.8rem)] right-0 w-[calc(100vw-2.5rem)] md:w-[440px] bg-[#0A0C0F]/95 backdrop-blur-3xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-[120]"
+            >
+              <div className="max-h-[60vh] md:max-h-[65vh] overflow-y-auto custom-scrollbar p-3">
+                {searcResult.length > 0 && !isLoading ? (
+                  searcResult.map((result) => (
                     <Link
-                      className="flex items-center w-full gap-4 transition-all duration-300 ease-in-out hover:bg-bgColor hover:text-primaryTextColor py-1 px-2 md:py-2 md:px-5"
+                      key={result.tmdb_id}
+                      to={result.media_type === "movie" ? `/mov/${result.tmdb_id}` : `/ser/${result.tmdb_id}`}
+                      className="flex items-center gap-4 p-3 rounded-[1.5rem] hover:bg-white/5 transition-all duration-300 group"
                       onClick={() => {
                         setQuery("");
+                        setIsSearchOpen(false);
                       }}
-                      to={
-                        result.media_type === "movie"
-                          ? `/mov/${result.tmdb_id}`
-                          : `/ser/${result.tmdb_id}`
-                      }
-                      style={{ textDecoration: "none" }}
-                      key={result.tmdb_id}
                     >
-                      <div className="flex items-center w-[3.5rem] sm:w-[4rem] aspect-[9/13.5] object-cover bg-bgColor shrink-0 rounded-lg">
-                        {result.poster ? (
-                          <LazyLoadImage
-                            alt={result.title}
-                            src={result.poster}
-                            effect="black-and-white"
-                            className="object-cover shrink-0 bg-bgColor rounded-lg"
-                          />
-                        ) : (
-                          <LazyLoadImage
-                            alt={result.title}
-                            src={posterPlaceholder}
-                            className="object-cover shrink-0 bg-bgColor rounded-lg"
-                          />
-                        )}
+                      <div className="w-12 md:w-14 aspect-[2/3] bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/5 shadow-lg">
+                        <LazyLoadImage
+                          alt={result.title}
+                          src={result.poster || posterPlaceholder}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
                       </div>
-
-                      <div className="">
-                        <p className=" line-clamp-1 text-sm lg:text-base">
-                          {result.title}
-                        </p>
-                        <p className="line-clamp-1 w-10/12 text-secondaryTextColor text-xs lg:text-sm">
-                          {result.description}
-                        </p>
-                        {/* Year/Rating/Type */}
-                        <div className="flex items-center gap-2 mt-2 text-secondaryTextColor text-[0.7rem]">
-                          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bgColor text-otherColor ">
-                            <BiStar className="mb-0.25 " />
-                            {result.rating && (
-                              <p className="">{result.rating.toFixed(1)}</p>
-                            )}
-                          </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-black truncate group-hover:text-red-500 transition-colors duration-300">{result.title}</p>
+                        <div className="flex items-center gap-3 mt-1 md:mt-2">
+                          <span className="text-[8px] md:text-[9px] text-white/40 uppercase font-black tracking-[0.15em] bg-white/5 px-2 py-0.5 rounded-lg border border-white/5">
+                            {result.media_type === "tv" ? "TV" : "Movie"}
+                          </span>
                           {result.release_year && (
-                            <p className="">{result.release_year}</p>
+                            <span className="text-[9px] md:text-10px text-white/30 font-bold">{result.release_year}</span>
                           )}
-                          {result.media_type == "tv" ? (
-                            <p className="uppercase ">tv</p>
-                          ) : (
-                            <p className="uppercase ">mov</p>
-                          )}
+                          <div className="flex items-center gap-1 text-[9px] md:text-[10px] text-yellow-500/70 font-black bg-yellow-500/5 px-2 py-0.5 rounded-lg border border-yellow-500/10">
+                            <BiStar className="text-xs" />
+                            {result.rating?.toFixed(1)}
+                          </div>
                         </div>
                       </div>
                     </Link>
-                  );
-                })
-                : // No results found
-                !isLoading && (
-                  <p className="p-5 text-sm sm:text-base">
-                    No results found for "{debouncedVal}".
-                  </p>
+                  ))
+                ) : !isLoading && (
+                  <div className="p-12 md:p-16 text-center">
+                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-5 border border-white/5">
+                      <FiSearch className="text-white/20 text-xl md:text-2xl" />
+                    </div>
+                    <p className="text-white/30 text-xs font-bold tracking-tight italic">No matches for "{debouncedVal}"</p>
+                  </div>
                 )}
 
-              {/* Loading Indicator Element */}
-              {isLoading && (
-                <div className="p-5 flex justify-center content-center items-center ">
-                  <div className="loader-search"></div>
-                </div>
-              )}
+                {isLoading && (
+                  <div className="p-12 md:p-16 flex justify-center">
+                    <div className="loader-search scale-75 opacity-40"></div>
+                  </div>
+                )}
+              </div>
 
-              {/* View more results button */}
               {searcResult.length > 5 && !isLoading && (
                 <Link
-                  className="bg-otherColor py-2 px-6 rounded-md min-w-[70%] text-sm mt-4  text-center"
                   to={`/search/${debouncedVal}`}
-                  style={{ textDecoration: "none", color: "black" }}
-                  onClick={() => setQuery("")}
+                  className="block p-4 md:p-5 bg-white/5 hover:bg-white/10 text-center text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-white/30 transition-all border-t border-white/5 hover:text-white"
+                  onClick={() => setIsSearchOpen(false)}
                 >
-                  <p>See More Results</p>
+                  Explore All Results
                 </Link>
               )}
-            </div>
+            </motion.div>
           )}
-        </form>
-        {/* <UserInfoBtn /> */}
-
+        </AnimatePresence>
       </div>
-
-    </>
+    </div>
   );
 }
