@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@nextui-org/button";
 import Spinner from "./svg/Spinner";
+import BannerAd from "./BannerAd";
 
 const VerificationPage = ({ children, title }) => {
   const [step, setStep] = useState(1);
@@ -19,16 +20,11 @@ const VerificationPage = ({ children, title }) => {
 
   return (
     <div className="flex flex-col items-center min-h-[70vh] w-full py-6 px-4">
-      {/* Banner Ad Placement Header */}
-      <div className="w-full max-w-4xl h-[90px] bg-secondary/20 border border-white/10 flex items-center justify-center rounded-xl mb-8 overflow-hidden shadow-lg relative">
-        <span className="text-white/40 text-sm font-bold tracking-widest uppercase">
-          Advertisement
-        </span>
-      </div>
+      <BannerAd />
 
       {step !== 4 ? (
-        <div className="flex flex-col items-center justify-center p-10 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md max-w-lg w-full text-center">
-          <h1 className="text-3xl font-bold text-white mb-6 uppercase tracking-wider drop-shadow-md">
+        <div className="flex flex-col items-center justify-center p-8 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md max-w-lg w-full text-center">
+          <h1 className="text-2xl font-bold text-white mb-6 uppercase tracking-wider drop-shadow-md">
             Human Verification
           </h1>
 
@@ -50,7 +46,7 @@ const VerificationPage = ({ children, title }) => {
 
           {step === 2 && (
             <div className="flex flex-col items-center gap-4 animate-appearance-in">
-              <Spinner className="w-12 h-12 text-primaryBtn" />
+              <Spinner className="w-12 h-12 text-white" />
               <p className="text-white/80 font-medium text-lg mt-4">
                 Please wait{" "}
                 <span className="text-primaryBtn font-bold text-2xl mx-1">

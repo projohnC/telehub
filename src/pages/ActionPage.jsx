@@ -192,11 +192,11 @@ const ActionPage = ({ actionType }) => {
 
   return (
     <VerificationPage title={btnType === "Download" ? "Download Links" : "Player Links"}>
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-4">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-10 uppercase drop-shadow-md tracking-wider">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-2 lg:px-4">
+        <h1 className="text-2xl font-bold mb-6 uppercase text-white text-center drop-shadow-md tracking-wider px-2">
           {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
         </h1>
-        <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-8 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md">
+        <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-6 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md overflow-y-auto max-h-[65vh]">
           {movieData.media_type === "movie" ? (
             <div className="flex justify-center flex-wrap gap-4 w-full">
               {renderMovieButtons()}

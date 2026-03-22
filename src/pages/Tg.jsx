@@ -113,11 +113,11 @@ const Tg = () => {
 
   return (
     <VerificationPage title="Telegram Links">
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10">
-        <h1 className="text-3xl font-bold mb-8 uppercase text-telegramColor drop-shadow-md">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-2 lg:px-4">
+        <h1 className="text-2xl font-bold mb-6 uppercase text-white text-center drop-shadow-md">
           Select Quality
         </h1>
-        <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm">
+        <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm overflow-y-auto max-h-[65vh]">
           {movieData.media_type === "movie"
             ? renderQualityButtons(movieData.telegram || [])
             : renderSeasonButtons()}

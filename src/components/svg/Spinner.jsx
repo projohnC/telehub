@@ -1,10 +1,10 @@
 // Spinner.js
 import React from 'react';
 
-const Spinner = () => {
+const Spinner = ({ className = "animate-spin h-5 w-5 text-current" }) => {
   return (
     <svg
-      className="animate-spin h-5 w-5 text-current"
+      className={className}
       fill="none"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
