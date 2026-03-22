@@ -4,6 +4,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { Button } from "@nextui-org/button";
 import axios from "axios";
 import Spinner from "../components/svg/Spinner";
+import VerificationPage from "../components/VerificationPage";
 
 const Tg = () => {
   const location = useLocation();
@@ -111,16 +112,18 @@ const Tg = () => {
     });
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10">
-      <h1 className="text-3xl font-bold mb-8 uppercase text-telegramColor drop-shadow-md">
-        Select Quality
-      </h1>
-      <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm">
-        {movieData.media_type === "movie"
-          ? renderQualityButtons(movieData.telegram || [])
-          : renderSeasonButtons()}
+    <VerificationPage title="Telegram Links">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10">
+        <h1 className="text-3xl font-bold mb-8 uppercase text-telegramColor drop-shadow-md">
+          Select Quality
+        </h1>
+        <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm">
+          {movieData.media_type === "movie"
+            ? renderQualityButtons(movieData.telegram || [])
+            : renderSeasonButtons()}
+        </div>
       </div>
-    </div>
+    </VerificationPage>
   );
 };
 

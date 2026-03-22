@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Button } from "@nextui-org/button";
 import axios from "axios";
 import Spinner from "../components/svg/Spinner";
+import VerificationPage from "../components/VerificationPage";
 
 const ActionPage = ({ actionType }) => {
   const location = useLocation();
@@ -190,20 +191,22 @@ const ActionPage = ({ actionType }) => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-4">
-      <h1 className="text-3xl lg:text-4xl font-bold mb-10 uppercase drop-shadow-md tracking-wider">
-        {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
-      </h1>
-      <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-8 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md">
-        {movieData.media_type === "movie" ? (
-          <div className="flex justify-center flex-wrap gap-4 w-full">
-            {renderMovieButtons()}
-          </div>
-        ) : (
-          renderShowSelectors()
-        )}
+    <VerificationPage title={btnType === "Download" ? "Download Links" : "Player Links"}>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-4">
+        <h1 className="text-3xl lg:text-4xl font-bold mb-10 uppercase drop-shadow-md tracking-wider">
+          {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
+        </h1>
+        <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-8 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md">
+          {movieData.media_type === "movie" ? (
+            <div className="flex justify-center flex-wrap gap-4 w-full">
+              {renderMovieButtons()}
+            </div>
+          ) : (
+            renderShowSelectors()
+          )}
+        </div>
       </div>
-    </div>
+    </VerificationPage>
   );
 };
 
