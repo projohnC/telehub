@@ -3,22 +3,19 @@ import { Button } from "@nextui-org/button";
 import Spinner from "./svg/Spinner";
 
 const VerificationPage = ({ children, title }) => {
+  const [step, setStep] = useState(1);
   const [timeLeft, setTimeLeft] = useState(8);
-  const [isReady, setIsReady] = useState(false);
-  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setIsReady(true);
+    if (step === 2) {
+      if (timeLeft > 0) {
+        const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+        return () => clearTimeout(timer);
+      } else {
+        setStep(3);
+      }
     }
-  }, [timeLeft]);
-
-  const handleVerify = () => {
-    setVerified(true);
-  };
+  }, [step, timeLeft]);
 
   return (
     <div className="flex flex-col items-center min-h-[70vh] w-full py-6 px-4">
@@ -29,14 +26,30 @@ const VerificationPage = ({ children, title }) => {
         </span>
       </div>
 
-      {!verified ? (
+      {step !== 4 ? (
         <div className="flex flex-col items-center justify-center p-10 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md max-w-lg w-full text-center">
           <h1 className="text-3xl font-bold text-white mb-6 uppercase tracking-wider drop-shadow-md">
             Human Verification
           </h1>
 
-          {!isReady ? (
-            <div className="flex flex-col items-center gap-4">
+          {step === 1 && (
+            <div className="flex flex-col items-center gap-4 animate-appearance-in">
+              <Button
+                color="primary"
+                size="lg"
+                className="font-bold text-white px-10 py-6 uppercase tracking-wider shadow-lg hover:scale-105 transition-transform"
+                onClick={() => setStep(2)}
+              >
+                I'm Human
+              </Button>
+              <p className="text-white/50 text-sm mt-2">
+                Click this button to verify you are a human.
+              </p>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="flex flex-col items-center gap-4 animate-appearance-in">
               <Spinner className="w-12 h-12 text-primaryBtn" />
               <p className="text-white/80 font-medium text-lg mt-4">
                 Please wait{" "}
@@ -49,18 +62,20 @@ const VerificationPage = ({ children, title }) => {
                 We are verifying your connection.
               </p>
             </div>
-          ) : (
+          )}
+
+          {step === 3 && (
             <div className="flex flex-col items-center gap-4 animate-appearance-in">
               <Button
                 color="success"
                 size="lg"
                 className="font-bold text-white px-10 py-6 uppercase tracking-wider shadow-lg hover:scale-105 transition-transform bg-green-600"
-                onClick={handleVerify}
+                onClick={() => setStep(4)}
               >
-                Verify to Continue
+                Continue
               </Button>
               <p className="text-white/50 text-sm mt-2">
-                Click the button above to access {title}.
+                Verification complete! Click the button above to access {title}.
               </p>
             </div>
           )}
