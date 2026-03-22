@@ -1,23 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 
 const BannerAd = () => {
-  const containerRef = useRef(null);
   const adCode = import.meta.env.VITE_BANNER_AD;
-
-  useEffect(() => {
-    if (!adCode || !containerRef.current) return;
-    
-    // Clear previous ad content securely to prevent duplicate mounting
-    containerRef.current.innerHTML = "";
-
-    try {
-      // createRange().createContextualFragment securely executes script tags safely in React 
-      const fragment = document.createRange().createContextualFragment(adCode);
-      containerRef.current.appendChild(fragment);
-    } catch (err) {
-      console.error("Failed to inject Banner Ad", err);
-    }
-  }, [adCode]);
 
   if (!adCode) {
     return (
@@ -30,14 +14,41 @@ const BannerAd = () => {
     );
   }
 
+  // Utilizing srcDoc prevents React DOM conflicts while supporting
+  // document.write(), which is heavily used by ad network invoke.js scripts.
+  const srcDocHtml = `<!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background: transparent; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+          }
+        </style>
+      </head>
+      <body>
+        ${adCode}
+      </body>
+    </html>`;
+
   return (
-    <div className="w-full flex justify-center mb-8 px-2">
-      <div 
-        ref={containerRef}
-        className="w-full max-w-[728px] min-h-[50px] md:min-h-[90px] flex items-center justify-center overflow-hidden [&>*]:max-w-full"
-      >
-        {/* Ad will be dynamically injected here */}
-      </div>
+    <div className="w-full flex justify-center mb-8 px-2 overflow-hidden">
+      <iframe
+        title="Banner Ad"
+        srcDoc={srcDocHtml}
+        width="728"
+        height="90"
+        scrolling="no"
+        frameBorder="0"
+        className="max-w-full border-none bg-transparent"
+        style={{ width: "100%", maxWidth: "728px", height: "90px" }}
+      />
     </div>
   );
 };
