@@ -46,7 +46,7 @@ const VerificationPage = ({ children, title }) => {
 
           {step === 2 && (
             <div className="flex flex-col items-center gap-4 animate-appearance-in">
-              <Spinner className="w-12 h-12 text-white" />
+              <Spinner className="animate-spin w-16 h-16 text-white drop-shadow-md" />
               <p className="text-white/80 font-medium text-lg mt-4">
                 Please wait{" "}
                 <span className="text-primaryBtn font-bold text-2xl mx-1">
