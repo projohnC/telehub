@@ -43,20 +43,22 @@ const BannerAd = () => {
     </html>`;
 
   return (
-    <div className="w-full flex justify-center my-4 px-2">
-      <div className="w-full max-w-[728px] flex justify-center overflow-x-auto scrollbar-hide">
-        <div className="min-w-[320px] md:min-w-[728px] flex justify-center">
-          <iframe
-            title="Banner Ad"
-            srcDoc={srcDocHtml}
-            width="728"
-            height="90"
-            scrolling="no"
-            frameBorder="0"
-            className="max-w-full border-none bg-transparent h-[60px] md:h-[90px]"
-            style={{ width: "100%", maxWidth: "728px" }}
-          />
-        </div>
+    <div className="w-full flex justify-center my-2 h-[45px] md:h-[90px] items-center overflow-visible">
+      {/* 
+          We use a container that is 728px wide. 
+          On mobile, we scale it down to fit the screen width (~320px-400px).
+      */}
+      <div className="flex justify-center items-center w-[728px] h-[90px] origin-center scale-[0.45] sm:scale-[0.6] md:scale-90 lg:scale-100">
+        <iframe
+          title="Banner Ad"
+          srcDoc={srcDocHtml}
+          width="728"
+          height="90"
+          scrolling="no"
+          frameBorder="0"
+          className="border-none bg-transparent"
+          style={{ width: "728px", height: "90px" }}
+        />
       </div>
     </div>
   );
