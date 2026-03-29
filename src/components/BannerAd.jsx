@@ -43,18 +43,20 @@ const BannerAd = () => {
     </html>`;
 
   return (
-    <div className="w-full flex justify-center my-6 px-2 overflow-hidden">
-      <div className="w-full max-w-[728px] flex justify-center">
-        <iframe
-          title="Banner Ad"
-          srcDoc={srcDocHtml}
-          width="728"
-          height="90"
-          scrolling="no"
-          frameBorder="0"
-          className="max-w-full border-none bg-transparent h-[50px] md:h-[90px]"
-          style={{ width: "100%", maxWidth: "728px" }}
-        />
+    <div className="w-full flex justify-center my-4 px-2">
+      <div className="w-full max-w-[728px] flex justify-center overflow-x-auto scrollbar-hide">
+        <div className="min-w-[320px] md:min-w-[728px] flex justify-center">
+          <iframe
+            title="Banner Ad"
+            srcDoc={srcDocHtml}
+            width="728"
+            height="90"
+            scrolling="no"
+            frameBorder="0"
+            className="max-w-full border-none bg-transparent h-[60px] md:h-[90px]"
+            style={{ width: "100%", maxWidth: "728px" }}
+          />
+        </div>
       </div>
     </div>
   );

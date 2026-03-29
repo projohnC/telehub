@@ -113,8 +113,8 @@ const Tg = () => {
 
   return (
     <VerificationPage title="Telegram Links">
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-2 lg:px-4">
-        <h1 className="text-2xl font-bold mb-6 uppercase text-white text-center drop-shadow-md">
+      <div className="flex flex-col items-center justify-center text-white w-full py-4 px-2 lg:px-4">
+        <h1 className="text-xl md:text-2xl font-bold mb-4 uppercase text-white text-center drop-shadow-md">
           Select Quality
         </h1>
         <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm overflow-y-auto max-h-[65vh]">
