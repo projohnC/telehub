@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@nextui-org/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaRobot, FaLock, FaBolt, FaShieldHalved } from "react-icons/fa6";
-import { HiInformationCircle, HiCheckCircle } from "react-icons/hi2";
 import BannerAd from "./BannerAd";
 
 const VerificationPage = ({ children, title }) => {
   const [step, setStep] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(3);
-  const [progress, setProgress] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(8);
 
   useEffect(() => {
     if (step === 2) {
@@ -23,53 +20,12 @@ const VerificationPage = ({ children, title }) => {
     }
   }, [step, timeLeft]);
 
-  useEffect(() => {
-    if (step === 2) {
-      const totalTime = 3000; // 3 seconds
-      const startTime = Date.now();
-      const progressTimer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const newProgress = Math.min((elapsed / totalTime) * 100, 100);
-        setProgress(newProgress);
-        if (newProgress === 100) clearInterval(progressTimer);
-      }, 50);
-      return () => clearInterval(progressTimer);
-    }
-  }, [step]);
-
   return (
-    <div className="flex flex-col items-center min-h-[85vh] w-full py-4 px-4 bg-[#0a0b1e] text-white">
+    <div className="flex flex-col items-center min-h-[85vh] w-full py-4 px-4 bg-[#eff3fb] text-[#0a0b1e]">
       {/* Top Banner Ad */}
       <BannerAd />
 
-      <div className="flex flex-col items-center max-w-lg w-full">
-        {/* Header Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center mb-4"
-        >
-          <div className="text-3xl mb-1">🔐</div>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 text-center leading-tight">
-            Secure File
-          </h1>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white text-center mt-[-5px]">
-            Access
-          </h1>
-          
-          <div className="flex gap-2 mt-4">
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-white/70">
-              <FaLock className="text-[9px]" /> Private
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-white/70">
-              <FaBolt className="text-[9px]" /> Fast
-            </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-medium text-white/70">
-              <FaShieldHalved className="text-[9px]" /> Encrypted
-            </span>
-          </div>
-        </motion.div>
-
+      <div className="flex flex-col items-center max-w-lg w-full mt-8">
         {/* Main Verification Card */}
         <AnimatePresence mode="wait">
           {step !== 4 ? (
@@ -78,97 +34,77 @@ const VerificationPage = ({ children, title }) => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full bg-[#161b33] border border-white/10 rounded-[2.5rem] p-6 flex flex-col items-center shadow-2xl relative overflow-hidden"
+              className="w-full bg-white border border-slate-100 rounded-[2rem] p-10 flex flex-col items-center shadow-sm relative overflow-hidden text-center"
             >
-              {/* Robot Icon Container */}
-              <div className="w-24 h-24 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-purple-500/20">
-                {step === 3 ? (
-                  <HiCheckCircle className="text-5xl text-white" />
-                ) : (
-                  <FaRobot className="text-4xl text-white" />
-                )}
-              </div>
-
               {step === 1 && (
-                <div className="flex flex-col items-center text-center animate-appearance-in">
-                  <h2 className="text-xl md:text-2xl font-bold mb-2">Human Verification Required</h2>
-                  <p className="text-white/60 mb-6 max-w-[250px]">Please verify that you're human to continue</p>
-                  
+                <div className="animate-appearance-in w-full">
+                  <h2 className="text-xl md:text-2xl font-normal mb-16 text-slate-700 leading-relaxed font-sans">
+                    Please Click On Continue Button to Verify Yourself !
+                  </h2>
                   <Button
                     onClick={() => setStep(2)}
-                    className="w-full py-6 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-lg shadow-xl shadow-purple-600/30 hover:opacity-90 transition-all flex gap-3"
+                    className="w-full py-7 rounded-full bg-[#1d4ed8] text-white font-bold text-[14px] shadow-md hover:bg-[#1e40af] transition-all uppercase tracking-tighter"
                   >
-                    <FaShieldHalved /> Verify I'm Human
+                    Click to Continue
                   </Button>
                 </div>
               )}
 
               {step === 2 && (
-                <div className="flex flex-col items-center text-center animate-appearance-in w-full">
-                  <h2 className="text-xl md:text-2xl font-bold mb-2">Human Verification Required</h2>
-                  <p className="text-white/60 mb-8 max-w-[250px]">Please verify that you're human to continue</p>
+                <div className="animate-appearance-in w-full flex flex-col items-center">
+                  <div className="flex items-center justify-center gap-2 mb-12">
+                    <h2 className="text-xl md:text-2xl font-normal text-slate-800 font-sans">
+                      Links Page is Almost Ready 🚀
+                    </h2>
+                  </div>
                   
-                  {/* Circular Progress */}
-                  <div className="relative w-28 h-28 flex items-center justify-center mb-6">
-                    <svg className="w-full h-full -rotate-90">
-                      <circle
-                        cx="56"
-                        cy="56"
-                        r="52"
-                        fill="transparent"
-                        stroke="rgba(255,255,255,0.05)"
-                        strokeWidth="8"
-                      />
-                      <circle
-                        cx="56"
-                        cy="56"
-                        r="52"
-                        fill="transparent"
-                        stroke="url(#progress-gradient)"
-                        strokeWidth="8"
-                        strokeDasharray="327"
-                        strokeDashoffset={327 - (327 * progress) / 100}
-                        strokeLinecap="round"
-                        className="transition-all duration-75"
-                      />
-                      <defs>
-                        <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#9333ea" />
-                          <stop offset="100%" stopColor="#3b82f6" />
-                        </linearGradient>
-                      </defs>
+                  {/* Concentrical circles SVG */}
+                  <div className="relative w-44 h-44 flex items-center justify-center mb-16">
+                    <svg className="w-full h-full">
+                      {/* Concentrical Circles representing the design */}
+                      <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="5,5" className="animate-[spin_20s_linear_infinite]" />
+                      <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="20,10" className="opacity-80 animate-[spin_10s_linear_infinite_reverse]" />
+                      <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" strokeDasharray="10,5" className="opacity-60 animate-[spin_15s_linear_infinite]" />
+                      <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" strokeDasharray="30,10" className="opacity-40 animate-[spin_25s_linear_infinite_reverse]" />
                     </svg>
-                    <span className="absolute text-4xl font-bold text-blue-400">{timeLeft}</span>
+                    <span className="absolute text-7xl font-light text-slate-800">{timeLeft}</span>
                   </div>
 
-                  <div className="mt-2">
-                    <p className="text-lg font-medium text-white/90">Verifying your request...</p>
-                    <p className="text-xs text-white/40 mt-1">Please wait {timeLeft} seconds</p>
-                  </div>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="flex flex-col items-center text-center animate-appearance-in w-full">
-                  <h2 className="text-2xl font-extrabold text-green-400 mb-2">Verification Completed!</h2>
-                  <p className="text-white/60 mb-6">You can now access the link</p>
-                  
                   <Button
-                    onClick={() => setStep(4)}
-                    className="w-full py-6 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-lg shadow-xl shadow-purple-600/30 hover:opacity-90 transition-all flex gap-3"
+                    disabled
+                    className="w-full py-7 rounded-full bg-[#5eead4] text-white font-bold text-[14px] cursor-not-allowed opacity-90 uppercase tracking-tighter"
                   >
-                    ➔ Continue
+                    Please Wait...
                   </Button>
                 </div>
               )}
 
-              {/* Info Box */}
-              <div className="mt-6 bg-black/20 border border-white/5 rounded-2xl p-4 flex gap-3 text-left w-full">
-                <HiInformationCircle className="text-blue-400 text-xl shrink-0 mt-0.5" />
-                <p className="text-white/40 text-[11px] leading-relaxed">
-                  This verification helps us prevent automated downloads and keep the service secure for everyone.
-                </p>
-              </div>
+              {step === 3 && (
+                <div className="animate-appearance-in w-full flex flex-col items-center">
+                  <div className="flex items-center justify-center gap-2 mb-12">
+                    <h2 className="text-xl md:text-2xl font-normal text-slate-800 font-sans">
+                      Links Page is Almost Ready 🚀
+                    </h2>
+                  </div>
+                  
+                  <div className="relative w-44 h-44 flex items-center justify-center mb-16">
+                    <svg className="w-full h-full opacity-30">
+                      <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+                      <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" />
+                      <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" />
+                      <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" />
+                    </svg>
+                    <span className="absolute text-7xl font-light text-slate-800">0</span>
+                  </div>
+
+                  <Button
+                    onClick={() => setStep(4)}
+                    className="w-full py-7 rounded-full bg-[#10b981] text-white font-bold text-[14px] shadow-md hover:bg-[#059669] transition-all uppercase tracking-tighter"
+                  >
+                    Get Links
+                  </Button>
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -183,19 +119,9 @@ const VerificationPage = ({ children, title }) => {
         </AnimatePresence>
 
         {/* Bottom Banner Ad */}
-        <div className="w-full">
+        <div className="w-full mt-4">
           <BannerAd />
         </div>
-        
-        {/* Footer Text */}
-        <footer className="mt-4 flex flex-col items-center text-center text-white/30 text-[10px]">
-          <p>© 2026 Secure File Access • All Rights Reserved</p>
-          <div className="flex gap-4 mt-2">
-            <a href="#" className="hover:text-white/50">Privacy Policy</a>
-            <a href="#" className="hover:text-white/50">Terms of Service</a>
-            <a href="#" className="hover:text-white/50">Contact</a>
-          </div>
-        </footer>
       </div>
     </div>
   );
