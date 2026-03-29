@@ -45,7 +45,7 @@ export default function Movies() {
     <div>
       {/* SEO SECTION */}
       <SEO
-        title={SITENAME}
+        title={`Watch Movies Online - ${SITENAME}`}
         description={`Discover a world of entertainment where every show, movie, and exclusive content takes you on a journey beyond the screen. ${SITENAME} offers endless options for every mood, helping you relax, escape, and imagine more. Stream your favorites, dream big, and repeat the experience, only with ${SITENAME}.`}
         name={SITENAME}
         type="text/html"
