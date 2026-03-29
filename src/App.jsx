@@ -24,23 +24,24 @@ import AdBlockDetector from "./components/AdBlockDetector";
 import ReactGa from "react-ga";
 import { useEffect } from "react";
 // import { ToastContainer } from "react-toastify";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 
 function App() {
   ReactGa.initialize("G-JDFS7KRV40");
+  const location = useLocation();
+  const isVerificationPage = ["/tg", "/dow", "/plyr"].includes(location.pathname);
+
   useEffect(() => {
     ReactGa.pageview(window.location.pathname + window.location.search);
   }, []);
 
   return (
-
-    <BrowserRouter>
+    <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
       <AdManager />
       <AdBlockDetector />
       <Nav />
-      <div className="p-3 md:p-10">
-
+      <div className={isVerificationPage ? "" : "p-3 md:p-10"}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route
@@ -95,7 +96,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
-    </BrowserRouter>
+    </div>
   );
 }
 
