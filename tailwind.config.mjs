@@ -41,6 +41,16 @@ export default {
       aspectRatio: {
         "9/13": "9/13",
       },
+      keyframes: {
+        oscillate: {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(360deg)" },
+        },
+        "oscillate-reverse": {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(-360deg)" },
+        },
+      },
       fontSize: {
         sm: "0.8rem",
         base: "1rem",

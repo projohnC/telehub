@@ -63,10 +63,10 @@ const VerificationPage = ({ children, title }) => {
                     <div className="relative w-44 h-44 flex items-center justify-center mb-16">
                       <svg className="w-full h-full">
                         {/* Concentrical Circles representing the design */}
-                        <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="5,5" className="animate-[spin_20s_linear_infinite]" />
-                        <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="20,10" className="opacity-80 animate-[spin_10s_linear_infinite_reverse]" />
-                        <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" strokeDasharray="10,5" className="opacity-60 animate-[spin_15s_linear_infinite]" />
-                        <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" strokeDasharray="30,10" className="opacity-40 animate-[spin_25s_linear_infinite_reverse]" />
+                        <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="5,5" className="animate-[oscillate_20s_ease-in-out_infinite]" />
+                        <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="20,10" className="opacity-80 animate-[oscillate-reverse_10s_ease-in-out_infinite]" />
+                        <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" strokeDasharray="10,5" className="opacity-60 animate-[oscillate_15s_ease-in-out_infinite]" />
+                        <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" strokeDasharray="30,10" className="opacity-40 animate-[oscillate-reverse_25s_ease-in-out_infinite]" />
                       </svg>
                       <span className="absolute text-7xl font-light text-slate-800">{timeLeft}</span>
                     </div>
