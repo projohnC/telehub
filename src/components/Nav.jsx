@@ -210,7 +210,13 @@ export default function Nav() {
                   searcResult.map((result) => (
                     <Link
                       key={result.tmdb_id}
-                      to={result.media_type === "movie" ? `/mov/${result.tmdb_id}` : `/ser/${result.tmdb_id}`}
+                      to={
+                        result.is_anime
+                          ? `/ani/${result.tmdb_id}`
+                          : result.media_type === "movie"
+                          ? `/mov/${result.tmdb_id}`
+                          : `/ser/${result.tmdb_id}`
+                      }
                       className="flex items-center gap-4 p-3 rounded-[1.5rem] hover:bg-white/5 transition-all duration-300 group"
                       onClick={() => {
                         setQuery("");

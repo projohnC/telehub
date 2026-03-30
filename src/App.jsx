@@ -53,6 +53,10 @@ function App() {
             element={<TvDetails />}
           />
           <Route
+            path="ani/:seriesID"
+            element={<TvDetails />}
+          />
+          <Route
             path="/Movies"
             element={<Movies />}
           />

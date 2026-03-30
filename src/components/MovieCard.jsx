@@ -26,13 +26,15 @@ const MovieCard = ({ movie }) => {
     <div className="relative">
       <div className="absolute top-2 left-2 z-10">
         <div className="bg-primaryBtn text-white text-[0.6rem] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider">
-          {movie.media_type === "movie" ? "Movies" : "Series"}
+          {movie.is_anime ? "Anime" : (movie.media_type === "movie" ? "Movies" : "Series")}
         </div>
       </div>
 
       <Link
         to={
-          movie.media_type === "movie"
+          movie.is_anime
+            ? `/ani/${movie.tmdb_id}`
+            : movie.media_type === "movie"
             ? `/mov/${movie.tmdb_id}`
             : `/ser/${movie.tmdb_id}`
         }
@@ -68,7 +70,9 @@ const MovieCard = ({ movie }) => {
         {openId === movie.tmdb_id && showPlayBtn && (
           <Link
             to={
-              movie.media_type === "movie"
+              movie.is_anime
+                ? `/ani/${movie.tmdb_id}`
+                : movie.media_type === "movie"
                 ? `/mov/${movie.tmdb_id}`
                 : `/ser/${movie.tmdb_id}`
             }

@@ -101,7 +101,13 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                       <div className="flex items-center gap-3">
                         <Link
                           className="flex items-center gap-2 bg-white text-black font-bold text-xs py-2.5 px-8 rounded-full sm:text-sm transition-all duration-300 ease-in-out hover:scale-105"
-                          to={`/mov/${movie.tmdb_id}`}
+                          to={
+                            movie.is_anime
+                              ? `/ani/${movie.tmdb_id}`
+                              : movie.media_type === "movie"
+                              ? `/mov/${movie.tmdb_id}`
+                              : `/ser/${movie.tmdb_id}`
+                          }
                           style={{ textDecoration: "none" }}
                         >
                           <FaPlay className="text-[10px]" />
