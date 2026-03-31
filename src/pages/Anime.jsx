@@ -49,7 +49,7 @@ export default function Anime() {
         name={SITENAME}
         type="text/html"
         keywords="watch anime online, free anime streaming, latest anime episodes, hd anime"
-        link={`https://${SITENAME}.com/Anime`}
+        link={`https://${SITENAME}.site`}
       />
       
       <MoviesAndSeriesSections

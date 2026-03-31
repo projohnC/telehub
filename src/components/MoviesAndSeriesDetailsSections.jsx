@@ -103,75 +103,87 @@ export default function MoviesAndSeriesDetailsSections(props) {
                 {props.movieData.description}
               </p>
 
-              <div className="flex gap-4 text-primaryTextColor flex-wrap mt-6">
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Media Type Icon and Info */}
-                  <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl">
-                    {props.movieData.media_type === "movie" ? (
-                      <BiTime className="text-primaryBtn text-xl xl:text-2xl" />
-                    ) : (
-                      <BsListStars className="text-primaryBtn text-xl xl:text-2xl" />
-                    )}
-                    {props.movieData.media_type === "movie" ? (
-                      <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
-                        {props.movieData.runtime} min
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
-                          {props.movieData.total_seasons} Seasons
-                        </p>
-                        <span className="text-white/20 mx-1">|</span>
-                        <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
-                          {props.movieData.total_episodes} Eps
-                        </p>
-                      </>
-                    )}
+              {/* Calculate available seasons and episodes */}
+              {(() => {
+                const availableSeasons = props.movieData.seasons?.filter(s => 
+                  s.season_number !== 0 && 
+                  (s.episode_count > 0 || (s.episodes && s.episodes.length > 0))
+                ) || [];
+                const availableSeasonsCount = availableSeasons.length;
+                const availableEpisodesCount = availableSeasons.reduce((acc, s) => acc + (s.episode_count || s.episodes?.length || 0), 0);
+
+                return (
+                  <div className="flex gap-4 text-primaryTextColor flex-wrap mt-6">
+                    <div className="flex flex-wrap items-center gap-4">
+                      {/* Media Type Icon and Info */}
+                      <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl">
+                        {props.movieData.media_type === "movie" ? (
+                          <BiTime className="text-primaryBtn text-xl xl:text-2xl" />
+                        ) : (
+                          <BsListStars className="text-primaryBtn text-xl xl:text-2xl" />
+                        )}
+                        {props.movieData.media_type === "movie" ? (
+                          <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
+                            {props.movieData.runtime} min
+                          </p>
+                        ) : (
+                          <>
+                            <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
+                              {availableSeasonsCount} {availableSeasonsCount === 1 ? "Season" : "Seasons"}
+                            </p>
+                            <span className="text-white/20 mx-1">|</span>
+                            <p className="text-xs xl:text-sm font-bold uppercase tracking-wider">
+                              {availableEpisodesCount} {availableEpisodesCount === 1 ? "Ep" : "Eps"}
+                            </p>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Release Year */}
+                      {(props.movieData.media_type === "movie" || props.movieData.release_year) && (
+                        <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl">
+                          <FiCalendar className="text-primaryBtn text-lg xl:text-xl" />
+                          <p className="text-xs xl:text-sm font-bold">
+                            {props.movieData.release_year}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Languages */}
+                      {props.movieData.languages && (
+                        <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                          <LuLanguages className="text-primaryBtn text-lg xl:text-xl" />
+                          <p className="text-xs xl:text-sm font-bold uppercase tracking-wide">
+                            {props.movieData.languages
+                              .map((lang) => lang.charAt(0).toUpperCase() + lang.slice(1))
+                              .join("-")}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Quality */}
+                      {props.movieData.rip && (
+                        <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-primaryBtn/20">
+                          <MdOutlineHighQuality className="text-primaryBtn text-lg xl:text-xl" />
+                          <p className="text-xs xl:text-sm font-black uppercase text-primaryBtn">
+                            {props.movieData.rip}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Rating */}
+                      {props.movieData.rating && (
+                        <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-yellow-500/20">
+                          <PiStarFill className="text-yellow-500 text-lg xl:text-xl" />
+                          <p className="text-xs xl:text-sm font-black">
+                            {props.movieData.rating.toFixed(1)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Release Year */}
-                  {(props.movieData.media_type === "movie" || props.movieData.release_year) && (
-                    <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl">
-                      <FiCalendar className="text-primaryBtn text-lg xl:text-xl" />
-                      <p className="text-xs xl:text-sm font-bold">
-                        {props.movieData.release_year}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Languages */}
-                  {props.movieData.languages && (
-                    <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-                      <LuLanguages className="text-primaryBtn text-lg xl:text-xl" />
-                      <p className="text-xs xl:text-sm font-bold uppercase tracking-wide">
-                        {props.movieData.languages
-                          .map((lang) => lang.charAt(0).toUpperCase() + lang.slice(1))
-                          .join("-")}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Quality */}
-                  {props.movieData.rip && (
-                    <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-primaryBtn/20">
-                      <MdOutlineHighQuality className="text-primaryBtn text-lg xl:text-xl" />
-                      <p className="text-xs xl:text-sm font-black uppercase text-primaryBtn">
-                        {props.movieData.rip}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Rating */}
-                  {props.movieData.rating && (
-                    <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-yellow-500/20">
-                      <PiStarFill className="text-yellow-500 text-lg xl:text-xl" />
-                      <p className="text-xs xl:text-sm font-black">
-                        {props.movieData.rating.toFixed(1)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+                );
+              })()}
 
               <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
                 <div className="grid grid-cols-2 gap-3">

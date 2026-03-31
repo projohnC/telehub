@@ -13,10 +13,10 @@ const AdManager = () => {
             const popunderAdLink = import.meta.env.VITE_POPUNDER_ADS;
             const currentTime = Date.now();
 
-            // Handle Direct Link Ads (3-minute cooldown)
+            // Handle Direct Link Ads (2-minute cooldown)
             if (directAdLink) {
                 const lastDirectAdTime = localStorage.getItem("last_direct_ad_popup");
-                const directCooldown = 10 * 60 * 1000; // 10 minutes
+                const directCooldown = 2 * 60 * 1000; // 2 minutes
 
                 if (!lastDirectAdTime || currentTime - parseInt(lastDirectAdTime) >= directCooldown) {
                     window.open(directAdLink, "_blank");
@@ -25,10 +25,10 @@ const AdManager = () => {
                 }
             }
 
-            // Handle Popunder Ads (3-minute cooldown)
+            // Handle Popunder Ads (2-minute cooldown)
             if (popunderAdLink) {
                 const lastPopunderTime = localStorage.getItem("last_popunder_ad_popup");
-                const popunderCooldown = 3 * 60 * 1000; // 3 minutes
+                const popunderCooldown = 1 * 60 * 1000; // 1 minutes
 
                 if (!lastPopunderTime || currentTime - parseInt(lastPopunderTime) >= popunderCooldown) {
                     if (popunderAdLink.endsWith(".js")) {
