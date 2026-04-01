@@ -14,7 +14,6 @@ import { FiCalendar } from "react-icons/fi";
 import { BsListStars } from "react-icons/bs";
 import { PiStarFill } from "react-icons/pi";
 import { LuLanguages } from "react-icons/lu";
-import TelegramButton from "./TelegramButtons";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
 
@@ -186,8 +185,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
               })()}
 
               <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
-                <div className="grid grid-cols-2 gap-3">
-                  <TelegramButton movieData={props.movieData} />
+                <div className="grid grid-cols-1 gap-3">
                   <DownloadButton
                     movieData={props.movieData}
                     btnType="Download"
