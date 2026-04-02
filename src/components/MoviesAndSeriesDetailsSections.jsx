@@ -62,6 +62,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   popUpType={props.detailType === "movie" ? "movie" : "episode"}
                   seasonNumber={props.seasonNumber}
                   episodeNumber={props.episodeNumber}
+                  setEpisodeNumber={props.setEpisodeNumber}
+                  setSeasonNumber={props.setSeasonNumber}
+                  episodes={props.episodes}
                 />
               ) : (
                 <>

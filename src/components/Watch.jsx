@@ -157,6 +157,63 @@ export default function WatchTrailer(props) {
     };
   }, []);
 
+  useEffect(() => {
+    const player = playerRef.current?.plyr;
+    if (!player) return;
+
+    const handleEnded = () => {
+      if (props.popUpType === "episode" && props.setEpisodeNumber) {
+        const currentEpisodeIndex = props.episodes?.findIndex(
+          (ep) => ep.episode_number === props.episodeNumber
+        );
+
+        if (
+          currentEpisodeIndex !== -1 &&
+          props.episodes &&
+          currentEpisodeIndex < props.episodes.length - 1
+        ) {
+          // Next episode in current season
+          const nextEpisode = props.episodes[currentEpisodeIndex + 1];
+          props.setEpisodeNumber(nextEpisode.episode_number);
+        } else if (props.setSeasonNumber && props.id.seasons) {
+          // Last episode of season, check for next season
+          const availableSeasons = props.id.seasons.filter(
+            (s) =>
+              s.season_number !== 0 &&
+              (s.episode_count > 0 || (s.episodes && s.episodes.length > 0))
+          );
+
+          const currentSeasonIndex = availableSeasons.findIndex(
+            (s) => s.season_number === props.seasonNumber
+          );
+
+          if (
+            currentSeasonIndex !== -1 &&
+            currentSeasonIndex < availableSeasons.length - 1
+          ) {
+            const nextSeason = availableSeasons[currentSeasonIndex + 1];
+            props.setSeasonNumber(nextSeason.season_number);
+            props.setEpisodeNumber(1);
+          }
+        }
+      }
+    };
+
+    player.on("ended", handleEnded);
+    return () => {
+      player.off("ended", handleEnded);
+    };
+  }, [
+    playerRef.current,
+    props.episodeNumber,
+    props.seasonNumber,
+    props.episodes,
+    props.id,
+    props.setEpisodeNumber,
+    props.setSeasonNumber,
+    props.popUpType,
+  ]);
+
   const getAudioTracks = () => {
     let audioTracks = [];
     if (props.popUpType === "movie") {
