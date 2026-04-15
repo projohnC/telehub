@@ -21,8 +21,8 @@ const VerificationPage = ({ children, title }) => {
   }, [step, timeLeft]);
 
   return (
-    <div className="flex flex-col items-center w-full pt-20 md:pt-24 pb-8 px-4 text-[#0a0b1e]">
-      <div className="flex flex-col items-center max-w-lg w-full">
+    <div className={`flex flex-col items-center w-full pb-8 px-4 ${step !== 4 ? "pt-20 md:pt-24 text-[#0a0b1e]" : ""}`}>
+      <div className={`flex flex-col items-center w-full ${step !== 4 ? "max-w-lg" : "max-w-7xl"}`}>
         {/* Top Banner Ad */}
         <BannerAd />
 
