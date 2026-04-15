@@ -67,10 +67,10 @@ const VerificationPage = ({ children, title }) => {
               {step === 1 && (
                 <div className="animate-appearance-in w-full">
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white tracking-tight">
-                    Verify Your Request
+                    Verification Required
                   </h2>
                   <p className="text-slate-400 mb-12 text-sm md:text-base leading-relaxed">
-                    Please click the button below to continue secured link generation.
+                    Please click the button below to continue link generation.
                   </p>
                   <Button
                     onClick={() => setStep(2)}
@@ -84,7 +84,7 @@ const VerificationPage = ({ children, title }) => {
               {step === 2 && (
                 <div className="animate-appearance-in w-full flex flex-col items-center">
                   <h2 className="text-2xl md:text-3xl font-bold mb-2 text-white tracking-tight">
-                    File is Almost Ready
+                    Links is Almost Ready
                   </h2>
                   <p className="text-slate-400 mb-12 text-sm">
                     Your link is being secured...
