@@ -47,7 +47,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
   };
 
   return (
-    <div className="relative mt-20 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
+    <div className="relative mt-4 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
       {!props.isMovieDataLoading ? (
         <>
           <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">

@@ -25,7 +25,7 @@ const VerificationPage = ({ children, title }) => {
       <div className="w-full pb-8 px-4 flex flex-col items-center">
         <div className="w-full max-w-7xl flex flex-col items-center">
           <BannerAd />
-          <div className="w-full mt-8">
+          <div className="w-full mt-0">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
