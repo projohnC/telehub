@@ -36,7 +36,7 @@ function App() {
   }, []);
 
   return (
-    <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
+    <div className={isVerificationPage ? "bg-[#050a18] min-h-screen" : ""}>
       <AdManager />
       <AdBlockDetector />
       <Nav />

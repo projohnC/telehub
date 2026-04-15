@@ -116,10 +116,10 @@ const Tg = () => {
       <div className="flex flex-col items-center max-w-7xl w-full">
         <BannerAd />
         <div className="flex flex-col items-center justify-center text-white w-full py-4 px-2 lg:px-4">
-          <h1 className="text-xl md:text-2xl font-bold mb-4 uppercase text-white text-center drop-shadow-md">
+          <h1 className="text-xl md:text-2xl font-bold mb-8 uppercase text-white text-center drop-shadow-md tracking-widest">
             Select Quality
           </h1>
-          <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm overflow-y-auto max-h-[65vh]">
+          <div className="flex gap-6 flex-wrap justify-center max-w-4xl p-8 bg-[#111827]/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl w-full border border-white/5 overflow-y-auto max-h-[65vh]">
             {movieData.media_type === "movie"
               ? renderQualityButtons(movieData.telegram || [])
               : renderSeasonButtons()}

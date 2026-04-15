@@ -195,10 +195,10 @@ const ActionPage = ({ actionType }) => {
       <div className="flex flex-col items-center max-w-7xl w-full">
         <BannerAd />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-white w-full py-10 px-2 lg:px-4">
-          <h1 className="text-2xl font-bold mb-6 uppercase text-white text-center drop-shadow-md tracking-wider px-2">
+          <h1 className="text-2xl font-bold mb-10 uppercase text-white text-center drop-shadow-md tracking-widest px-2">
             {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
           </h1>
-          <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-6 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md overflow-y-auto max-h-[65vh]">
+          <div className="flex gap-6 flex-wrap justify-center items-center w-full max-w-4xl p-8 bg-[#111827]/40 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/5 overflow-y-auto max-h-[65vh]">
             {movieData.media_type === "movie" ? (
               <div className="flex justify-center flex-wrap gap-4 w-full">
                 {renderMovieButtons()}
