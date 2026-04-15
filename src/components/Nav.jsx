@@ -31,7 +31,6 @@ export default function Nav() {
     if (path === "/") setNavStatus("Home");
     else if (path.startsWith("/mov") || path.startsWith("/movie")) setNavStatus("Movies");
     else if (path.startsWith("/ser") || path.startsWith("/series")) setNavStatus("Series");
-    else if (path.startsWith("/ani") || path.startsWith("/anime")) setNavStatus("Anime");
   }, [location.pathname]);
 
   useEffect(() => {
@@ -112,7 +111,6 @@ export default function Nav() {
                     { icon: BiHomeAlt2, name: "Home", path: "/" },
                     { icon: BiSolidMovie, name: "Movies", path: "/Movies" },
                     { icon: BsTv, name: "Series", path: "/Series" },
-                    { icon: FaPlay, name: "Anime", path: "/Anime" },
                   ].map((item) => (
                     <Link
                       key={item.name}
@@ -148,7 +146,6 @@ export default function Nav() {
             { name: "Home", path: "/" },
             { name: "Movies", path: "/Movies" },
             { name: "Series", path: "/Series" },
-            { name: "Anime", path: "/Anime" },
           ].map((item) => (
             <Link
               key={item.name}
@@ -211,9 +208,7 @@ export default function Nav() {
                     <Link
                       key={result.tmdb_id}
                       to={
-                        result.is_anime
-                          ? `/ani/${result.tmdb_id}`
-                          : result.media_type === "movie"
+                        result.media_type === "movie"
                           ? `/mov/${result.tmdb_id}`
                           : `/ser/${result.tmdb_id}`
                       }

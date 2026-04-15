@@ -101,11 +101,11 @@ export default function Home() {
       <ToastContainer style={{ fontSize: "0.8rem" }} />
       {/* SEO SECTION */}
       <SEO
-        title={`${SITENAME} Official - Watch Online Movies Webseries & Anime`}
+        title={`${SITENAME} Official - Watch Online Movies & Webseries Like HDHub4u Vegamovies Cinevood MoviesMod Filmy4wap Filmyzilla hdhub4u MoviesDrive`}
         description={`Discover a world of entertainment where every show, movie, and exclusive content takes you on a journey beyond the screen. ${SITENAME} offers endless options for every mood, helping you relax, escape, and imagine more. Stream your favorites, dream big, and repeat the experience, only with ${SITENAME}.`}
-        name={SITENAME}
+        name={`${SITENAME} Official - Watch Online Movies & Webseries Like HDHub4u Vegamovies Cinevood MoviesMod Filmy4wap Filmyzilla hdhub4u MoviesDrive`}
         type="text/html"
-        keywords="watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"
+        keywords="HDHub4u alternatives, sites like HDHub4u, HDHub4u.hn, HDHub4u, hdhub4u, HDHub4u movie, HDHub4u.Tv, Vegamovies, VegaMovies.org, Moviesmod, cinevood, CineVood, moviesdrive, MoviesDrive, watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"
         link={`https://${SITENAME}.site`}
       />
 
@@ -113,7 +113,7 @@ export default function Home() {
       <div className="col-span-1 lg:col-span-2">
         <HeroSlider
           movieData={heroPopularMovies}
-          isMovieDataLoading={isHeroLoading}
+          isMvieDataLoading={isHeroLoading}
           dataType="heroPopularMovies"
           sliderTypePrev="slideHeroTrendingMovies-prev"
           sliderTypeNext="slideHeroTrendingMovies-next"
