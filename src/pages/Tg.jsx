@@ -4,7 +4,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { Button } from "@nextui-org/button";
 import axios from "axios";
 import Spinner from "../components/svg/Spinner";
-import VerificationPage from "../components/VerificationPage";
+import BannerAd from "../components/BannerAd";
 
 const Tg = () => {
   const location = useLocation();
@@ -112,18 +112,24 @@ const Tg = () => {
     });
 
   return (
-    <VerificationPage title="Telegram Links">
-      <div className="flex flex-col items-center justify-center text-white w-full py-4 px-2 lg:px-4">
-        <h1 className="text-xl md:text-2xl font-bold mb-4 uppercase text-white text-center drop-shadow-md">
-          Select Quality
-        </h1>
-        <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm overflow-y-auto max-h-[65vh]">
-          {movieData.media_type === "movie"
-            ? renderQualityButtons(movieData.telegram || [])
-            : renderSeasonButtons()}
+    <div className="flex flex-col items-center w-full pt-20 md:pt-24 pb-8 px-4">
+      <div className="flex flex-col items-center max-w-7xl w-full">
+        <BannerAd />
+        <div className="flex flex-col items-center justify-center text-white w-full py-4 px-2 lg:px-4">
+          <h1 className="text-xl md:text-2xl font-bold mb-4 uppercase text-white text-center drop-shadow-md">
+            Select Quality
+          </h1>
+          <div className="flex gap-4 flex-wrap justify-center max-w-4xl p-6 bg-secondary/10 rounded-3xl shadow-2xl w-full border border-secondary/20 backdrop-blur-sm overflow-y-auto max-h-[65vh]">
+            {movieData.media_type === "movie"
+              ? renderQualityButtons(movieData.telegram || [])
+              : renderSeasonButtons()}
+          </div>
+        </div>
+        <div className="w-full mt-8">
+          <BannerAd />
         </div>
       </div>
-    </VerificationPage>
+    </div>
   );
 };
 
