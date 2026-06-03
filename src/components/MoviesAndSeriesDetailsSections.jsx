@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BannerAd from "./BannerAd";
 import Watch from "./Watch";
 import "react-lazy-load-image-component/src/effects/black-and-white.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,36 +48,40 @@ export default function MoviesAndSeriesDetailsSections(props) {
   };
 
   return (
-    <div className="relative mt-4 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
+    <div className="relative mt-20 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
       {!props.isMovieDataLoading ? (
         <>
           <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
-            <div
-              onClick={handleMoviePlayClick}
-              className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
-            >
-              {isInlinePlayerActive ? (
-                <Watch
-                  isInline={true}
-                  id={props.movieData}
-                  popUpType={props.detailType === "movie" ? "movie" : "episode"}
-                  seasonNumber={props.seasonNumber}
-                  episodeNumber={props.episodeNumber}
-                />
-              ) : (
-                <>
-                  <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-primaryBtn cursor-pointer rounded-full text-5xl sm:text-6xl p-2 shadow-2xl transition hover:scale-110 active:scale-95">
-                    <BiPlay />
-                  </div>
-
-                  <LazyLoadImage
-                    src={props.movieData.backdrop}
-                    effect="black-and-white"
-                    alt={props.movieData.title}
-                    className=" aspect-video w-full rounded-3xl shrink-0 bg-btnColor object-cover"
+            <div className="flex flex-col gap-2 w-full">
+              <BannerAd />
+              <div
+                onClick={handleMoviePlayClick}
+                className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
+              >
+                {isInlinePlayerActive ? (
+                  <Watch
+                    isInline={true}
+                    id={props.movieData}
+                    popUpType={props.detailType === "movie" ? "movie" : "episode"}
+                    seasonNumber={props.seasonNumber}
+                    episodeNumber={props.episodeNumber}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-primaryBtn cursor-pointer rounded-full text-5xl sm:text-6xl p-2 shadow-2xl transition hover:scale-110 active:scale-95">
+                      <BiPlay />
+                    </div>
+
+                    <LazyLoadImage
+                      src={props.movieData.backdrop}
+                      effect="black-and-white"
+                      alt={props.movieData.title}
+                      className=" aspect-video w-full rounded-3xl shrink-0 bg-btnColor object-cover"
+                    />
+                  </>
+                )}
+              </div>
+              <BannerAd />
             </div>
 
             <div className="p-5">

@@ -8,6 +8,7 @@ import SimilarSeries from "./pages/SimilarSeries";
 import SearResults from "./pages/SearchResults";
 import Tg from "./pages/Tg";
 import ActionPage from "./pages/ActionPage";
+import Anime from "./pages/Anime";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
 // import Login from "./pages/Login";
@@ -36,7 +37,7 @@ function App() {
   }, []);
 
   return (
-    <div className={isVerificationPage ? "bg-[#050a18] min-h-screen" : ""}>
+    <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
       <AdManager />
       <AdBlockDetector />
       <Nav />
@@ -52,12 +53,20 @@ function App() {
             element={<TvDetails />}
           />
           <Route
+            path="ani/:seriesID"
+            element={<TvDetails />}
+          />
+          <Route
             path="/Movies"
             element={<Movies />}
           />
           <Route
             path="/Series"
             element={<Series />}
+          />
+          <Route
+            path="/Anime"
+            element={<Anime />}
           />
           <Route
             path="*"

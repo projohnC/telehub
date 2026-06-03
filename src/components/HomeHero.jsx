@@ -1,4 +1,5 @@
 import React from "react";
+import BannerAd from "./BannerAd";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -102,7 +103,9 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                         <Link
                           className="flex items-center gap-2 bg-white text-black font-bold text-xs py-2.5 px-8 rounded-full sm:text-sm transition-all duration-300 ease-in-out hover:scale-105"
                           to={
-                            movie.media_type === "movie"
+                            movie.is_anime
+                              ? `/ani/${movie.tmdb_id}`
+                              : movie.media_type === "movie"
                               ? `/mov/${movie.tmdb_id}`
                               : `/ser/${movie.tmdb_id}`
                           }
@@ -126,10 +129,13 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
               </SwiperSlide>
             ))}
           </Swiper>
-          <div className="flex items-center justify-between gap-3 mt-5 px-4 sm:px-8">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-3 mt-5 px-4 sm:px-8 overflow-hidden">
+            <div className="flex items-center gap-3 shrink-0">
               <BsArrowLeftCircle className="heroSlidePrev text-[2.4rem] text-secondaryTextColor p-2 cursor-pointer rounded-full transition-all duration-300 ease-in-out hover:bg-bgColorSecondary hover:text-primaryTextColor " />
               <BsArrowRightCircle className="heroSlideNext text-[2.4rem] text-secondaryTextColor p-2 cursor-pointer rounded-full transition-all duration-300 ease-in-out hover:bg-bgColorSecondary hover:text-primaryTextColor" />
+            </div>
+            <div className="flex-1 max-w-[728px] overflow-hidden flex justify-center">
+              <BannerAd />
             </div>
           </div>
         </>
