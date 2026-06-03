@@ -4,6 +4,7 @@ import axios from "axios";
 import HeroSlider from "../components/HomeHero";
 import HomeSections from "../components/HomeSections";
 import SEO from "../components/SEO";
+import BannerAd from "../components/BannerAd";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -119,6 +120,9 @@ export default function Home() {
           sliderTypeNext="slideHeroTrendingMovies-next"
         />
       </div>
+
+      {/* Banner Ad */}
+      <BannerAd />
 
       {/* Combined Latest Section */}
       <HomeSections

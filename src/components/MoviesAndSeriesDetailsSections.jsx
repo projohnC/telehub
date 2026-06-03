@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import BannerAd from "./BannerAd";
 import Watch from "./Watch";
 import "react-lazy-load-image-component/src/effects/black-and-white.css";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +16,7 @@ import { PiStarFill } from "react-icons/pi";
 import { LuLanguages } from "react-icons/lu";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
+import BannerAd from "./BannerAd";
 
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);

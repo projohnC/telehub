@@ -1,5 +1,4 @@
 import React from "react";
-import BannerAd from "./BannerAd";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -129,13 +128,10 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
               </SwiperSlide>
             ))}
           </Swiper>
-          <div className="flex items-center justify-between gap-3 mt-5 px-4 sm:px-8 overflow-hidden">
-            <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center justify-between gap-3 mt-5 px-4 sm:px-8">
+            <div className="flex items-center gap-3">
               <BsArrowLeftCircle className="heroSlidePrev text-[2.4rem] text-secondaryTextColor p-2 cursor-pointer rounded-full transition-all duration-300 ease-in-out hover:bg-bgColorSecondary hover:text-primaryTextColor " />
               <BsArrowRightCircle className="heroSlideNext text-[2.4rem] text-secondaryTextColor p-2 cursor-pointer rounded-full transition-all duration-300 ease-in-out hover:bg-bgColorSecondary hover:text-primaryTextColor" />
-            </div>
-            <div className="flex-1 max-w-[728px] overflow-hidden flex justify-center">
-              <BannerAd />
             </div>
           </div>
         </>
