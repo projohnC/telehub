@@ -271,22 +271,18 @@ export default function MoviesAndSeriesDetailsSections(props) {
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
                             {(() => {
-                              // Try to find episode range (e.g., E01-05) in title or telegram filename
-                              let match = eps.title?.match(/e(\d+)[-~](\d+)/i);
-                              if (!match && eps.telegram && eps.telegram[0]) {
-                                match = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
-                              }
-                              if (match) {
-                                return `E${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}`;
+                              let hasRange = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              if (!hasRange && eps.telegram && eps.telegram[0]) {
+                                hasRange = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
                               }
 
-                              // Try to find season combined (e.g., S01)
-                              if (eps.episode_number === 0) {
-                                let sMatch = eps.title?.match(/Season\s+(\d+)/i);
+                              if (eps.episode_number === 0 || hasRange) {
+                                let sMatch = eps.title?.match(/s(\d+)/i);
                                 if (!sMatch && eps.telegram && eps.telegram[0]) {
                                   sMatch = eps.telegram[0].name?.match(/s(\d+)/i);
                                 }
-                                return sMatch ? `S${sMatch[1].padStart(2, '0')}` : "ALL";
+                                const seasonNum = sMatch ? parseInt(sMatch[1]) : (props.seasonNumber || 1);
+                                return `S${seasonNum.toString().padStart(2, '0')}`;
                               }
 
                               return eps.episode_number;
@@ -294,13 +290,18 @@ export default function MoviesAndSeriesDetailsSections(props) {
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
                             {(() => {
-                              let hasRange = eps.title?.match(/e(\d+)[-~](\d+)/i);
-                              if (!hasRange && eps.telegram && eps.telegram[0]) {
-                                hasRange = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                              let rangeMatch = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              if (!rangeMatch && eps.telegram && eps.telegram[0]) {
+                                rangeMatch = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
                               }
-                              return (eps.episode_number === 0 || eps.episode_number >= 100 || hasRange)
-                                ? "Combined" 
-                                : (eps.name || eps.title || `Episode ${eps.episode_number}`);
+
+                              if (rangeMatch) {
+                                return `E${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`;
+                              }
+                              if (eps.episode_number === 0 || eps.episode_number >= 100) {
+                                return "Combined";
+                              }
+                              return eps.name || eps.title || `Episode ${eps.episode_number}`;
                             })()}
                           </span>
                         </div>
