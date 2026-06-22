@@ -7,7 +7,7 @@ export default function Footer() {
   const SITENAME = import.meta.env.VITE_SITENAME;
 
   const location = useLocation();
-  const isVerificationPage = ["/tg", "/dow", "/plyr"].includes(location.pathname);
+  const isVerificationPage = false;
 
   const navLinks = [
     { name: "Home", path: "/" },

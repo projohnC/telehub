@@ -30,7 +30,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 function App() {
   ReactGa.initialize("G-JDFS7KRV40");
   const location = useLocation();
-  const isVerificationPage = ["/tg", "/dow", "/plyr"].includes(location.pathname);
+  const isVerificationPage = false;
 
   useEffect(() => {
     ReactGa.pageview(window.location.pathname + window.location.search);
