@@ -270,10 +270,30 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             }`}
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
-                            {eps.episode_number === 0 ? "ALL" : (eps.episode_number >= 100 ? "COMB" : eps.episode_number)}
+                            {(() => {
+                              // Try to find episode range (e.g., E01-05) in title or telegram filename
+                              let match = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              if (!match && eps.telegram && eps.telegram[0]) {
+                                match = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                              }
+                              if (match) {
+                                return `E${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}`;
+                              }
+
+                              // Try to find season combined (e.g., S01)
+                              if (eps.episode_number === 0) {
+                                let sMatch = eps.title?.match(/Season\s+(\d+)/i);
+                                if (!sMatch && eps.telegram && eps.telegram[0]) {
+                                  sMatch = eps.telegram[0].name?.match(/s(\d+)/i);
+                                }
+                                return sMatch ? `S${sMatch[1].padStart(2, '0')}` : "ALL";
+                              }
+
+                              return eps.episode_number;
+                            })()}
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.episode_number === 0 || eps.episode_number >= 100 ? eps.title : (eps.name || eps.title || `Episode ${eps.episode_number}`)}
+                            {eps.episode_number === 0 || eps.episode_number >= 100 ? "Combined" : (eps.name || eps.title || `Episode ${eps.episode_number}`)}
                           </span>
                         </div>
                       ))
