@@ -137,7 +137,7 @@ const ActionPage = ({ actionType }) => {
               .sort((a, b) => a.episode_number - b.episode_number)
               .map((e) => (
                 <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
-                  Episode {e.episode_number}
+                  {e.episode_number === 0 || e.episode_number >= 100 ? e.title : `Episode ${e.episode_number}`}
                 </option>
               ))}
           </select>
