@@ -52,31 +52,31 @@ const Tg = () => {
   };
 
   const renderQualityButtons = (qualityDetails) =>
-    qualityDetails.map(({ quality }, index) => (
+    qualityDetails.map((q, index) => (
       <Button
         key={index}
         onClick={() =>
           handleButtonClick(
-            `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${quality}`,
-            quality
+            q.custom_download_url || `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${q.quality}`,
+            q.quality
           )
         }
         size="lg"
         className="bg-primaryBtn rounded-full m-2 text-white font-bold px-8 shadow-lg"
-        isLoading={loading[quality]}
+        isLoading={loading[q.quality]}
         spinner={<Spinner />}
       >
-        {quality}
+        {q.quality}
       </Button>
     ));
 
   const renderSeasonButtons = () =>
     movieData.seasons.map((season, seasonIndex) => {
-      const availableQualities = new Set();
+      const qualityMap = new Map();
       season.episodes.forEach((episode) => {
-        episode.telegram?.forEach(({ quality }) =>
-          availableQualities.add(quality)
-        );
+        episode.telegram?.forEach((q) => {
+          qualityMap.set(q.quality, q.custom_download_url || qualityMap.get(q.quality) || null);
+        });
       });
 
       return (
@@ -88,23 +88,26 @@ const Tg = () => {
           </PopoverTrigger>
           <PopoverContent className="bg-btnColor">
             <div className="px-2 py-4 flex gap-2 flex-wrap max-w-sm justify-center">
-              {Array.from(availableQualities).map((quality, qualityIndex) => (
-                <Button
-                  key={qualityIndex}
-                  onClick={() =>
-                    handleButtonClick(
-                      `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`,
-                      quality
-                    )
-                  }
-                  size="md"
-                  className="bg-primaryBtn rounded-full text-white font-bold"
-                  isLoading={loading[quality]}
-                  spinner={<Spinner />}
-                >
-                  {quality}
-                </Button>
-              ))}
+              {Array.from(qualityMap.keys()).map((quality, qualityIndex) => {
+                const customUrl = qualityMap.get(quality);
+                return (
+                  <Button
+                    key={qualityIndex}
+                    onClick={() =>
+                      handleButtonClick(
+                        customUrl || `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`,
+                        quality
+                      )
+                    }
+                    size="md"
+                    className="bg-primaryBtn rounded-full text-white font-bold"
+                    isLoading={loading[quality]}
+                    spinner={<Spinner />}
+                  >
+                    {quality}
+                  </Button>
+                );
+              })}
             </div>
           </PopoverContent>
         </Popover>

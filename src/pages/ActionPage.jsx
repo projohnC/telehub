@@ -74,9 +74,9 @@ const ActionPage = ({ actionType }) => {
     return `intent:${downloadUrl}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
   };
 
-  const handleButtonClick = async (id, name, quality) => {
+  const handleButtonClick = async (id, name, quality, customDownloadUrl) => {
     setLoading((prev) => ({ ...prev, [quality]: true }));
-    const rawUrl = generateUrl(id, name);
+    const rawUrl = customDownloadUrl || generateUrl(id, name);
     const shortUrl = await shortenUrl(rawUrl);
     setLoading((prev) => ({ ...prev, [quality]: false }));
     window.open(shortUrl, "_blank", "noopener noreferrer");
@@ -86,7 +86,7 @@ const ActionPage = ({ actionType }) => {
     movieData.telegram?.map((q, i) => (
       <Button
         key={i}
-        onClick={() => handleButtonClick(q.id, q.name, q.quality)}
+        onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url)}
         size="lg"
         className="bg-black/60 hover:bg-black/80 text-white font-bold border border-white/20 rounded-xl min-w-[120px] m-2 shadow-lg"
         isLoading={loading[q.quality]}
@@ -176,7 +176,7 @@ const ActionPage = ({ actionType }) => {
       <button
         onClick={() => {
           const q = qualities.find((q) => q.quality === selectedQuality);
-          if (q) handleButtonClick(q.id, q.name, q.quality);
+          if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url);
         }}
         disabled={!selectedQuality}
         className={`w-full mt-4 disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-xl hover:scale-105 ${
