@@ -48,11 +48,12 @@ export default function MoviesAndSeriesDetailsSections(props) {
   };
 
   return (
-    <div className="relative mt-20 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
-      {!props.isMovieDataLoading ? (
-        <>
-          <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
-            <div className="flex flex-col gap-4 w-full">
+    <>
+      <BannerAd />
+      <div className="relative mt-8 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
+        {!props.isMovieDataLoading ? (
+          <>
+            <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
               <div
                 onClick={handleMoviePlayClick}
                 className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
@@ -80,8 +81,6 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   </>
                 )}
               </div>
-              <BannerAd />
-            </div>
 
             <div className="p-5">
               {props.movieData.genres && (
@@ -292,5 +291,6 @@ export default function MoviesAndSeriesDetailsSections(props) {
         </div>
       )}
     </div>
+    </>
   );
 }
