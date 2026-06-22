@@ -276,7 +276,19 @@ export default function MoviesAndSeriesDetailsSections(props) {
                                 hasRange = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
                               }
 
-                              if (eps.episode_number === 0 || hasRange) {
+                              if (hasRange) {
+                                const combinedList = props.episodes.filter(ep => {
+                                  let r = ep.title?.match(/e(\d+)[-~](\d+)/i);
+                                  if (!r && ep.telegram && ep.telegram[0]) {
+                                    r = ep.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                                  }
+                                  return !!r;
+                                }).sort((a, b) => a.episode_number - b.episode_number);
+                                const seqIndex = combinedList.findIndex(ep => ep.episode_number === eps.episode_number) + 1;
+                                return seqIndex;
+                              }
+
+                              if (eps.episode_number === 0) {
                                 let sMatch = eps.title?.match(/s(\d+)/i);
                                 if (!sMatch && eps.telegram && eps.telegram[0]) {
                                   sMatch = eps.telegram[0].name?.match(/s(\d+)/i);
