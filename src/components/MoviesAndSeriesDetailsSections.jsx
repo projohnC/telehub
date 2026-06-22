@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import BannerAd from "./BannerAd";
 
 import { BiListUl, BiPlay, BiTime } from "react-icons/bi";
 import { IoIosArrowDown } from "react-icons/io";
@@ -16,7 +17,6 @@ import { PiStarFill } from "react-icons/pi";
 import { LuLanguages } from "react-icons/lu";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
-import BannerAd from "./BannerAd";
 
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
@@ -52,8 +52,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
       {!props.isMovieDataLoading ? (
         <>
           <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
-            <div className="flex flex-col gap-2 w-full">
-              <BannerAd />
+            <div className="flex flex-col gap-4 w-full">
               <div
                 onClick={handleMoviePlayClick}
                 className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
