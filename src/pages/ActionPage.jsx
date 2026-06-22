@@ -137,7 +137,16 @@ const ActionPage = ({ actionType }) => {
               .sort((a, b) => a.episode_number - b.episode_number)
               .map((e) => (
                 <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
-                  {e.episode_number === 0 || e.episode_number >= 100 ? e.title : `Episode ${e.episode_number}`}
+                  {(() => {
+                    let match = e.title?.match(/e(\d+)[-~](\d+)/i);
+                    if (!match && e.telegram && e.telegram[0]) {
+                      match = e.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                    }
+                    if (match) {
+                      return `Episodes ${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')} Combined`;
+                    }
+                    return e.episode_number === 0 || e.episode_number >= 100 ? e.title : `Episode ${e.episode_number}`;
+                  })()}
                 </option>
               ))}
           </select>

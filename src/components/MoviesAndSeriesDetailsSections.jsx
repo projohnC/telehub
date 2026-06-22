@@ -293,7 +293,15 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             })()}
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.episode_number === 0 || eps.episode_number >= 100 ? "Combined" : (eps.name || eps.title || `Episode ${eps.episode_number}`)}
+                            {(() => {
+                              let hasRange = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              if (!hasRange && eps.telegram && eps.telegram[0]) {
+                                hasRange = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                              }
+                              return (eps.episode_number === 0 || eps.episode_number >= 100 || hasRange)
+                                ? "Combined" 
+                                : (eps.name || eps.title || `Episode ${eps.episode_number}`);
+                            })()}
                           </span>
                         </div>
                       ))
