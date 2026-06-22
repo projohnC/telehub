@@ -271,16 +271,16 @@ export default function MoviesAndSeriesDetailsSections(props) {
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
                             {(() => {
-                              let hasRange = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              let hasRange = eps.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                               if (!hasRange && eps.telegram && eps.telegram[0]) {
-                                hasRange = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                                hasRange = eps.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                               }
 
                               if (hasRange) {
                                 const combinedList = props.episodes.filter(ep => {
-                                  let r = ep.title?.match(/e(\d+)[-~](\d+)/i);
+                                  let r = ep.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                                   if (!r && ep.telegram && ep.telegram[0]) {
-                                    r = ep.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                                    r = ep.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                                   }
                                   return !!r;
                                 }).sort((a, b) => a.episode_number - b.episode_number);
@@ -302,9 +302,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
                             {(() => {
-                              let rangeMatch = eps.title?.match(/e(\d+)[-~](\d+)/i);
+                              let rangeMatch = eps.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                               if (!rangeMatch && eps.telegram && eps.telegram[0]) {
-                                rangeMatch = eps.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                                rangeMatch = eps.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                               }
 
                               if (rangeMatch) {

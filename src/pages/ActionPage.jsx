@@ -138,9 +138,9 @@ const ActionPage = ({ actionType }) => {
               .map((e) => (
                 <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
                   {(() => {
-                    let match = e.title?.match(/e(\d+)[-~](\d+)/i);
+                    let match = e.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                     if (!match && e.telegram && e.telegram[0]) {
-                      match = e.telegram[0].name?.match(/e(\d+)[-~](\d+)/i);
+                      match = e.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
                     }
                     if (match) {
                       return `Episodes ${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')} Combined`;
