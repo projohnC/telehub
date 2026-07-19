@@ -293,10 +293,24 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             }`}
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
-                            {eps.episode_number}
+                            {(() => {
+                              let num = eps.episode_number;
+                              if (num >= 100) {
+                                const mod = num % 100;
+                                if (mod !== 0) num = mod;
+                              }
+                              return num;
+                            })()}
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.name || eps.title || `Episode ${eps.episode_number}`}
+                            {(() => {
+                              let num = eps.episode_number;
+                              if (num >= 100) {
+                                const mod = num % 100;
+                                if (mod !== 0) num = mod;
+                              }
+                              return `Episode ${num}`;
+                            })()}
                           </span>
                         </div>
                       ))
