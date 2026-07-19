@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import HeroSlider from "../components/HomeHero";
 import HomeSections from "../components/HomeSections";
+import Pagination from "../components/Pagination";
 import SEO from "../components/SEO";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +19,9 @@ export default function Home() {
   const [isHeroLoading, setIsHeroLoading] = useState(true);
   const [isTrendingMoviesLoading, setIsTrendingMoviesLoading] = useState(true);
   const [isTrendingTvLoading, setIsTrendingTvLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalMoviesCount, setTotalMoviesCount] = useState(0);
+  const [totalTvShowsCount, setTotalTvShowsCount] = useState(0);
 
   useEffect(() => {
     setIsHeroLoading(true);
@@ -46,19 +50,20 @@ export default function Home() {
       .get(`${BASE}/api/movies`, {
         params: {
           sort_by: "updated_on:desc",
-          page: 1,
+          page: currentPage,
           page_size: 20,
         },
       })
       .then((response) => {
         setTrendingMovies(response.data.movies);
+        setTotalMoviesCount(response.data.total_count || 0);
         setIsTrendingMoviesLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending movies:", error);
         setIsTrendingMoviesLoading(false);
       });
-  }, [BASE]);
+  }, [BASE, currentPage]);
 
   useEffect(() => {
     setIsTrendingTvLoading(true);
@@ -66,19 +71,20 @@ export default function Home() {
       .get(`${BASE}/api/tvshows`, {
         params: {
           sort_by: "updated_on:desc",
-          page: 1,
+          page: currentPage,
           page_size: 20,
         },
       })
       .then((response) => {
         setTrendingTv(response.data.tv_shows);
+        setTotalTvShowsCount(response.data.total_count || 0);
         setIsTrendingTvLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending TV shows:", error);
         setIsTrendingTvLoading(false);
       });
-  }, [BASE]);
+  }, [BASE, currentPage]);
 
   // Combined Latest
   const [combinedLatest, setCombinedLatest] = useState([]);
@@ -129,6 +135,17 @@ export default function Home() {
         sectionTitle="Recently Added"
         sectionSeeMoreButtonLink="/Movies" // Could point to a combined page if available
         dataType="latestContent"
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        total={totalMoviesCount + totalTvShowsCount}
+        pagesNum={Math.ceil((totalMoviesCount + totalTvShowsCount) / 24)}
+        onPageChange={(p) => {
+          setCurrentPage(p);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        limit={24}
       />
     </div>
   );
