@@ -47,11 +47,11 @@ const DomainNotice = () => {
             onClose={handleClose}
             backdrop="blur"
             placement="center"
-            size="md"
+            size="sm"
             hideCloseButton={true}
             className="text-white mx-4 md:mx-0 font-sans"
             classNames={{
-                base: "bg-[#0f1015] border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.15)] rounded-[2rem] overflow-hidden max-w-[400px] relative",
+                base: "bg-[#181922] border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.15)] rounded-[1.5rem] overflow-hidden max-w-[340px] md:max-w-[360px] relative",
                 backdrop: "bg-[#000000]/80 backdrop-blur-md",
             }}
         >
@@ -68,23 +68,20 @@ const DomainNotice = () => {
 
                         <div className="flex flex-col items-start gap-4">
                             {/* Bookmark Icon Container */}
-                            <div className="w-14 h-14 border border-amber-500/30 rounded-2xl flex items-center justify-center bg-amber-500/5">
-                                <FaBookmark className="text-amber-500 text-xl" />
+                            <div className="w-12 h-12 border border-amber-500/30 rounded-xl flex items-center justify-center bg-amber-500/5">
+                                <FaBookmark className="text-amber-500 text-lg" />
                             </div>
 
                             {/* Notice Label */}
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
-                                </span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">
-                                    {SITENAME} OFFICIAL NOTICE
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="w-2 h-2 bg-amber-500 rounded-full inline-block"></span>
+                                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
+                                    OFFICIAL NOTICE
                                 </span>
                             </div>
 
                             {/* Title */}
-                            <h2 className="text-2xl font-bold tracking-tight text-white leading-snug">
+                            <h2 className="text-xl font-bold tracking-tight text-white leading-snug">
                                 Always Remember our <br />
                                 <span className="text-amber-500 italic font-extrabold">Official</span> Domains
                             </h2>
@@ -94,17 +91,20 @@ const DomainNotice = () => {
                                 {/* Main Domain */}
                                 <div 
                                     onClick={() => handleDomainClick(MAIN_DOMAIN)}
-                                    className="group w-full flex items-center justify-between p-4 bg-[#16171f] hover:bg-[#1c1d27] border border-amber-500/10 rounded-2xl cursor-pointer transition-all duration-300 active:scale-[0.98]"
+                                    className="group w-full flex items-center justify-between p-3.5 bg-[#20212b] hover:bg-[#252735] border border-amber-500/10 rounded-xl cursor-pointer transition-all duration-300 active:scale-[0.98]"
                                 >
                                     <div className="flex flex-col gap-0.5">
-                                        <span className="text-[9px] font-extrabold uppercase tracking-widest text-cyan-400">
+                                        <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-500">
                                             MAIN DOMAIN
                                         </span>
-                                        <span className="text-lg font-bold text-amber-400/90 tracking-wide font-mono">
+                                        <span 
+                                            className="text-base text-gray-200 tracking-wide"
+                                            style={{ fontFamily: "'Courier New', Courier, monospace" }}
+                                        >
                                             {MAIN_DOMAIN}
                                         </span>
                                     </div>
-                                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 text-amber-500 group-hover:text-black flex items-center justify-center transition-all duration-300">
+                                    <div className="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center transition-all duration-300">
                                         <FaArrowRight className="text-xs" />
                                     </div>
                                 </div>
@@ -112,34 +112,37 @@ const DomainNotice = () => {
                                 {/* Telegram Notification */}
                                 <div 
                                     onClick={handleTelegramClick}
-                                    className="group w-full flex items-center justify-between p-4 bg-[#16171f] hover:bg-[#1c1d27] border border-amber-500/10 rounded-2xl cursor-pointer transition-all duration-300 active:scale-[0.98]"
+                                    className="group w-full flex items-center justify-between p-3.5 bg-[#20212b] hover:bg-[#252735] border border-amber-500/10 rounded-xl cursor-pointer transition-all duration-300 active:scale-[0.98]"
                                 >
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-[9px] font-extrabold uppercase tracking-widest text-amber-500">
                                             TELEGRAM NOTIFICATION
                                         </span>
-                                        <span className="text-lg font-bold text-white tracking-wide font-mono">
+                                        <span 
+                                            className="text-base text-gray-200 tracking-wide"
+                                            style={{ fontFamily: "'Courier New', Courier, monospace" }}
+                                        >
                                             Join Telegram channel
                                         </span>
                                     </div>
-                                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 group-hover:bg-amber-500 text-amber-500 group-hover:text-black flex items-center justify-center transition-all duration-300">
+                                    <div className="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center transition-all duration-300">
                                         <FaArrowRight className="text-xs" />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Dismiss pill */}
-                            <button
-                                onClick={handleDismiss}
-                                className="w-full flex items-center justify-between px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl mt-4 transition-all duration-300 active:scale-[0.98] group cursor-pointer"
-                            >
-                                <span className="text-sm font-bold text-gray-200 group-hover:text-white">
+                            {/* Dismiss option */}
+                            <div className="w-full border-t border-white/5 pt-4 flex items-center justify-between mt-3">
+                                <button
+                                    onClick={handleDismiss}
+                                    className="text-sm font-bold text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer"
+                                >
                                     Dismiss Notice
-                                </span>
-                                <span className="text-[10px] font-bold text-gray-500 group-hover:text-gray-400 uppercase tracking-wider">
+                                </button>
+                                <span className="text-xs text-gray-600">
                                     Hide For 24hr
                                 </span>
-                            </button>
+                            </div>
                         </div>
                     </div>
                 )}
