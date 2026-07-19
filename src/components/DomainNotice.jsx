@@ -30,7 +30,7 @@ const DomainNotice = () => {
     };
 
     const handleClose = () => {
-        setIsOpen(false);
+        handleDismiss();
     };
 
     const handleDomainClick = (domain) => {
@@ -49,7 +49,7 @@ const DomainNotice = () => {
             placement="center"
             size="sm"
             hideCloseButton={true}
-            className="text-white mx-4 md:mx-0 font-sans"
+            className="text-white mx-4 md:mx-0 font-sans domain-notice-modal"
             classNames={{
                 base: "bg-[#181922] border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.15)] rounded-[1.5rem] overflow-hidden max-w-[340px] md:max-w-[360px] relative",
                 backdrop: "bg-[#000000]/80 backdrop-blur-md",

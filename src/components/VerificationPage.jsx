@@ -58,16 +58,10 @@ const VerificationPage = ({ children, title }) => {
                         Links Page is Almost Ready 🚀
                       </h2>
                     </div>
-                    
-                    {/* Concentrical circles SVG */}
+                    {/* CSS Border Spinner */}
                     <div className="relative w-44 h-44 flex items-center justify-center mb-16">
-                      <svg className="w-full h-full">
-                        {/* Concentrical Circles representing the design */}
-                        <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" strokeDasharray="5,5" className="animate-[oscillate_20s_ease-in-out_infinite]" />
-                        <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" strokeDasharray="20,10" className="opacity-80 animate-[oscillate-reverse_10s_ease-in-out_infinite]" />
-                        <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" strokeDasharray="10,5" className="opacity-60 animate-[oscillate_15s_ease-in-out_infinite]" />
-                        <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" strokeDasharray="30,10" className="opacity-40 animate-[oscillate-reverse_25s_ease-in-out_infinite]" />
-                      </svg>
+                      <div className="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                      <div className="absolute inset-0 rounded-full border-4 border-t-[#1d4ed8] animate-spin"></div>
                       <span className="absolute text-7xl font-light text-slate-800">{timeLeft}</span>
                     </div>
 
@@ -88,13 +82,9 @@ const VerificationPage = ({ children, title }) => {
                       </h2>
                     </div>
                     
+                    {/* Completed Ring */}
                     <div className="relative w-44 h-44 flex items-center justify-center mb-16">
-                      <svg className="w-full h-full opacity-30">
-                        <circle cx="88" cy="88" r="45" fill="none" stroke="#e2e8f0" strokeWidth="1" />
-                        <circle cx="88" cy="88" r="55" fill="none" stroke="#4f46e5" strokeWidth="2" />
-                        <circle cx="88" cy="88" r="65" fill="none" stroke="#3730a3" strokeWidth="1" />
-                        <circle cx="88" cy="88" r="75" fill="none" stroke="#4f46e5" strokeWidth="1" />
-                      </svg>
+                      <div className="absolute inset-0 rounded-full border-4 border-[#10b981]"></div>
                       <span className="absolute text-7xl font-light text-slate-800">0</span>
                     </div>
 

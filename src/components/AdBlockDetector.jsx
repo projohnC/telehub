@@ -81,7 +81,7 @@ const AdBlockDetector = () => {
             backdrop="blur"
             placement="center"
             size="md"
-            className="text-black mx-4 md:mx-0 font-sans"
+            className="text-black mx-4 md:mx-0 font-sans adblock-detector-modal"
             classNames={{
                 base: "bg-white shadow-2xl rounded-[2rem]",
                 backdrop: "bg-[#000000]/80 backdrop-blur-md",

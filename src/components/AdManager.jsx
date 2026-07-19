@@ -3,6 +3,11 @@ import { useEffect } from "react";
 const AdManager = () => {
     useEffect(() => {
         const handleGlobalClick = (e) => {
+            // Ignore clicks inside AdBlockDetector and DomainNotice modals
+            if (e.target.closest(".adblock-detector-modal") || e.target.closest(".domain-notice-modal")) {
+                return;
+            }
+
             // Check if the clicked element is a button, link, or part of one
             const target = e.target.closest("button, a, [role='button']");
 
