@@ -11,6 +11,7 @@ import "react-lazy-load-image-component/src/effects/black-and-white.css";
 import { BsArrowLeftCircle, BsArrowRightCircle } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
 import { PiStarFill } from "react-icons/pi";
+import BannerAd from "./BannerAd";
 
 export default function HeroSlider({ movieData, isMovieDataLoading }) {
   return (
@@ -128,6 +129,7 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
               </SwiperSlide>
             ))}
           </Swiper>
+          <BannerAd />
           <div className="flex items-center justify-between gap-3 mt-5 px-4 sm:px-8">
             <div className="flex items-center gap-3">
               <BsArrowLeftCircle className="heroSlidePrev text-[2.4rem] text-secondaryTextColor p-2 cursor-pointer rounded-full transition-all duration-300 ease-in-out hover:bg-bgColorSecondary hover:text-primaryTextColor " />

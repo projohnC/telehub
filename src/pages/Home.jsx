@@ -86,7 +86,9 @@ export default function Home() {
 
   useEffect(() => {
     if (!isTrendingMoviesLoading && !isTrendingTvLoading) {
-      const merged = [...trendingMovies, ...trendingTv].sort((a, b) => {
+      const movies = Array.isArray(trendingMovies) ? trendingMovies : [];
+      const tv = Array.isArray(trendingTv) ? trendingTv : [];
+      const merged = [...movies, ...tv].sort((a, b) => {
         return new Date(b.updated_on) - new Date(a.updated_on);
       });
       setCombinedLatest(merged.slice(0, 24)); // Show top 24 mixed items
@@ -112,8 +114,8 @@ export default function Home() {
       {/* HEADER - Hero and boxoffice */}
       <div className="col-span-1 lg:col-span-2">
         <HeroSlider
-          movieData={heroPopularMovies}
-          isMovieDataLoading={isHeroLoading}
+          movieData={combinedLatest.slice(0, 10)}
+          isMovieDataLoading={isCombinedLoading}
           dataType="heroPopularMovies"
           sliderTypePrev="slideHeroTrendingMovies-prev"
           sliderTypeNext="slideHeroTrendingMovies-next"

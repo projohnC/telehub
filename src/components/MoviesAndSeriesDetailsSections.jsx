@@ -270,7 +270,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             {eps.episode_number === 103 ? 3 : eps.episode_number}
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.name || eps.title || `Episode ${eps.episode_number === 103 ? 3 : eps.episode_number}`}
+                            {eps.episode_number === 103 ? "Episode 3" : (eps.name || eps.title || `Episode ${eps.episode_number}`)}
                           </span>
                         </div>
                       ))
