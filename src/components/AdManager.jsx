@@ -8,6 +8,12 @@ const AdManager = () => {
                 return;
             }
 
+            // Ignore clicks on action/verification pages (/tg, /dow, /plyr)
+            const isActionPage = ["/tg", "/dow", "/plyr"].includes(window.location.pathname);
+            if (isActionPage) {
+                return;
+            }
+
             // Check if the clicked element is a button, link, or part of one
             const target = e.target.closest("button, a, [role='button']");
 

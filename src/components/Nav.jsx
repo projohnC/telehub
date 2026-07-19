@@ -172,7 +172,10 @@ export default function Nav() {
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               className="relative overflow-hidden flex items-center flex-1 md:flex-none"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                setDebouncedVal(query);
+              }}
             >
               <input
                 autoFocus
