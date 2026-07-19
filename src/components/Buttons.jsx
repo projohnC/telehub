@@ -2,14 +2,14 @@ import React from "react";
 import { FaCloudDownloadAlt, FaPlay } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const DownloadButton = ({ movieData, btnType, detailType, seasonNumber, episodeNumber }) => {
+const DownloadButton = ({ movieData, btnType }) => {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
     if (btnType === "Download") {
-      navigate("/dow", { state: { movieData, btnType, detailType, seasonNumber, episodeNumber } });
+      navigate("/dow", { state: { movieData, btnType } });
     } else {
-      navigate("/plyr", { state: { movieData, btnType, detailType, seasonNumber, episodeNumber } });
+      navigate("/plyr", { state: { movieData, btnType } });
     }
   };
 

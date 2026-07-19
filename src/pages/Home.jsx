@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import HeroSlider from "../components/HomeHero";
 import HomeSections from "../components/HomeSections";
-import Pagination from "../components/Pagination";
 import SEO from "../components/SEO";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,17 +12,33 @@ export default function Home() {
   const SITENAME = import.meta.env.VITE_SITENAME;
 
   // States
+  const [heroPopularMovies, setHeroPopularMovies] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingTv, setTrendingTv] = useState([]);
+  const [isHeroLoading, setIsHeroLoading] = useState(true);
   const [isTrendingMoviesLoading, setIsTrendingMoviesLoading] = useState(true);
   const [isTrendingTvLoading, setIsTrendingTvLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalMovies, setTotalMovies] = useState(0);
-  const [totalTv, setTotalTv] = useState(0);
 
   useEffect(() => {
+    setIsHeroLoading(true);
     window.scrollTo(0, 0);
-  }, [currentPage]);
+    axios
+      .get(`${BASE}/api/movies`, {
+        params: {
+          sort_by: "rating:desc",
+          page: 1,
+          page_size: 10,
+        },
+      })
+      .then((response) => {
+        setHeroPopularMovies(response.data.movies);
+        setIsHeroLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching hero popular movies:", error);
+        setIsHeroLoading(false);
+      });
+  }, [BASE]);
 
   useEffect(() => {
     setIsTrendingMoviesLoading(true);
@@ -31,20 +46,19 @@ export default function Home() {
       .get(`${BASE}/api/movies`, {
         params: {
           sort_by: "updated_on:desc",
-          page: currentPage,
+          page: 1,
           page_size: 20,
         },
       })
       .then((response) => {
         setTrendingMovies(response.data.movies);
-        setTotalMovies(response.data.total_count || 0);
         setIsTrendingMoviesLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending movies:", error);
         setIsTrendingMoviesLoading(false);
       });
-  }, [BASE, currentPage]);
+  }, [BASE]);
 
   useEffect(() => {
     setIsTrendingTvLoading(true);
@@ -52,20 +66,19 @@ export default function Home() {
       .get(`${BASE}/api/tvshows`, {
         params: {
           sort_by: "updated_on:desc",
-          page: currentPage,
+          page: 1,
           page_size: 20,
         },
       })
       .then((response) => {
         setTrendingTv(response.data.tv_shows);
-        setTotalTv(response.data.total_count || 0);
         setIsTrendingTvLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending TV shows:", error);
         setIsTrendingTvLoading(false);
       });
-  }, [BASE, currentPage]);
+  }, [BASE]);
 
   // Combined Latest
   const [combinedLatest, setCombinedLatest] = useState([]);
@@ -88,19 +101,19 @@ export default function Home() {
       <ToastContainer style={{ fontSize: "0.8rem" }} />
       {/* SEO SECTION */}
       <SEO
-        title={`${SITENAME} Official - Watch Online Movies Webseries & Anime Like HDHub4u Vegamovies Cinevood MoviesMod Filmy4wap Filmyzilla hdhub4u MoviesDrive`}
+        title={`${SITENAME} Official - Watch Online Movies Webseries & Anime`}
         description={`Discover a world of entertainment where every show, movie, and exclusive content takes you on a journey beyond the screen. ${SITENAME} offers endless options for every mood, helping you relax, escape, and imagine more. Stream your favorites, dream big, and repeat the experience, only with ${SITENAME}.`}
-        name={`${SITENAME} Official - Watch Online Movies Webseries & Anime Like HDHub4u Vegamovies Cinevood MoviesMod Filmy4wap Filmyzilla hdhub4u MoviesDrive`}
+        name={SITENAME}
         type="text/html"
-        keywords="HDHub4u alternatives, sites like HDHub4u, HDHub4u.hn, HDHub4u, hdhub4u, HDHub4u movie, HDHub4u.Tv, Vegamovies, VegaMovies.org, Moviesmod, cinevood, CineVood, moviesdrive, MoviesDrive, watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"
+        keywords="watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"
         link={`https://${SITENAME}.site`}
       />
 
       {/* HEADER - Hero and boxoffice */}
       <div className="col-span-1 lg:col-span-2">
         <HeroSlider
-          movieData={combinedLatest.slice(0, 10)}
-          isMovieDataLoading={isCombinedLoading}
+          movieData={heroPopularMovies}
+          isMovieDataLoading={isHeroLoading}
           dataType="heroPopularMovies"
           sliderTypePrev="slideHeroTrendingMovies-prev"
           sliderTypeNext="slideHeroTrendingMovies-next"
@@ -114,17 +127,6 @@ export default function Home() {
         sectionTitle="Recently Added"
         sectionSeeMoreButtonLink="/Movies" // Could point to a combined page if available
         dataType="latestContent"
-      />
-
-      {/* Call Pagination Component */}
-      <Pagination
-        currentPage={currentPage}
-        total={totalMovies + totalTv}
-        pagesNum={Math.ceil((totalMovies + totalTv) / 24)}
-        onPageChange={(p) => {
-          setCurrentPage(p);
-        }}
-        limit={24}
       />
     </div>
   );

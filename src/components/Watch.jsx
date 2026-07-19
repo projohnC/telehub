@@ -10,14 +10,7 @@ export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const rawBase = import.meta.env.VITE_BASE_URL || "";
-  const BASE = rawBase
-    ? (rawBase.startsWith("http://") || rawBase.startsWith("https://")
-      ? rawBase
-      : (rawBase === "0.0.0.0" || rawBase.includes("localhost") || rawBase.includes("127.0.0.1")
-        ? `http://${rawBase}`
-        : `https://${rawBase}`))
-    : window.location.origin;
+  const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
   const location = useLocation();
@@ -39,31 +32,23 @@ export default function WatchTrailer(props) {
             }));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
-            let episode = null;
-            if (props.episodes && props.episodes.length > 0) {
-              episode = props.episodes.find(
+            const season = props.id.seasons.find(
+              (season) => season.season_number === props.seasonNumber
+            );
+
+            if (season) {
+              const episode = season.episodes.find(
                 (ep) => ep.episode_number === props.episodeNumber
               );
-            }
 
-            if (!episode && props.id?.seasons) {
-              const season = props.id.seasons.find(
-                (season) => season.season_number === props.seasonNumber
-              );
-              if (season && season.episodes) {
-                episode = season.episodes.find(
-                  (ep) => ep.episode_number === props.episodeNumber
-                );
+              if (episode) {
+                videoSources = episode.telegram.map((q) => ({
+                  src: `${BASE}/dl/${q.id}/${q.name}`,
+                  type: "video/mp4",
+                  size: parseInt(q.quality.replace("p", ""), 10),
+                }));
+                selectedPoster = episode.episode_backdrop;
               }
-            }
-
-            if (episode) {
-              videoSources = (episode.telegram || []).map((q) => ({
-                src: `${BASE}/dl/${q.id}/${q.name}`,
-                type: "video/mp4",
-                size: parseInt(q.quality.replace("p", ""), 10),
-              }));
-              selectedPoster = episode.episode_backdrop || props.id.backdrop;
             }
           }
 

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
     Modal,
     ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
 } from "@nextui-org/modal";
+import { Button } from "@nextui-org/button";
+import { IoShieldHalfOutline } from "react-icons/io5";
 
 const AdBlockDetector = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -76,77 +81,53 @@ const AdBlockDetector = () => {
             backdrop="blur"
             placement="center"
             size="md"
-            className="light text-black mx-4 md:mx-0"
+            className="dark text-foreground mx-4 md:mx-0"
             classNames={{
-                base: "bg-white shadow-2xl rounded-[2.5rem] overflow-visible border-0 max-w-[420px] my-auto",
-                backdrop: "bg-[#000000]/70 backdrop-blur-md",
+                base: "bg-black/95 border border-white/10 shadow-2xl rounded-[2.5rem]",
+                backdrop: "bg-[#000000]/80 backdrop-blur-md",
             }}
         >
             <ModalContent>
                 {() => (
-                    <div className="relative flex flex-col items-center justify-center p-8 pb-10 text-center">
-                        {/* Custom Red Octagon Icon with Hand and Magnifying Glass Globe */}
-                        <div className="relative mb-6">
-                            <svg viewBox="0 0 100 100" className="w-28 h-28 mx-auto drop-shadow-md">
-                                {/* Red Octagon */}
-                                <polygon
-                                    points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30"
-                                    fill="#ff0000"
-                                    stroke="#ffffff"
-                                    strokeWidth="3.5"
-                                />
-                                
-                                {/* White Hand */}
-                                <g transform="translate(9, 8)">
-                                    <path
-                                        d="M48.5 21C47.1 21 46 22.1 46 23.5v20.6c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5V17.5C43 16.1 41.9 15 40.5 15S38 16.1 38 17.5v26.6c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5V15.5C35 14.1 33.9 13 32.5 13S30 14.1 30 15.5v28.6c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5V19.5C27 18.1 25.9 17 24.5 17S22 18.1 22 19.5v28.6c0 10.5 8.5 19 19 19s19-8.5 19-19V30.5C60 29.1 58.9 28 57.5 28S55 29.1 55 30.5v13.6c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5V23.5C52 22.1 50.9 21 49.5 21h-1z"
-                                        fill="#ffffff"
-                                        stroke="#ff0000"
-                                        strokeWidth="0.5"
-                                    />
-                                </g>
-
-                                {/* Magnifying Glass with Globe */}
-                                <line x1="48" y1="71" x2="38" y2="81" stroke="#1e293b" strokeWidth="4.5" strokeLinecap="round" />
-                                <circle cx="58" cy="62" r="14" fill="#ffffff" stroke="#1e293b" strokeWidth="2.5" />
-                                <circle cx="58" cy="62" r="12" fill="#3b82f6" />
-                                <ellipse cx="58" cy="62" rx="12" ry="4" fill="none" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
-                                <ellipse cx="58" cy="62" rx="4" ry="12" fill="none" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
-                                <line x1="46" y1="62" x2="70" y2="62" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
-                                <line x1="58" y1="50" x2="58" y2="74" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
-                                <circle cx="58" cy="62" r="12" fill="none" stroke="#1e293b" strokeWidth="2" />
-                                <path d="M 52 56 A 8 8 0 0 1 64 56" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
-                            </svg>
-                        </div>
-
-                        {/* Title */}
-                        <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 mb-6 tracking-tight">
-                            Ads Blocker Detected!!!
-                        </h2>
-
-                        {/* Description */}
-                        <p className="text-neutral-700 text-sm md:text-base leading-relaxed mb-8 px-2 font-medium">
-                            We have Detected that you are using adblocking plugin in your browser.<br />
-                            The revenue we earn by the advertisements is used to manage this website, we request you to whitelist our website in your adblocking plugin.-<br />
-                            <span className="font-semibold text-neutral-900">Hubstream</span>
-                        </p>
-
-                        {/* Refresh Button */}
-                        <button
-                            type="button"
-                            onClick={() => window.location.reload()}
-                            className="px-8 py-3 bg-neutral-100 hover:bg-neutral-200 active:scale-95 text-neutral-800 font-semibold rounded-xl text-sm md:text-base transition-all duration-200 shadow-sm border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-300"
-                        >
-                            Refresh
-                        </button>
-
-                        {/* Floating Powered By Badge */}
-                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1.5 px-5 py-2 bg-white rounded-full shadow-lg border border-neutral-100 text-[10px] font-extrabold tracking-wider whitespace-nowrap z-50">
-                            <span className="text-neutral-500">POWERED BY</span>
-                            <span className="flex items-center justify-center w-4 h-4 bg-[#ff0000] rounded-full text-white text-[9px] font-black leading-none">✋</span>
-                            <span className="text-[#ff0000]">CHP ADBLOCK</span>
-                        </div>
-                    </div>
+                    <>
+                        <ModalHeader className="flex flex-col gap-1 items-center pt-10 px-8">
+                            <div className="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mb-4 border border-red-600/20 shadow-[0_0_30px_rgba(220,38,38,0.1)]">
+                                <IoShieldHalfOutline className="text-red-600 text-5xl animate-pulse" />
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-center tracking-tight uppercase">
+                                Ad Blocker Detected
+                            </h2>
+                        </ModalHeader>
+                        <ModalBody className="text-center px-8 md:px-12 py-6">
+                            <p className="text-white/60 text-base md:text-lg font-medium leading-relaxed">
+                                We notice you're using an ad blocker. HubStream relies on ads to keep our service free and accessible for everyone.
+                            </p>
+                            <div className="mt-6 p-5 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-2 shadow-inner">
+                                <p className="text-red-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                                    How to continue
+                                </p>
+                                <p className="text-white/90 text-sm md:text-base font-bold italic">
+                                    Please disable your ad blocker and refresh the page to start streaming.
+                                </p>
+                            </div>
+                        </ModalBody>
+                        <ModalFooter className="flex flex-col items-center pb-12 px-8 md:px-12 gap-4">
+                            <Button
+                                color="danger"
+                                variant="shadow"
+                                className="w-full font-black h-14 text-sm md:text-base uppercase tracking-widest rounded-2xl bg-red-600 shadow-[0_8px_24px_-8px_rgba(220,38,38,0.5)] active:scale-95 transition-all duration-300"
+                                onPress={() => {
+                                    setIsOpen(false); // Briefly close to re-trigger check
+                                    setTimeout(checkAdBlocker, 100);
+                                }}
+                            >
+                                I've disabled it
+                            </Button>
+                            <p className="text-[10px] md:text-xs text-white/30 uppercase tracking-[0.2em] font-bold">
+                                Support free streaming
+                            </p>
+                        </ModalFooter>
+                    </>
                 )}
             </ModalContent>
         </Modal>

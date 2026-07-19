@@ -9,61 +9,30 @@ const ActionPage = ({ actionType }) => {
   const location = useLocation();
   const movieData = location.state?.movieData;
   const btnType = location.state?.btnType || actionType;
-  const detailType = location.state?.detailType || (movieData?.media_type === "movie" ? "movie" : "series");
-  const initialSeason = location.state?.seasonNumber;
-  const initialEpisode = location.state?.episodeNumber;
 
-  const rawBase = import.meta.env.VITE_BASE_URL || "";
-  const BASE = rawBase
-    ? (rawBase.startsWith("http://") || rawBase.startsWith("https://")
-      ? rawBase
-      : (rawBase === "0.0.0.0" || rawBase.includes("localhost") || rawBase.includes("127.0.0.1")
-        ? `http://${rawBase}`
-        : `https://${rawBase}`))
-    : window.location.origin;
+  const BASE = import.meta.env.VITE_BASE_URL;
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [selectedSeason, setSelectedSeason] = useState(initialSeason ? String(initialSeason) : "");
-  const [selectedEpisode, setSelectedEpisode] = useState(initialEpisode ? String(initialEpisode) : "");
+  const [selectedSeason, setSelectedSeason] = useState("");
+  const [selectedEpisode, setSelectedEpisode] = useState("");
   const [selectedQuality, setSelectedQuality] = useState("");
   const [episodes, setEpisodes] = useState([]);
   const [qualities, setQualities] = useState([]);
   const [loading, setLoading] = useState({});
 
-  const isInitialMount = React.useRef(true);
-
-  // Fetch episodes dynamically for a season
   useEffect(() => {
-    let active = true;
-    if (selectedSeason && movieData?.tmdb_id) {
-      if (!isInitialMount.current) {
+    if (selectedSeason && movieData?.seasons) {
+      const season = movieData.seasons.find(
+        (s) => s.season_number === parseInt(selectedSeason)
+      );
+      if (season) {
+        setEpisodes(season.episodes);
         setSelectedEpisode("");
         setQualities([]);
-        setSelectedQuality("");
       }
-
-      axios
-        .get(`${BASE}/api/id/${movieData.tmdb_id}`, {
-          params: { season_number: selectedSeason },
-        })
-        .then((response) => {
-          if (active && response.data?.episodes) {
-            setEpisodes(response.data.episodes);
-            isInitialMount.current = false;
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching episodes in ActionPage:", error);
-          if (active) {
-            isInitialMount.current = false;
-          }
-        });
     }
-    return () => {
-      active = false;
-    };
-  }, [selectedSeason, movieData, BASE]);
+  }, [selectedSeason, movieData]);
 
   useEffect(() => {
     if (selectedEpisode && episodes.length > 0) {
@@ -71,36 +40,11 @@ const ActionPage = ({ actionType }) => {
         (e) => e.episode_number === parseInt(selectedEpisode)
       );
       if (episode) {
-        setQualities(episode.telegram || []);
-        setSelectedQuality((prev) => {
-          if (prev && episode.telegram?.some((q) => q.quality === prev)) {
-            return prev;
-          }
-          return "";
-        });
+        setQualities(episode.telegram);
+        setSelectedQuality("");
       }
-    } else {
-      setQualities([]);
-      setSelectedQuality("");
     }
   }, [selectedEpisode, episodes]);
-
-  const hideDownload =
-    import.meta.env.VITE_HIDE_DOWNLAOD === "true" ||
-    import.meta.env.VITE_HIDE_DOWNLOAD === "true" ||
-    import.meta.env.VITE_HIDE_DOWNLAOD === "1" ||
-    import.meta.env.VITE_HIDE_DOWNLOAD === "1";
-  const hidePlayer =
-    import.meta.env.VITE_HIDE_PLAYER === "true" ||
-    import.meta.env.VITE_HIDE_PLAYER === "1";
-
-  if ((btnType === "Download" && hideDownload) || (btnType === "Player" && hidePlayer)) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        <p>This feature is disabled.</p>
-      </div>
-    );
-  }
 
   if (!movieData) {
     return (
@@ -124,113 +68,32 @@ const ActionPage = ({ actionType }) => {
     }
   };
 
-  const generateUrl = (id, name, playerType) => {
+  const generateUrl = (id, name) => {
     const downloadUrl = `${BASE}/dl/${id}/${encodeURIComponent(name)}`;
-    if (btnType === "Download" || playerType === "download") return downloadUrl;
-
-    const urlWithoutProtocol = downloadUrl.replace(/^https?:\/\//, "");
-
-    if (API_URL) {
-      return `${window.location.origin}/play-redirect?url=${encodeURIComponent(downloadUrl)}&player=${playerType}`;
-    }
-
-    if (playerType === "vlc") {
-      return `intent:${urlWithoutProtocol}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
-    }
-    if (playerType === "mx") {
-      return `intent:${urlWithoutProtocol}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
-    }
-    return `intent:${urlWithoutProtocol}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
+    if (btnType === "Download") return downloadUrl;
+    return `intent:${downloadUrl}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
   };
 
-  const handleButtonClick = async (id, name, quality, customDownloadUrl, playerType) => {
-    let rawUrl = customDownloadUrl || generateUrl(id, name, playerType);
-
-    if (btnType === "Player" && customDownloadUrl && playerType) {
-      const urlWithoutProtocol = customDownloadUrl.replace(/^https?:\/\//, "");
-      if (API_URL) {
-        rawUrl = `${window.location.origin}/play-redirect?url=${encodeURIComponent(customDownloadUrl)}&player=${playerType}`;
-      } else {
-        if (playerType === "vlc") {
-          rawUrl = `intent:${urlWithoutProtocol}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
-        } else if (playerType === "mx") {
-          rawUrl = `intent:${urlWithoutProtocol}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
-        }
-      }
-    }
-
-    const key = `${quality}-${playerType || 'dl'}`;
-    setLoading((prev) => ({ ...prev, [key]: true }));
-
-    let newWindow = null;
-    const isIntent = rawUrl.startsWith("intent:");
-    if (API_URL && !isIntent) {
-      newWindow = window.open("", "_blank");
-    }
-
-    try {
-      const shortUrl = await shortenUrl(rawUrl);
-      setLoading((prev) => ({ ...prev, [key]: false }));
-      if (newWindow) {
-        newWindow.location.href = shortUrl;
-      } else {
-        if (shortUrl.startsWith("intent:")) {
-          window.location.href = shortUrl;
-        } else {
-          window.open(shortUrl, "_blank", "noopener noreferrer");
-        }
-      }
-    } catch (error) {
-      console.error("Error processing URL in ActionPage:", error);
-      setLoading((prev) => ({ ...prev, [key]: false }));
-      if (newWindow) {
-        newWindow.close();
-      }
-      if (rawUrl.startsWith("intent:")) {
-        window.location.href = rawUrl;
-      } else {
-        window.open(rawUrl, "_blank", "noopener noreferrer");
-      }
-    }
+  const handleButtonClick = async (id, name, quality) => {
+    setLoading((prev) => ({ ...prev, [quality]: true }));
+    const rawUrl = generateUrl(id, name);
+    const shortUrl = await shortenUrl(rawUrl);
+    setLoading((prev) => ({ ...prev, [quality]: false }));
+    window.open(shortUrl, "_blank", "noopener noreferrer");
   };
 
   const renderMovieButtons = () =>
     movieData.telegram?.map((q, i) => (
-      <div key={i} className="flex flex-col items-center p-4 bg-black/40 border border-white/10 rounded-2xl m-2 min-w-[180px] shadow-lg">
-        <span className="text-white font-bold text-sm mb-3 opacity-90">{q.quality}</span>
-        {btnType === "Download" ? (
-          <Button
-            onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "download")}
-            size="md"
-            className="w-full bg-gradient-to-r from-[#E50914] to-[#B20710] text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
-            isLoading={loading[`${q.quality}-download`]}
-            spinner={<Spinner />}
-          >
-            Download
-          </Button>
-        ) : (
-          <div className="flex flex-col gap-2 w-full">
-            <Button
-              onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "vlc")}
-              size="md"
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
-              isLoading={loading[`${q.quality}-vlc`]}
-              spinner={<Spinner />}
-            >
-              Play in VLC
-            </Button>
-            <Button
-              onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "mx")}
-              size="md"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
-              isLoading={loading[`${q.quality}-mx`]}
-              spinner={<Spinner />}
-            >
-              Play in MX
-            </Button>
-          </div>
-        )}
-      </div>
+      <Button
+        key={i}
+        onClick={() => handleButtonClick(q.id, q.name, q.quality)}
+        size="lg"
+        className="bg-black/60 hover:bg-black/80 text-white font-bold border border-white/20 rounded-xl min-w-[120px] m-2 shadow-lg"
+        isLoading={loading[q.quality]}
+        spinner={<Spinner />}
+      >
+        {q.quality}
+      </Button>
     ));
 
   const renderShowSelectors = () => (
@@ -274,16 +137,7 @@ const ActionPage = ({ actionType }) => {
               .sort((a, b) => a.episode_number - b.episode_number)
               .map((e) => (
                 <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
-                  {(() => {
-                    let match = e.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                    if (!match && e.telegram && e.telegram[0]) {
-                      match = e.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                    }
-                    if (match) {
-                      return `Episodes ${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')} Combined`;
-                    }
-                    return e.episode_number === 0 || e.episode_number >= 100 ? e.title : `Episode ${e.episode_number}`;
-                  })()}
+                  Episode {e.episode_number}
                 </option>
               ))}
           </select>
@@ -319,41 +173,20 @@ const ActionPage = ({ actionType }) => {
         </div>
       </div>
 
-      {btnType === "Download" ? (
-        <button
-          onClick={() => {
-            const q = qualities.find((q) => q.quality === selectedQuality);
-            if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "download");
-          }}
-          disabled={!selectedQuality}
-          className="w-full mt-4 disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-xl hover:scale-105 bg-gradient-to-r from-[#E50914] to-[#B20710]"
-        >
-          {loading[`${selectedQuality}-download`] ? <Spinner /> : "Download Now"}
-        </button>
-      ) : (
-        <div className="flex flex-col gap-3 w-full mt-4">
-          <button
-            onClick={() => {
-              const q = qualities.find((q) => q.quality === selectedQuality);
-              if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "vlc");
-            }}
-            disabled={!selectedQuality}
-            className="w-full disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-lg hover:scale-105 bg-orange-600 hover:bg-orange-700"
-          >
-            {loading[`${selectedQuality}-vlc`] ? <Spinner /> : "Play in VLC"}
-          </button>
-          <button
-            onClick={() => {
-              const q = qualities.find((q) => q.quality === selectedQuality);
-              if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "mx");
-            }}
-            disabled={!selectedQuality}
-            className="w-full disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-lg hover:scale-105 bg-blue-600 hover:bg-blue-700"
-          >
-            {loading[`${selectedQuality}-mx`] ? <Spinner /> : "Play in MX Player"}
-          </button>
-        </div>
-      )}
+      <button
+        onClick={() => {
+          const q = qualities.find((q) => q.quality === selectedQuality);
+          if (q) handleButtonClick(q.id, q.name, q.quality);
+        }}
+        disabled={!selectedQuality}
+        className={`w-full mt-4 disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-xl hover:scale-105 ${
+          btnType === "Download" 
+            ? "bg-gradient-to-r from-[#E50914] to-[#B20710]" 
+            : "bg-primaryBtn"
+        }`}
+      >
+        {loading[selectedQuality] ? <Spinner /> : (btnType === "Download" ? "Download Now" : "Play in Player")}
+      </button>
     </div>
   );
 
@@ -364,7 +197,7 @@ const ActionPage = ({ actionType }) => {
           {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
         </h1>
         <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-6 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md overflow-y-auto max-h-[65vh]">
-          {detailType === "movie" || movieData.media_type === "movie" ? (
+          {movieData.media_type === "movie" ? (
             <div className="flex justify-center flex-wrap gap-4 w-full">
               {renderMovieButtons()}
             </div>

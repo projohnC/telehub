@@ -8,7 +8,6 @@ import SimilarSeries from "./pages/SimilarSeries";
 import SearResults from "./pages/SearchResults";
 import Tg from "./pages/Tg";
 import ActionPage from "./pages/ActionPage";
-import PlayRedirect from "./pages/PlayRedirect";
 import Anime from "./pages/Anime";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
@@ -18,7 +17,6 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import AdManager from "./components/AdManager";
 import AdBlockDetector from "./components/AdBlockDetector";
-import OfficialDomainsModal from "./components/OfficialDomainsModal";
 // import PrivateRoute from "./components/PrivateRoute";
 
 // import { AuthProvider } from "./context/AuthContext";
@@ -32,7 +30,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 function App() {
   ReactGa.initialize("G-JDFS7KRV40");
   const location = useLocation();
-  const isVerificationPage = false;
+  const isVerificationPage = ["/tg", "/dow", "/plyr"].includes(location.pathname);
 
   useEffect(() => {
     ReactGa.pageview(window.location.pathname + window.location.search);
@@ -42,7 +40,6 @@ function App() {
     <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
       <AdManager />
       <AdBlockDetector />
-      <OfficialDomainsModal />
       <Nav />
       <div className={isVerificationPage ? "" : "p-3 md:p-10"}>
         <Routes>
@@ -99,10 +96,6 @@ function App() {
           <Route
             path="/plyr"
             element={<ActionPage actionType="Player" />}
-          />
-          <Route
-            path="/play-redirect"
-            element={<PlayRedirect />}
           />
         </Routes>
       </div>

@@ -7,7 +7,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
-import BannerAd from "./BannerAd";
 
 import { BiListUl, BiPlay, BiTime } from "react-icons/bi";
 import { IoIosArrowDown } from "react-icons/io";
@@ -21,23 +20,6 @@ import { MdOutlineHighQuality } from "react-icons/md";
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
-
-  const hideDownload =
-    import.meta.env.VITE_HIDE_DOWNLAOD === "true" ||
-    import.meta.env.VITE_HIDE_DOWNLOAD === "true" ||
-    import.meta.env.VITE_HIDE_DOWNLAOD === "1" ||
-    import.meta.env.VITE_HIDE_DOWNLOAD === "1";
-  const hidePlayer =
-    import.meta.env.VITE_HIDE_PLAYER === "true" ||
-    import.meta.env.VITE_HIDE_PLAYER === "1";
-
-  console.log("Vite Environment Hiding Status:", {
-    VITE_HIDE_DOWNLAOD: import.meta.env.VITE_HIDE_DOWNLAOD,
-    VITE_HIDE_DOWNLOAD: import.meta.env.VITE_HIDE_DOWNLOAD,
-    VITE_HIDE_PLAYER: import.meta.env.VITE_HIDE_PLAYER,
-    hideDownload,
-    hidePlayer,
-  });
 
   // Trigger inline player
   const handleMoviePlayClick = () => {
@@ -65,40 +47,37 @@ export default function MoviesAndSeriesDetailsSections(props) {
   };
 
   return (
-    <>
-      <BannerAd />
-      <div className="relative mt-8 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
-        {!props.isMovieDataLoading ? (
-          <>
-            <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
-              <div
-                onClick={handleMoviePlayClick}
-                className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
-              >
-                {isInlinePlayerActive ? (
-                  <Watch
-                    isInline={true}
-                    id={props.movieData}
-                    popUpType={props.detailType === "movie" ? "movie" : "episode"}
-                    seasonNumber={props.seasonNumber}
-                    episodeNumber={props.episodeNumber}
-                    episodes={props.episodes}
-                  />
-                ) : (
-                  <>
-                    <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-primaryBtn cursor-pointer rounded-full text-5xl sm:text-6xl p-2 shadow-2xl transition hover:scale-110 active:scale-95">
-                      <BiPlay />
-                    </div>
+    <div className="relative mt-20 bg-btnColor/40 p-3 md:p-10 rounded-3xl ">
+      {!props.isMovieDataLoading ? (
+        <>
+          <div className="grid lg:grid-cols-2 content-center items-center gap-5 ">
+            <div
+              onClick={handleMoviePlayClick}
+              className={`aspect-video w-full relative flex items-center shrink-0 bg-black rounded-3xl overflow-hidden transition-all duration-300 ease-in-out ${!isInlinePlayerActive ? 'hover:scale-[1.02] cursor-pointer' : ''}`}
+            >
+              {isInlinePlayerActive ? (
+                <Watch
+                  isInline={true}
+                  id={props.movieData}
+                  popUpType={props.detailType === "movie" ? "movie" : "episode"}
+                  seasonNumber={props.seasonNumber}
+                  episodeNumber={props.episodeNumber}
+                />
+              ) : (
+                <>
+                  <div className="absolute z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-primaryBtn cursor-pointer rounded-full text-5xl sm:text-6xl p-2 shadow-2xl transition hover:scale-110 active:scale-95">
+                    <BiPlay />
+                  </div>
 
-                    <LazyLoadImage
-                      src={props.movieData.backdrop}
-                      effect="black-and-white"
-                      alt={props.movieData.title}
-                      className=" aspect-video w-full rounded-3xl shrink-0 bg-btnColor object-cover"
-                    />
-                  </>
-                )}
-              </div>
+                  <LazyLoadImage
+                    src={props.movieData.backdrop}
+                    effect="black-and-white"
+                    alt={props.movieData.title}
+                    className=" aspect-video w-full rounded-3xl shrink-0 bg-btnColor object-cover"
+                  />
+                </>
+              )}
+            </div>
 
             <div className="p-5">
               {props.movieData.genres && (
@@ -205,32 +184,20 @@ export default function MoviesAndSeriesDetailsSections(props) {
                 );
               })()}
 
-              {(!hideDownload || !hidePlayer) && (
-                <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
-                  {!hideDownload && (
-                    <div className="grid grid-cols-1 gap-3">
-                      <DownloadButton
-                        movieData={props.movieData}
-                        btnType="Download"
-                        detailType={props.detailType}
-                        seasonNumber={props.seasonNumber}
-                        episodeNumber={props.episodeNumber}
-                      />
-                    </div>
-                  )}
-                  {!hidePlayer && (
-                    <div className="w-full">
-                      <DownloadButton
-                        movieData={props.movieData}
-                        btnType="Player"
-                        detailType={props.detailType}
-                        seasonNumber={props.seasonNumber}
-                        episodeNumber={props.episodeNumber}
-                      />
-                    </div>
-                  )}
+              <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
+                <div className="grid grid-cols-1 gap-3">
+                  <DownloadButton
+                    movieData={props.movieData}
+                    btnType="Download"
+                  />
                 </div>
-              )}
+                <div className="w-full">
+                  <DownloadButton
+                    movieData={props.movieData}
+                    btnType="Player"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -250,10 +217,10 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   <AnimatePresence>
                     {isSeasonsOpen && (
                       <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          className="absolute top-12 left-0 right-0 z-50 max-h-[300px] overflow-y-auto py-2 text-secondaryTextColor text-md rounded-xl bg-btnColor border border-white/10 shadow-2xl backdrop-blur-xl"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="absolute top-12 left-0 right-0 z-50 max-h-[300px] overflow-y-auto py-2 text-secondaryTextColor text-md rounded-xl bg-btnColor border border-white/10 shadow-2xl backdrop-blur-xl"
                       >
                         {props.movieData.seasons
                           .sort((a, b) => a.season_number - b.season_number)
@@ -299,25 +266,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             : "bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10"
                             }`}
                         >
-                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
-                            {(() => {
-                              let num = eps.episode_number;
-                              if (num >= 100) {
-                                const mod = num % 100;
-                                if (mod !== 0) num = mod;
-                              }
-                              return num;
-                            })()}
-                          </span>
+                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>{eps.episode_number}</span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {(() => {
-                              let num = eps.episode_number;
-                              if (num >= 100) {
-                                const mod = num % 100;
-                                if (mod !== 0) num = mod;
-                              }
-                              return `Episode ${num}`;
-                            })()}
+                            {eps.name || eps.title || `Episode ${eps.episode_number}`}
                           </span>
                         </div>
                       ))
@@ -337,6 +288,5 @@ export default function MoviesAndSeriesDetailsSections(props) {
         </div>
       )}
     </div>
-    </>
   );
 }

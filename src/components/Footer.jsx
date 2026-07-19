@@ -7,7 +7,7 @@ export default function Footer() {
   const SITENAME = import.meta.env.VITE_SITENAME;
 
   const location = useLocation();
-  const isVerificationPage = false;
+  const isVerificationPage = ["/tg", "/dow", "/plyr"].includes(location.pathname);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -55,9 +55,6 @@ export default function Footer() {
                 </p>
                 <p className="text-sm text-secondaryTextColor/60 lg:text-md leading-relaxed font-medium">
                   All content available on this platform is sourced from publicly accessible third-party services. {SITENAME} simply indexes and provides links to media files that are hosted externally, including Telegram and other platforms.
-                </p>
-                <p className="text-xs text-secondaryTextColor/40 leading-relaxed font-medium pt-2">
-                  <span className="font-semibold text-secondaryTextColor/50">Tags:</span> hubstream, hubstream art, hubstream.site, hubstream site, hdmovies.in, hubstream in, hubstream south hindi dubbed, hubstream pro, hubstream apk, all hubstream, South movies, Hubstream.art
                 </p>
               </div>
             </div>
