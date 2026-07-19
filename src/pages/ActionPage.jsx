@@ -85,32 +85,73 @@ const ActionPage = ({ actionType }) => {
     }
   };
 
-  const generateUrl = (id, name) => {
+  const generateUrl = (id, name, playerType) => {
     const downloadUrl = `${BASE}/dl/${id}/${encodeURIComponent(name)}`;
-    if (btnType === "Download") return downloadUrl;
+    if (btnType === "Download" || playerType === "download") return downloadUrl;
+
+    if (playerType === "vlc") {
+      return `intent:${downloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+    }
+    if (playerType === "mx") {
+      return `intent:${downloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+    }
     return `intent:${downloadUrl}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
   };
 
-  const handleButtonClick = async (id, name, quality, customDownloadUrl) => {
-    setLoading((prev) => ({ ...prev, [quality]: true }));
-    const rawUrl = customDownloadUrl || generateUrl(id, name);
+  const handleButtonClick = async (id, name, quality, customDownloadUrl, playerType) => {
+    let rawUrl = customDownloadUrl || generateUrl(id, name, playerType);
+    if (btnType === "Player" && customDownloadUrl && playerType) {
+      if (playerType === "vlc") {
+        rawUrl = `intent:${customDownloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+      } else if (playerType === "mx") {
+        rawUrl = `intent:${customDownloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+      }
+    }
+
+    const key = `${quality}-${playerType || 'dl'}`;
+    setLoading((prev) => ({ ...prev, [key]: true }));
     const shortUrl = await shortenUrl(rawUrl);
-    setLoading((prev) => ({ ...prev, [quality]: false }));
+    setLoading((prev) => ({ ...prev, [key]: false }));
     window.open(shortUrl, "_blank", "noopener noreferrer");
   };
 
   const renderMovieButtons = () =>
     movieData.telegram?.map((q, i) => (
-      <Button
-        key={i}
-        onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url)}
-        size="lg"
-        className="bg-black/60 hover:bg-black/80 text-white font-bold border border-white/20 rounded-xl min-w-[120px] m-2 shadow-lg"
-        isLoading={loading[q.quality]}
-        spinner={<Spinner />}
-      >
-        {q.quality}
-      </Button>
+      <div key={i} className="flex flex-col items-center p-4 bg-black/40 border border-white/10 rounded-2xl m-2 min-w-[180px] shadow-lg">
+        <span className="text-white font-bold text-sm mb-3 opacity-90">{q.quality}</span>
+        {btnType === "Download" ? (
+          <Button
+            onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "download")}
+            size="md"
+            className="w-full bg-gradient-to-r from-[#E50914] to-[#B20710] text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
+            isLoading={loading[`${q.quality}-download`]}
+            spinner={<Spinner />}
+          >
+            Download
+          </Button>
+        ) : (
+          <div className="flex flex-col gap-2 w-full">
+            <Button
+              onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "vlc")}
+              size="md"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
+              isLoading={loading[`${q.quality}-vlc`]}
+              spinner={<Spinner />}
+            >
+              Play in VLC
+            </Button>
+            <Button
+              onClick={() => handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "mx")}
+              size="md"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow active:scale-95 transition-all duration-200"
+              isLoading={loading[`${q.quality}-mx`]}
+              spinner={<Spinner />}
+            >
+              Play in MX
+            </Button>
+          </div>
+        )}
+      </div>
     ));
 
   const renderShowSelectors = () => (
@@ -199,20 +240,41 @@ const ActionPage = ({ actionType }) => {
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          const q = qualities.find((q) => q.quality === selectedQuality);
-          if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url);
-        }}
-        disabled={!selectedQuality}
-        className={`w-full mt-4 disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-xl hover:scale-105 ${
-          btnType === "Download" 
-            ? "bg-gradient-to-r from-[#E50914] to-[#B20710]" 
-            : "bg-primaryBtn"
-        }`}
-      >
-        {loading[selectedQuality] ? <Spinner /> : (btnType === "Download" ? "Download Now" : "Play in Player")}
-      </button>
+      {btnType === "Download" ? (
+        <button
+          onClick={() => {
+            const q = qualities.find((q) => q.quality === selectedQuality);
+            if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "download");
+          }}
+          disabled={!selectedQuality}
+          className="w-full mt-4 disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-xl hover:scale-105 bg-gradient-to-r from-[#E50914] to-[#B20710]"
+        >
+          {loading[`${selectedQuality}-download`] ? <Spinner /> : "Download Now"}
+        </button>
+      ) : (
+        <div className="flex flex-col gap-3 w-full mt-4">
+          <button
+            onClick={() => {
+              const q = qualities.find((q) => q.quality === selectedQuality);
+              if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "vlc");
+            }}
+            disabled={!selectedQuality}
+            className="w-full disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-lg hover:scale-105 bg-orange-600 hover:bg-orange-700"
+          >
+            {loading[`${selectedQuality}-vlc`] ? <Spinner /> : "Play in VLC"}
+          </button>
+          <button
+            onClick={() => {
+              const q = qualities.find((q) => q.quality === selectedQuality);
+              if (q) handleButtonClick(q.id, q.name, q.quality, q.custom_download_url, "mx");
+            }}
+            disabled={!selectedQuality}
+            className="w-full disabled:opacity-30 disabled:hover:scale-100 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-2xl flex justify-center items-center text-lg hover:scale-105 bg-blue-600 hover:bg-blue-700"
+          >
+            {loading[`${selectedQuality}-mx`] ? <Spinner /> : "Play in MX Player"}
+          </button>
+        </div>
+      )}
     </div>
   );
 
