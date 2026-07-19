@@ -9,13 +9,14 @@ const PlayRedirect = () => {
 
   useEffect(() => {
     if (url) {
-      let intentUrl = url;
+      const urlWithoutProtocol = url.replace(/^https?:\/\//, "");
+      let intentUrl = "";
       if (player === "vlc") {
-        intentUrl = `intent:${url}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+        intentUrl = `intent:${urlWithoutProtocol}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
       } else if (player === "mx") {
-        intentUrl = `intent:${url}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+        intentUrl = `intent:${urlWithoutProtocol}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
       } else {
-        intentUrl = `intent:${url}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
+        intentUrl = `intent:${urlWithoutProtocol}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
       }
       window.location.replace(intentUrl);
     }

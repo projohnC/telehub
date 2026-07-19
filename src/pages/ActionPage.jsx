@@ -128,29 +128,33 @@ const ActionPage = ({ actionType }) => {
     const downloadUrl = `${BASE}/dl/${id}/${encodeURIComponent(name)}`;
     if (btnType === "Download" || playerType === "download") return downloadUrl;
 
+    const urlWithoutProtocol = downloadUrl.replace(/^https?:\/\//, "");
+
     if (API_URL) {
       return `${window.location.origin}/play-redirect?url=${encodeURIComponent(downloadUrl)}&player=${playerType}`;
     }
 
     if (playerType === "vlc") {
-      return `intent:${downloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+      return `intent:${urlWithoutProtocol}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
     }
     if (playerType === "mx") {
-      return `intent:${downloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+      return `intent:${urlWithoutProtocol}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
     }
-    return `intent:${downloadUrl}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
+    return `intent:${urlWithoutProtocol}#Intent;type=video/x-matroska;action=android.intent.action.VIEW;end;`;
   };
 
   const handleButtonClick = async (id, name, quality, customDownloadUrl, playerType) => {
     let rawUrl = customDownloadUrl || generateUrl(id, name, playerType);
+
     if (btnType === "Player" && customDownloadUrl && playerType) {
+      const urlWithoutProtocol = customDownloadUrl.replace(/^https?:\/\//, "");
       if (API_URL) {
         rawUrl = `${window.location.origin}/play-redirect?url=${encodeURIComponent(customDownloadUrl)}&player=${playerType}`;
       } else {
         if (playerType === "vlc") {
-          rawUrl = `intent:${customDownloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+          rawUrl = `intent:${urlWithoutProtocol}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
         } else if (playerType === "mx") {
-          rawUrl = `intent:${customDownloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+          rawUrl = `intent:${urlWithoutProtocol}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
         }
       }
     }
