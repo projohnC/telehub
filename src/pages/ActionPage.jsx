@@ -5,6 +5,26 @@ import axios from "axios";
 import Spinner from "../components/svg/Spinner";
 import VerificationPage from "../components/VerificationPage";
 
+const getDisplayEpisodeInfo = (epsNum, name = "") => {
+  const nameStr = String(name || "");
+  const isCombined = nameStr.toLowerCase().includes("combined");
+  
+  let num = epsNum;
+  if (isCombined) {
+    const match = nameStr.match(/episodes\s+(\d+)/i);
+    if (match) {
+      num = parseInt(match[1], 10);
+    } else if (epsNum >= 100 && epsNum < 200) {
+      num = epsNum - 100;
+    }
+  } else if (epsNum >= 100 && epsNum < 200) {
+    num = epsNum - 100;
+  }
+
+  const displayName = isCombined ? `Episode ${num}` : name;
+  return { num, name: displayName };
+};
+
 const ActionPage = ({ actionType }) => {
   const location = useLocation();
   const movieData = location.state?.movieData;
@@ -135,11 +155,14 @@ const ActionPage = ({ actionType }) => {
             <option value="" disabled className="bg-[#08090b]">Select episode</option>
             {episodes
               .sort((a, b) => a.episode_number - b.episode_number)
-              .map((e) => (
-                <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
-                  Episode {e.episode_number === 103 ? 3 : e.episode_number}
-                </option>
-              ))}
+              .map((e) => {
+                const { num } = getDisplayEpisodeInfo(e.episode_number, e.name || e.title);
+                return (
+                  <option key={e.episode_number} value={e.episode_number} className="bg-[#08090b]">
+                    Episode {num}
+                  </option>
+                );
+              })}
           </select>
           <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

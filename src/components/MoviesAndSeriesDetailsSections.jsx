@@ -17,6 +17,26 @@ import { LuLanguages } from "react-icons/lu";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
 
+const getDisplayEpisodeInfo = (epsNum, name = "") => {
+  const nameStr = String(name || "");
+  const isCombined = nameStr.toLowerCase().includes("combined");
+  
+  let num = epsNum;
+  if (isCombined) {
+    const match = nameStr.match(/episodes\s+(\d+)/i);
+    if (match) {
+      num = parseInt(match[1], 10);
+    } else if (epsNum >= 100 && epsNum < 200) {
+      num = epsNum - 100;
+    }
+  } else if (epsNum >= 100 && epsNum < 200) {
+    num = epsNum - 100;
+  }
+
+  const displayName = isCombined ? `Episode ${num}` : name;
+  return { num, name: displayName };
+};
+
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
@@ -257,23 +277,26 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     props.episodes &&
                     props.episodes
                       .sort((a, b) => a.episode_number - b.episode_number)
-                      .map((eps, index) => (
-                        <div
-                          key={index}
-                          onClick={() => handleEpisodeClick(eps.episode_number)}
-                          className={`group relative flex flex-col items-center justify-center py-4 px-2 rounded-2xl border transition-all duration-300 cursor-pointer ${props.episodeNumber === eps.episode_number
-                            ? "bg-[#E50914] text-white border-[#E50914] shadow-lg shadow-[#E50914]/20 scale-105 z-10"
-                            : "bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10"
-                            }`}
-                        >
-                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
-                            {eps.episode_number === 103 ? 3 : eps.episode_number}
-                          </span>
-                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.episode_number === 103 ? "Episode 3" : (eps.name || eps.title || `Episode ${eps.episode_number}`)}
-                          </span>
-                        </div>
-                      ))
+                      .map((eps, index) => {
+                        const { num, name } = getDisplayEpisodeInfo(eps.episode_number, eps.name || eps.title);
+                        return (
+                          <div
+                            key={index}
+                            onClick={() => handleEpisodeClick(eps.episode_number)}
+                            className={`group relative flex flex-col items-center justify-center py-4 px-2 rounded-2xl border transition-all duration-300 cursor-pointer ${props.episodeNumber === eps.episode_number
+                              ? "bg-[#E50914] text-white border-[#E50914] shadow-lg shadow-[#E50914]/20 scale-105 z-10"
+                              : "bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10"
+                              }`}
+                          >
+                            <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
+                              {num}
+                            </span>
+                            <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
+                              {name || `Episode ${num}`}
+                            </span>
+                          </div>
+                        );
+                      })
                   ) : (
                     <div className="col-span-full py-20 flex justify-center w-full">
                       <div className="loader-episode"></div>
