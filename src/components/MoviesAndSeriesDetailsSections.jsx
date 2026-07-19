@@ -22,6 +22,23 @@ export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
 
+  const hideDownload =
+    import.meta.env.VITE_HIDE_DOWNLAOD === "true" ||
+    import.meta.env.VITE_HIDE_DOWNLOAD === "true" ||
+    import.meta.env.VITE_HIDE_DOWNLAOD === "1" ||
+    import.meta.env.VITE_HIDE_DOWNLOAD === "1";
+  const hidePlayer =
+    import.meta.env.VITE_HIDE_PLAYER === "true" ||
+    import.meta.env.VITE_HIDE_PLAYER === "1";
+
+  console.log("Vite Environment Hiding Status:", {
+    VITE_HIDE_DOWNLAOD: import.meta.env.VITE_HIDE_DOWNLAOD,
+    VITE_HIDE_DOWNLOAD: import.meta.env.VITE_HIDE_DOWNLOAD,
+    VITE_HIDE_PLAYER: import.meta.env.VITE_HIDE_PLAYER,
+    hideDownload,
+    hidePlayer,
+  });
+
   // Trigger inline player
   const handleMoviePlayClick = () => {
     setIsInlinePlayerActive(true);
@@ -187,20 +204,26 @@ export default function MoviesAndSeriesDetailsSections(props) {
                 );
               })()}
 
-              <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
-                <div className="grid grid-cols-1 gap-3">
-                  <DownloadButton
-                    movieData={props.movieData}
-                    btnType="Download"
-                  />
+              {(!hideDownload || !hidePlayer) && (
+                <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
+                  {!hideDownload && (
+                    <div className="grid grid-cols-1 gap-3">
+                      <DownloadButton
+                        movieData={props.movieData}
+                        btnType="Download"
+                      />
+                    </div>
+                  )}
+                  {!hidePlayer && (
+                    <div className="w-full">
+                      <DownloadButton
+                        movieData={props.movieData}
+                        btnType="Player"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="w-full">
-                  <DownloadButton
-                    movieData={props.movieData}
-                    btnType="Player"
-                  />
-                </div>
-              </div>
+              )}
             </div>
           </div>
 

@@ -46,6 +46,23 @@ const ActionPage = ({ actionType }) => {
     }
   }, [selectedEpisode, episodes]);
 
+  const hideDownload =
+    import.meta.env.VITE_HIDE_DOWNLAOD === "true" ||
+    import.meta.env.VITE_HIDE_DOWNLOAD === "true" ||
+    import.meta.env.VITE_HIDE_DOWNLAOD === "1" ||
+    import.meta.env.VITE_HIDE_DOWNLOAD === "1";
+  const hidePlayer =
+    import.meta.env.VITE_HIDE_PLAYER === "true" ||
+    import.meta.env.VITE_HIDE_PLAYER === "1";
+
+  if ((btnType === "Download" && hideDownload) || (btnType === "Player" && hidePlayer)) {
+    return (
+      <div className="flex items-center justify-center h-screen text-white">
+        <p>This feature is disabled.</p>
+      </div>
+    );
+  }
+
   if (!movieData) {
     return (
       <div className="flex items-center justify-center h-screen text-white">

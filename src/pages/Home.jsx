@@ -12,33 +12,14 @@ export default function Home() {
   const SITENAME = import.meta.env.VITE_SITENAME;
 
   // States
-  const [heroPopularMovies, setHeroPopularMovies] = useState([]);
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingTv, setTrendingTv] = useState([]);
-  const [isHeroLoading, setIsHeroLoading] = useState(true);
   const [isTrendingMoviesLoading, setIsTrendingMoviesLoading] = useState(true);
   const [isTrendingTvLoading, setIsTrendingTvLoading] = useState(true);
 
   useEffect(() => {
-    setIsHeroLoading(true);
     window.scrollTo(0, 0);
-    axios
-      .get(`${BASE}/api/movies`, {
-        params: {
-          sort_by: "rating:desc",
-          page: 1,
-          page_size: 10,
-        },
-      })
-      .then((response) => {
-        setHeroPopularMovies(response.data.movies);
-        setIsHeroLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching hero popular movies:", error);
-        setIsHeroLoading(false);
-      });
-  }, [BASE]);
+  }, []);
 
   useEffect(() => {
     setIsTrendingMoviesLoading(true);
@@ -112,8 +93,8 @@ export default function Home() {
       {/* HEADER - Hero and boxoffice */}
       <div className="col-span-1 lg:col-span-2">
         <HeroSlider
-          movieData={heroPopularMovies}
-          isMvieDataLoading={isHeroLoading}
+          movieData={combinedLatest.slice(0, 10)}
+          isMovieDataLoading={isCombinedLoading}
           dataType="heroPopularMovies"
           sliderTypePrev="slideHeroTrendingMovies-prev"
           sliderTypeNext="slideHeroTrendingMovies-next"
