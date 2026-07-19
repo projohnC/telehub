@@ -17,6 +17,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import AdManager from "./components/AdManager";
 import AdBlockDetector from "./components/AdBlockDetector";
+import DomainNotice from "./components/DomainNotice";
 // import PrivateRoute from "./components/PrivateRoute";
 
 // import { AuthProvider } from "./context/AuthContext";
@@ -40,6 +41,7 @@ function App() {
     <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
       <AdManager />
       <AdBlockDetector />
+      <DomainNotice />
       <Nav />
       <div className={isVerificationPage ? "" : "p-3 md:p-10"}>
         <Routes>

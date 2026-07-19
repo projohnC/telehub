@@ -41,6 +41,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
 
+  const hideDownload = import.meta.env.VITE_HIDE_DOWNLOAD === "True" || import.meta.env.VITE_HIDE_DOWNLOAD === "true";
+  const hidePlayer = import.meta.env.VITE_HIDE_PLAYER === "True" || import.meta.env.VITE_HIDE_PLAYER === "true";
+
   // Trigger inline player
   const handleMoviePlayClick = () => {
     setIsInlinePlayerActive(true);
@@ -204,20 +207,26 @@ export default function MoviesAndSeriesDetailsSections(props) {
                 );
               })()}
 
-              <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
-                <div className="grid grid-cols-1 gap-3">
-                  <DownloadButton
-                    movieData={props.movieData}
-                    btnType="Download"
-                  />
+              {(!hideDownload || !hidePlayer) && (
+                <div className="flex flex-col gap-3 text-primaryTextColor mt-8">
+                  {!hideDownload && (
+                    <div className="grid grid-cols-1 gap-3">
+                      <DownloadButton
+                        movieData={props.movieData}
+                        btnType="Download"
+                      />
+                    </div>
+                  )}
+                  {!hidePlayer && (
+                    <div className="w-full">
+                      <DownloadButton
+                        movieData={props.movieData}
+                        btnType="Player"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="w-full">
-                  <DownloadButton
-                    movieData={props.movieData}
-                    btnType="Player"
-                  />
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
