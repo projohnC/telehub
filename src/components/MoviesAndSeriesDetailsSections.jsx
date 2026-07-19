@@ -18,21 +18,6 @@ import { LuLanguages } from "react-icons/lu";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
 
-const parseEpisodeRange = (title, telegram) => {
-  let match = title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-  if (!match && telegram && telegram[0]) {
-    match = telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-  }
-  if (match) {
-    const endVal = parseInt(match[2], 10);
-    // Avoid false positives with common video resolutions (e.g. 720, 1080) or unreasonably large episode numbers for a range end
-    if ([360, 480, 540, 576, 720, 1080, 2160].includes(endVal) || endVal >= 100) {
-      return null;
-    }
-  }
-  return match;
-};
-
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
@@ -308,42 +293,10 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             }`}
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
-                            {(() => {
-                              const hasRange = parseEpisodeRange(eps.title, eps.telegram);
-
-                              if (hasRange) {
-                                const combinedList = props.episodes.filter(ep => {
-                                  const r = parseEpisodeRange(ep.title, ep.telegram);
-                                  return !!r;
-                                }).sort((a, b) => a.episode_number - b.episode_number);
-                                const seqIndex = combinedList.findIndex(ep => ep.episode_number === eps.episode_number) + 1;
-                                return seqIndex;
-                              }
-
-                              if (eps.episode_number === 0) {
-                                let sMatch = eps.title?.match(/s(\d+)/i);
-                                if (!sMatch && eps.telegram && eps.telegram[0]) {
-                                  sMatch = eps.telegram[0].name?.match(/s(\d+)/i);
-                                }
-                                const seasonNum = sMatch ? parseInt(sMatch[1]) : (props.seasonNumber || 1);
-                                return `S${seasonNum.toString().padStart(2, '0')}`;
-                              }
-
-                              return eps.episode_number;
-                            })()}
+                            {eps.episode_number}
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {(() => {
-                              const rangeMatch = parseEpisodeRange(eps.title, eps.telegram);
-
-                              if (rangeMatch) {
-                                return `E${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`;
-                              }
-                              if (eps.episode_number === 0 || eps.episode_number >= 100) {
-                                return "Combined";
-                              }
-                              return eps.name || eps.title || `Episode ${eps.episode_number}`;
-                            })()}
+                            {eps.name || eps.title || `Episode ${eps.episode_number}`}
                           </span>
                         </div>
                       ))
