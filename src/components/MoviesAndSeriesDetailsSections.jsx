@@ -82,6 +82,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                     popUpType={props.detailType === "movie" ? "movie" : "episode"}
                     seasonNumber={props.seasonNumber}
                     episodeNumber={props.episodeNumber}
+                    episodes={props.episodes}
                   />
                 ) : (
                   <>
@@ -211,6 +212,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
                       <DownloadButton
                         movieData={props.movieData}
                         btnType="Download"
+                        detailType={props.detailType}
+                        seasonNumber={props.seasonNumber}
+                        episodeNumber={props.episodeNumber}
                       />
                     </div>
                   )}
@@ -219,6 +223,9 @@ export default function MoviesAndSeriesDetailsSections(props) {
                       <DownloadButton
                         movieData={props.movieData}
                         btnType="Player"
+                        detailType={props.detailType}
+                        seasonNumber={props.seasonNumber}
+                        episodeNumber={props.episodeNumber}
                       />
                     </div>
                   )}

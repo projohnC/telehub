@@ -8,6 +8,7 @@ import SimilarSeries from "./pages/SimilarSeries";
 import SearResults from "./pages/SearchResults";
 import Tg from "./pages/Tg";
 import ActionPage from "./pages/ActionPage";
+import PlayRedirect from "./pages/PlayRedirect";
 import Anime from "./pages/Anime";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
@@ -98,6 +99,10 @@ function App() {
           <Route
             path="/plyr"
             element={<ActionPage actionType="Player" />}
+          />
+          <Route
+            path="/play-redirect"
+            element={<PlayRedirect />}
           />
         </Routes>
       </div>

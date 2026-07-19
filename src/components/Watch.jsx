@@ -39,23 +39,31 @@ export default function WatchTrailer(props) {
             }));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
-            const season = props.id.seasons.find(
-              (season) => season.season_number === props.seasonNumber
-            );
-
-            if (season) {
-              const episode = season.episodes.find(
+            let episode = null;
+            if (props.episodes && props.episodes.length > 0) {
+              episode = props.episodes.find(
                 (ep) => ep.episode_number === props.episodeNumber
               );
+            }
 
-              if (episode) {
-                videoSources = episode.telegram.map((q) => ({
-                  src: `${BASE}/dl/${q.id}/${q.name}`,
-                  type: "video/mp4",
-                  size: parseInt(q.quality.replace("p", ""), 10),
-                }));
-                selectedPoster = episode.episode_backdrop;
+            if (!episode && props.id?.seasons) {
+              const season = props.id.seasons.find(
+                (season) => season.season_number === props.seasonNumber
+              );
+              if (season && season.episodes) {
+                episode = season.episodes.find(
+                  (ep) => ep.episode_number === props.episodeNumber
+                );
               }
+            }
+
+            if (episode) {
+              videoSources = (episode.telegram || []).map((q) => ({
+                src: `${BASE}/dl/${q.id}/${q.name}`,
+                type: "video/mp4",
+                size: parseInt(q.quality.replace("p", ""), 10),
+              }));
+              selectedPoster = episode.episode_backdrop || props.id.backdrop;
             }
           }
 

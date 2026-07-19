@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Popover, PopoverTrigger, PopoverContent } from "@nextui-org/popover";
 import { Button } from "@nextui-org/button";
@@ -13,8 +13,49 @@ const Tg = () => {
   const USERNAME = import.meta.env.VITE_TG_USERNAME;
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
+  const rawBase = import.meta.env.VITE_BASE_URL || "";
+  const BASE = rawBase
+    ? (rawBase.startsWith("http://") || rawBase.startsWith("https://")
+      ? rawBase
+      : (rawBase === "0.0.0.0" || rawBase.includes("localhost") || rawBase.includes("127.0.0.1")
+        ? `http://${rawBase}`
+        : `https://${rawBase}`))
+    : window.location.origin;
 
   const [loading, setLoading] = useState({});
+  const [seasonsEpisodes, setSeasonsEpisodes] = useState({});
+  const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (movieData && movieData.media_type !== "movie" && movieData.seasons) {
+      setLoadingEpisodes(true);
+      const promises = movieData.seasons
+        .filter((s) => s.season_number !== 0)
+        .map((s) =>
+          axios
+            .get(`${BASE}/api/id/${movieData.tmdb_id}`, {
+              params: { season_number: s.season_number },
+            })
+            .then((res) => ({ season_number: s.season_number, episodes: res.data?.episodes || [] }))
+            .catch(() => ({ season_number: s.season_number, episodes: [] }))
+        );
+
+      Promise.all(promises).then((results) => {
+        if (active) {
+          const mapping = {};
+          results.forEach((res) => {
+            mapping[res.season_number] = res.episodes;
+          });
+          setSeasonsEpisodes(mapping);
+          setLoadingEpisodes(false);
+        }
+      });
+    }
+    return () => {
+      active = false;
+    };
+  }, [movieData, BASE]);
 
   if (!movieData) {
     return (
@@ -40,14 +81,26 @@ const Tg = () => {
 
   const handleButtonClick = async (originalUrl, quality) => {
     setLoading((prev) => ({ ...prev, [quality]: true }));
-    let shortUrl = originalUrl;
+    let newWindow = null;
+    if (API_URL) {
+      newWindow = window.open("", "_blank");
+    }
+
     try {
-      shortUrl = await shortenUrl(originalUrl);
-    } catch (error) {
-      console.error("Error processing URL:", error);
-    } finally {
+      const shortUrl = await shortenUrl(originalUrl);
       setLoading((prev) => ({ ...prev, [quality]: false }));
-      window.open(shortUrl, "_blank", "noopener noreferrer");
+      if (newWindow) {
+        newWindow.location.href = shortUrl;
+      } else {
+        window.open(shortUrl, "_blank", "noopener noreferrer");
+      }
+    } catch (error) {
+      console.error("Error processing URL in Tg:", error);
+      setLoading((prev) => ({ ...prev, [quality]: false }));
+      if (newWindow) {
+        newWindow.close();
+      }
+      window.open(originalUrl, "_blank", "noopener noreferrer");
     }
   };
 
@@ -70,49 +123,61 @@ const Tg = () => {
       </Button>
     ));
 
-  const renderSeasonButtons = () =>
-    movieData.seasons.map((season, seasonIndex) => {
-      const qualityMap = new Map();
-      season.episodes.forEach((episode) => {
-        episode.telegram?.forEach((q) => {
-          qualityMap.set(q.quality, q.custom_download_url || qualityMap.get(q.quality) || null);
-        });
-      });
-
+  const renderSeasonButtons = () => {
+    if (loadingEpisodes) {
       return (
-        <Popover key={seasonIndex} placement="bottom" showArrow={true} offset={20}>
-          <PopoverTrigger>
-            <button className="bg-otherColor text-bgColor py-2 px-6 rounded-full border-2 border-otherColor m-2 text-lg font-bold shadow-md hover:scale-105 transition-transform">
-              Season {season.season_number}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="bg-btnColor">
-            <div className="px-2 py-4 flex gap-2 flex-wrap max-w-sm justify-center">
-              {Array.from(qualityMap.keys()).map((quality, qualityIndex) => {
-                const customUrl = qualityMap.get(quality);
-                return (
-                  <Button
-                    key={qualityIndex}
-                    onClick={() =>
-                      handleButtonClick(
-                        customUrl || `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`,
-                        quality
-                      )
-                    }
-                    size="md"
-                    className="bg-primaryBtn rounded-full text-white font-bold"
-                    isLoading={loading[quality]}
-                    spinner={<Spinner />}
-                  >
-                    {quality}
-                  </Button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
+        <div className="flex justify-center w-full py-10">
+          <Spinner />
+        </div>
       );
-    });
+    }
+
+    return movieData.seasons
+      .filter((s) => s.season_number !== 0)
+      .map((season, seasonIndex) => {
+        const qualityMap = new Map();
+        const eps = seasonsEpisodes[season.season_number] || [];
+        eps.forEach((episode) => {
+          episode.telegram?.forEach((q) => {
+            qualityMap.set(q.quality, q.custom_download_url || qualityMap.get(q.quality) || null);
+          });
+        });
+
+        return (
+          <Popover key={seasonIndex} placement="bottom" showArrow={true} offset={20}>
+            <PopoverTrigger>
+              <button className="bg-otherColor text-bgColor py-2 px-6 rounded-full border-2 border-otherColor m-2 text-lg font-bold shadow-md hover:scale-105 transition-transform">
+                Season {season.season_number}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="bg-btnColor">
+              <div className="px-2 py-4 flex gap-2 flex-wrap max-w-sm justify-center">
+                {Array.from(qualityMap.keys()).map((quality, qualityIndex) => {
+                  const customUrl = qualityMap.get(quality);
+                  return (
+                    <Button
+                      key={qualityIndex}
+                      onClick={() =>
+                        handleButtonClick(
+                          customUrl || `https://t.me/${USERNAME}?start=file_${movieData.tmdb_id}_${season.season_number}_${quality}`,
+                          quality
+                        )
+                      }
+                      size="md"
+                      className="bg-primaryBtn rounded-full text-white font-bold"
+                      isLoading={loading[quality]}
+                      spinner={<Spinner />}
+                    >
+                      {quality}
+                    </Button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+        );
+      });
+  };
 
   return (
     <VerificationPage title="Telegram Links">

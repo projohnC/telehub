@@ -9,6 +9,9 @@ const ActionPage = ({ actionType }) => {
   const location = useLocation();
   const movieData = location.state?.movieData;
   const btnType = location.state?.btnType || actionType;
+  const detailType = location.state?.detailType || (movieData?.media_type === "movie" ? "movie" : "series");
+  const initialSeason = location.state?.seasonNumber;
+  const initialEpisode = location.state?.episodeNumber;
 
   const rawBase = import.meta.env.VITE_BASE_URL || "";
   const BASE = rawBase
@@ -21,25 +24,46 @@ const ActionPage = ({ actionType }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  const [selectedSeason, setSelectedSeason] = useState("");
-  const [selectedEpisode, setSelectedEpisode] = useState("");
+  const [selectedSeason, setSelectedSeason] = useState(initialSeason ? String(initialSeason) : "");
+  const [selectedEpisode, setSelectedEpisode] = useState(initialEpisode ? String(initialEpisode) : "");
   const [selectedQuality, setSelectedQuality] = useState("");
   const [episodes, setEpisodes] = useState([]);
   const [qualities, setQualities] = useState([]);
   const [loading, setLoading] = useState({});
 
+  const isInitialMount = React.useRef(true);
+
+  // Fetch episodes dynamically for a season
   useEffect(() => {
-    if (selectedSeason && movieData?.seasons) {
-      const season = movieData.seasons.find(
-        (s) => s.season_number === parseInt(selectedSeason)
-      );
-      if (season) {
-        setEpisodes(season.episodes);
+    let active = true;
+    if (selectedSeason && movieData?.tmdb_id) {
+      if (!isInitialMount.current) {
         setSelectedEpisode("");
         setQualities([]);
+        setSelectedQuality("");
       }
+
+      axios
+        .get(`${BASE}/api/id/${movieData.tmdb_id}`, {
+          params: { season_number: selectedSeason },
+        })
+        .then((response) => {
+          if (active && response.data?.episodes) {
+            setEpisodes(response.data.episodes);
+            isInitialMount.current = false;
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching episodes in ActionPage:", error);
+          if (active) {
+            isInitialMount.current = false;
+          }
+        });
     }
-  }, [selectedSeason, movieData]);
+    return () => {
+      active = false;
+    };
+  }, [selectedSeason, movieData, BASE]);
 
   useEffect(() => {
     if (selectedEpisode && episodes.length > 0) {
@@ -47,9 +71,17 @@ const ActionPage = ({ actionType }) => {
         (e) => e.episode_number === parseInt(selectedEpisode)
       );
       if (episode) {
-        setQualities(episode.telegram);
-        setSelectedQuality("");
+        setQualities(episode.telegram || []);
+        setSelectedQuality((prev) => {
+          if (prev && episode.telegram?.some((q) => q.quality === prev)) {
+            return prev;
+          }
+          return "";
+        });
       }
+    } else {
+      setQualities([]);
+      setSelectedQuality("");
     }
   }, [selectedEpisode, episodes]);
 
@@ -96,6 +128,10 @@ const ActionPage = ({ actionType }) => {
     const downloadUrl = `${BASE}/dl/${id}/${encodeURIComponent(name)}`;
     if (btnType === "Download" || playerType === "download") return downloadUrl;
 
+    if (API_URL) {
+      return `${window.location.origin}/play-redirect?url=${encodeURIComponent(downloadUrl)}&player=${playerType}`;
+    }
+
     if (playerType === "vlc") {
       return `intent:${downloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
     }
@@ -108,18 +144,50 @@ const ActionPage = ({ actionType }) => {
   const handleButtonClick = async (id, name, quality, customDownloadUrl, playerType) => {
     let rawUrl = customDownloadUrl || generateUrl(id, name, playerType);
     if (btnType === "Player" && customDownloadUrl && playerType) {
-      if (playerType === "vlc") {
-        rawUrl = `intent:${customDownloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
-      } else if (playerType === "mx") {
-        rawUrl = `intent:${customDownloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+      if (API_URL) {
+        rawUrl = `${window.location.origin}/play-redirect?url=${encodeURIComponent(customDownloadUrl)}&player=${playerType}`;
+      } else {
+        if (playerType === "vlc") {
+          rawUrl = `intent:${customDownloadUrl}#Intent;package=org.videolan.vlc;action=android.intent.action.VIEW;type=video/*;end;`;
+        } else if (playerType === "mx") {
+          rawUrl = `intent:${customDownloadUrl}#Intent;package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end;`;
+        }
       }
     }
 
     const key = `${quality}-${playerType || 'dl'}`;
     setLoading((prev) => ({ ...prev, [key]: true }));
-    const shortUrl = await shortenUrl(rawUrl);
-    setLoading((prev) => ({ ...prev, [key]: false }));
-    window.open(shortUrl, "_blank", "noopener noreferrer");
+
+    let newWindow = null;
+    const isIntent = rawUrl.startsWith("intent:");
+    if (API_URL && !isIntent) {
+      newWindow = window.open("", "_blank");
+    }
+
+    try {
+      const shortUrl = await shortenUrl(rawUrl);
+      setLoading((prev) => ({ ...prev, [key]: false }));
+      if (newWindow) {
+        newWindow.location.href = shortUrl;
+      } else {
+        if (shortUrl.startsWith("intent:")) {
+          window.location.href = shortUrl;
+        } else {
+          window.open(shortUrl, "_blank", "noopener noreferrer");
+        }
+      }
+    } catch (error) {
+      console.error("Error processing URL in ActionPage:", error);
+      setLoading((prev) => ({ ...prev, [key]: false }));
+      if (newWindow) {
+        newWindow.close();
+      }
+      if (rawUrl.startsWith("intent:")) {
+        window.location.href = rawUrl;
+      } else {
+        window.open(rawUrl, "_blank", "noopener noreferrer");
+      }
+    }
   };
 
   const renderMovieButtons = () =>
@@ -292,7 +360,7 @@ const ActionPage = ({ actionType }) => {
           {btnType === "Download" ? "Select Download Quality" : "Select Play Quality"}
         </h1>
         <div className="flex gap-4 flex-wrap justify-center items-center w-full max-w-4xl p-6 bg-secondary/10 rounded-[2rem] shadow-2xl border border-secondary/20 backdrop-blur-md overflow-y-auto max-h-[65vh]">
-          {movieData.media_type === "movie" ? (
+          {detailType === "movie" || movieData.media_type === "movie" ? (
             <div className="flex justify-center flex-wrap gap-4 w-full">
               {renderMovieButtons()}
             </div>
