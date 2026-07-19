@@ -266,9 +266,11 @@ export default function MoviesAndSeriesDetailsSections(props) {
                             : "bg-white/5 border-white/5 hover:border-white/10 hover:bg-white/10"
                             }`}
                         >
-                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>{eps.episode_number}</span>
+                          <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
+                            {eps.episode_number === 103 ? 3 : eps.episode_number}
+                          </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
-                            {eps.name || eps.title || `Episode ${eps.episode_number}`}
+                            {eps.name || eps.title || `Episode ${eps.episode_number === 103 ? 3 : eps.episode_number}`}
                           </span>
                         </div>
                       ))
