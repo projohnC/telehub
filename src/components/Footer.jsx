@@ -56,6 +56,11 @@ export default function Footer() {
                 <p className="text-sm text-secondaryTextColor/60 lg:text-md leading-relaxed font-medium">
                   All content available on this platform is sourced from publicly accessible third-party services. {SITENAME} simply indexes and provides links to media files that are hosted externally, including Telegram and other platforms.
                 </p>
+                {/* Tags Section */}
+                <div className="text-[11px] text-secondaryTextColor/30 leading-relaxed font-normal pt-2 border-t border-white/5 w-full select-none">
+                  <span className="font-semibold text-secondaryTextColor/40">Tags: </span>
+                  hubstream, hubstream art, hubstream.site, hubstream site, hdmovies.in, hubstream in, hubstream south hindi dubbed, hubstream pro, hubstream apk, all hubstream, South movies, Hubstream.art, hubstream apk, hubstream app, hubstream movies, hubstream streaming, hubstream watch online, hubstream hd, hubstream premium, hubstream online streaming, hubstream fast streaming, movie streaming platform, best movie website, 720p movies, 1080p movies, full hd movies, free movie streaming, online movie streaming
+                </div>
               </div>
             </div>
 

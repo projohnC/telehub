@@ -1,9 +1,9 @@
 import {
-  AiOutlineFastBackward,
-  AiFillFastForward,
-  AiOutlineArrowRight,
-  AiOutlineArrowLeft,
-} from "react-icons/ai";
+  FaStepBackward,
+  FaStepForward,
+  FaArrowRight,
+  FaArrowLeft,
+} from "react-icons/fa";
 
 const range = (start, end) => {
   return [...Array(end - start).keys()].map((el) => el + start);
@@ -32,26 +32,14 @@ const PaginationItem = ({ page, currentPage, onPageChange, isDisabled }) => {
     <button
       className={
         page === Number(currentPage)
-          ? " border-none flex-grow max-w-fit text-md px-4 py-[0.2rem] bg-otherColor text-bgColor list-none rounded-full transition-all duration-300 ease-in-out hover:bg-secondaryTextColor hover:text-bgColor"
-          : " border-none text-secondaryTextColor max-w-fit text-md flex-grow px-4 py-[0.2rem] bg-btnColor list-none rounded-full transition-all duration-300 ease-in-out hover:bg-secondaryTextColor hover:text-bgColor"
+          ? "border-none w-10 h-10 flex items-center justify-center text-sm font-bold bg-[#E50914] text-white rounded-full transition-all duration-300 ease-in-out cursor-pointer hover:opacity-90 active:scale-95"
+          : "border-none w-10 h-10 flex items-center justify-center text-sm font-bold bg-[#1f1f1f] text-white/80 rounded-full transition-all duration-300 ease-in-out cursor-pointer hover:bg-white/10 active:scale-95"
       }
       onClick={() => onPageChange(page)}
     >
-      <span className="page-link">{page}</span>
+      {page}
     </button>
-  ) : (
-    <button
-      style={{ display: "none" }}
-      className={
-        page === Number(currentPage)
-          ? " border-none flex-grow max-w-[5rem] text-md px-4 py-[0.2rem] bg-otherColor text-bgColor list-none rounded-full transition-all duration-300 ease-in-out hover:bg-secondaryTextColor hover:text-bgColor"
-          : " border-none text-secondaryTextColor text-md flex-grow max-w-[5rem] px-4 py-[0.2rem] bg-btnColor list-none rounded-full transition-all duration-300 ease-in-out hover:bg-secondaryTextColor hover:text-bgColor"
-      }
-      onClick={() => onPageChange(page)}
-    >
-      <span className="page-link">{page}</span>
-    </button>
-  );
+  ) : null;
 };
 
 const Pagination = ({ currentPage, total, limit, onPageChange, pagesNum }) => {
@@ -65,13 +53,13 @@ const Pagination = ({ currentPage, total, limit, onPageChange, pagesNum }) => {
   return (
     <ul className="flex items-center gap-2 flex-wrap mt-6">
       <PaginationItem
-        page={<AiOutlineFastBackward className="text-xl" />}
+        page={<FaStepBackward className="text-xs" />}
         currentPage={Number(currentPage)}
         onPageChange={() => onPageChange(1)}
         isDisabled={isFirstPage}
       />
       <PaginationItem
-        page={<AiOutlineArrowLeft className="text-xl" />}
+        page={<FaArrowLeft className="text-xs" />}
         currentPage={Number(currentPage)}
         onPageChange={() => onPageChange(Number(currentPage) - 1)}
         isDisabled={isFirstPage}
@@ -85,13 +73,13 @@ const Pagination = ({ currentPage, total, limit, onPageChange, pagesNum }) => {
         />
       ))}
       <PaginationItem
-        page={<AiOutlineArrowRight className="text-xl" />}
+        page={<FaArrowRight className="text-xs" />}
         currentPage={Number(currentPage)}
         onPageChange={() => onPageChange(Number(currentPage) + 1)}
         isDisabled={isLastPage}
       />
       <PaginationItem
-        page={<AiFillFastForward className="text-xl" />}
+        page={<FaStepForward className="text-xs" />}
         currentPage={Number(currentPage)}
         onPageChange={() => onPageChange(pagesNum)}
         isDisabled={isLastPage}
