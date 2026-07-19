@@ -10,7 +10,14 @@ export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const BASE = import.meta.env.VITE_BASE_URL;
+  const rawBase = import.meta.env.VITE_BASE_URL || "";
+  const BASE = rawBase
+    ? (rawBase.startsWith("http://") || rawBase.startsWith("https://")
+      ? rawBase
+      : (rawBase === "0.0.0.0" || rawBase.includes("localhost") || rawBase.includes("127.0.0.1")
+        ? `http://${rawBase}`
+        : `https://${rawBase}`))
+    : window.location.origin;
 
   const playerRef = useRef(null);
   const location = useLocation();

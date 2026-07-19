@@ -10,7 +10,14 @@ const ActionPage = ({ actionType }) => {
   const movieData = location.state?.movieData;
   const btnType = location.state?.btnType || actionType;
 
-  const BASE = import.meta.env.VITE_BASE_URL;
+  const rawBase = import.meta.env.VITE_BASE_URL || "";
+  const BASE = rawBase
+    ? (rawBase.startsWith("http://") || rawBase.startsWith("https://")
+      ? rawBase
+      : (rawBase === "0.0.0.0" || rawBase.includes("localhost") || rawBase.includes("127.0.0.1")
+        ? `http://${rawBase}`
+        : `https://${rawBase}`))
+    : window.location.origin;
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
