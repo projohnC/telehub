@@ -18,6 +18,21 @@ import { LuLanguages } from "react-icons/lu";
 import DownloadButton from "./Buttons";
 import { MdOutlineHighQuality } from "react-icons/md";
 
+const parseEpisodeRange = (title, telegram) => {
+  let match = title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
+  if (!match && telegram && telegram[0]) {
+    match = telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
+  }
+  if (match) {
+    const endVal = parseInt(match[2], 10);
+    // Avoid false positives with common video resolutions (e.g. 720, 1080) or unreasonably large episode numbers for a range end
+    if ([360, 480, 540, 576, 720, 1080, 2160].includes(endVal) || endVal >= 100) {
+      return null;
+    }
+  }
+  return match;
+};
+
 export default function MoviesAndSeriesDetailsSections(props) {
   const [isInlinePlayerActive, setIsInlinePlayerActive] = useState(false);
   const [isSeasonsOpen, setIsSeasonspOpen] = useState(false);
@@ -243,10 +258,10 @@ export default function MoviesAndSeriesDetailsSections(props) {
                   <AnimatePresence>
                     {isSeasonsOpen && (
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="absolute top-12 left-0 right-0 z-50 max-h-[300px] overflow-y-auto py-2 text-secondaryTextColor text-md rounded-xl bg-btnColor border border-white/10 shadow-2xl backdrop-blur-xl"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="absolute top-12 left-0 right-0 z-50 max-h-[300px] overflow-y-auto py-2 text-secondaryTextColor text-md rounded-xl bg-btnColor border border-white/10 shadow-2xl backdrop-blur-xl"
                       >
                         {props.movieData.seasons
                           .sort((a, b) => a.season_number - b.season_number)
@@ -294,17 +309,11 @@ export default function MoviesAndSeriesDetailsSections(props) {
                         >
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white" : "text-white/90"} text-lg font-black mb-1`}>
                             {(() => {
-                              let hasRange = eps.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                              if (!hasRange && eps.telegram && eps.telegram[0]) {
-                                hasRange = eps.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                              }
+                              const hasRange = parseEpisodeRange(eps.title, eps.telegram);
 
                               if (hasRange) {
                                 const combinedList = props.episodes.filter(ep => {
-                                  let r = ep.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                                  if (!r && ep.telegram && ep.telegram[0]) {
-                                    r = ep.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                                  }
+                                  const r = parseEpisodeRange(ep.title, ep.telegram);
                                   return !!r;
                                 }).sort((a, b) => a.episode_number - b.episode_number);
                                 const seqIndex = combinedList.findIndex(ep => ep.episode_number === eps.episode_number) + 1;
@@ -325,10 +334,7 @@ export default function MoviesAndSeriesDetailsSections(props) {
                           </span>
                           <span className={`${props.episodeNumber === eps.episode_number ? "text-white/90" : "text-white/50"} text-[0.65rem] font-bold text-center w-full break-words leading-tight`}>
                             {(() => {
-                              let rangeMatch = eps.title?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                              if (!rangeMatch && eps.telegram && eps.telegram[0]) {
-                                rangeMatch = eps.telegram[0].name?.match(/e(\d+)(?:[-~\s]|to)+(\d+)/i);
-                              }
+                              const rangeMatch = parseEpisodeRange(eps.title, eps.telegram);
 
                               if (rangeMatch) {
                                 return `E${rangeMatch[1].padStart(2, '0')}-${rangeMatch[2].padStart(2, '0')}`;
