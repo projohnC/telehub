@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { PiTelegramLogo } from "react-icons/pi";
+import BannerAd from "./BannerAd";
 
 export default function Footer() {
   const TG_URL = import.meta.env.VITE_TG_URL;
@@ -21,6 +22,7 @@ export default function Footer() {
       <div className="w-11/12 max-w-7xl mx-auto flex flex-col items-start gap-8">
         {!isVerificationPage && (
           <>
+            <BannerAd />
             {/* Quick Menu Section */}
             <div className="flex flex-col items-start gap-4 w-full">
               <div className="inline-block">
