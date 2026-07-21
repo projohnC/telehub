@@ -39,6 +39,9 @@ const Tg = () => {
   };
 
   const handleButtonClick = async (originalUrl, quality) => {
+    // Open a blank tab synchronously to prevent Chrome's popup blocker
+    const newWindow = window.open("about:blank", "_blank");
+
     setLoading((prev) => ({ ...prev, [quality]: true }));
     let shortUrl = originalUrl;
     try {
@@ -47,7 +50,14 @@ const Tg = () => {
       console.error("Error processing URL:", error);
     } finally {
       setLoading((prev) => ({ ...prev, [quality]: false }));
-      window.open(shortUrl, "_blank", "noopener noreferrer");
+      if (newWindow) {
+        newWindow.location.href = shortUrl;
+        try {
+          newWindow.opener = null;
+        } catch (e) {
+          console.error("Error setting opener:", e);
+        }
+      }
     }
   };
 
