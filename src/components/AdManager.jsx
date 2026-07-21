@@ -30,7 +30,7 @@ const AdManager = () => {
                 const directCooldown = 2 * 60 * 1000; // 2 minutes
 
                 if (!lastDirectAdTime || currentTime - parseInt(lastDirectAdTime) >= directCooldown) {
-                    window.open(directAdLink, "_blank", "popup=yes,width=1200,height=800,noopener,noreferrer");
+                    window.open(directAdLink, "_blank");
                     localStorage.setItem("last_direct_ad_popup", currentTime.toString());
                     return; // Avoid triggering both at the same time if both are configured
                 }
@@ -57,7 +57,7 @@ const AdManager = () => {
                             }
                         }, 5000);
                     } else {
-                        window.open(popunderAdLink, "_blank", "popup=yes,width=1200,height=800,noopener,noreferrer");
+                        window.open(popunderAdLink, "_blank");
                     }
                     localStorage.setItem("last_popunder_ad_popup", currentTime.toString());
                 }

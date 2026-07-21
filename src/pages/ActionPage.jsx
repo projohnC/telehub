@@ -95,22 +95,11 @@ const ActionPage = ({ actionType }) => {
   };
 
   const handleButtonClick = async (id, name, quality) => {
-    // Open a blank tab synchronously to prevent Chrome's popup blocker
-    const newWindow = window.open("about:blank", "_blank");
-
     setLoading((prev) => ({ ...prev, [quality]: true }));
     const rawUrl = generateUrl(id, name);
     const shortUrl = await shortenUrl(rawUrl);
     setLoading((prev) => ({ ...prev, [quality]: false }));
-
-    if (newWindow) {
-      newWindow.location.href = shortUrl;
-      try {
-        newWindow.opener = null;
-      } catch (e) {
-        console.error("Error setting opener:", e);
-      }
-    }
+    window.open(shortUrl, "_blank", "noopener noreferrer");
   };
 
   const renderMovieButtons = () =>

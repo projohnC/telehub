@@ -44,11 +44,11 @@ export default function Anime() {
   return (
     <div>
       <SEO
-        title={`Watch Anime Online - ${SITENAME}`}
-        description={`Stream the latest Anime series and movies for free on ${SITENAME}. Explore a wide variety of animated content in high quality.`}
+        title={`${SITENAME} - Watch Anime Online in HD`}
+        description={`Hubstream offers a growing collection of anime series and movies in HD. Browse the latest releases, classic favorites, and trending titles with English subtitles and dubbed versions. Find action, fantasy, romance, comedy, mystery, horror, and adventure anime for every fan.`}
         name={SITENAME}
         type="text/html"
-        keywords="watch anime online, free anime streaming, latest anime episodes, hd anime"
+        keywords="hubstream, hubstream art, hubstream.site, hubstream site, hdmovies.in, hubstream in, hubstream south hindi dubbed, hubstream pro, hubstream apk, all hubstream, South movies, Hubstream.art, hubstream apk, hubstream app, hubstream movies, hubstream streaming, hubstream watch online, hubstream hd, hubstream premium, hubstream online streaming, hubstream fast streaming, movie streaming platform, best movie website, 720p movies, 1080p movies, full hd movies, free movie streaming, online movie streaming, fast anime streaming, watch anime online, free anime streaming, latest anime episodes, hd anime, online anime streaming, best anime streaming, anime watch online, anime streaming hd, best anime streaming, hubstream anime, hubstream anime site, hubstream anime watch online, hubstream anime streaming, anime streaming platform, watch anime online"
         link={`https://${SITENAME}.site`}
       />
       
