@@ -45,13 +45,10 @@ export default function MovieDetails() {
           tmdb_id: movieID,
           media_type: "movie",
           limit: 10,
-          is_anime: true,
         },
       })
       .then((response) => {
-        const rawSimilar = response.data.similar_media || [];
-        const animeSimilar = rawSimilar.filter((m) => m.is_anime);
-        setSimilarMovies(animeSimilar);
+        setSimilarMovies(response.data.similar_media);
         setIsSimilarLoading(false);
       })
       .catch((error) => {
@@ -59,14 +56,6 @@ export default function MovieDetails() {
         setIsSimilarLoading(false);
       });
   }, [movieID, BASE]);
-
-  if (!isDetailsLoading && (!movieDetail || !movieDetail.is_anime)) {
-    return (
-      <div className="flex items-center justify-center h-[60vh] text-white">
-        <p className="text-lg font-bold">This content is not available.</p>
-      </div>
-    );
-  }
 
   return (
     <div>

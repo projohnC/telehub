@@ -29,15 +29,12 @@ export default function SimilarMovies() {
         tmdb_id: movieID,
         media_type: "movie",
         limit: 20,
-        page: currentPage,
-        is_anime: true
+        page: currentPage
       }
     })
     .then(response => {
-      const rawSimilar = response.data.similar_media || [];
-      const animeSimilar = rawSimilar.filter((m) => m.is_anime);
-      setMovies(animeSimilar);
-      setMoviesDataForPageCount(response.data.total_count || animeSimilar.length);
+      setMovies(response.data.similar_media);
+      setMoviesDataForPageCount(response.data.total_count);
       setIsMoviesDataLoading(false); 
     })
     .catch(error => {

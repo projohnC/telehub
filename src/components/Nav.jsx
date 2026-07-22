@@ -47,11 +47,9 @@ export default function Nav() {
       }
       setIsLoading(true);
       try {
-        const response = await fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1&is_anime=true`);
+        const response = await fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1`);
         const search_data = await response.json();
-        const rawResults = search_data.results || [];
-        const animeResults = rawResults.filter((r) => r.is_anime);
-        setSearchResult(animeResults);
+        setSearchResult(search_data.results || []);
       } catch (error) {
         console.error("Search error:", error);
       } finally {
@@ -217,7 +215,9 @@ export default function Nav() {
                       key={result.tmdb_id}
                       to={
                         result.is_anime
-                          ? `/ani/${result.tmdb_id}`
+                          ? result.media_type === "movie"
+                            ? `/mov/${result.tmdb_id}`
+                            : `/ani/${result.tmdb_id}`
                           : result.media_type === "movie"
                           ? `/mov/${result.tmdb_id}`
                           : `/ser/${result.tmdb_id}`

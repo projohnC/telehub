@@ -29,14 +29,11 @@ export default function SimilarMovies() {
         media_type: "tvshow",
         limit: 20,
         page: currentPage,
-        is_anime: true,
       },
     })
     .then(response => {
-      const rawSimilar = response.data.similar_media || [];
-      const animeSimilar = rawSimilar.filter((t) => t.is_anime);
-      setMovies(animeSimilar);
-      setMoviesDataForPageCount(response.data.total_count || animeSimilar.length);
+      setMovies(response.data.similar_media);
+      setMoviesDataForPageCount(response.data.total_count);
       setIsMoviesDataLoading(false);
     })
     .catch(error => {

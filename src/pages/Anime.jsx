@@ -31,9 +31,8 @@ export default function Anime() {
     .then(response => {
       // Handle potential different response structures
       const data = response.data.anime || response.data.results || response.data.movies || response.data.tv_shows || [];
-      const animeData = data.filter((item) => item.is_anime);
-      setAnime(animeData);
-      setTotalCount(response.data.total_count || animeData.length);
+      setAnime(data);
+      setTotalCount(response.data.total_count || data.length);
       setIsLoading(false);
     })
     .catch(error => {

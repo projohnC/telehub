@@ -34,14 +34,6 @@ const ActionPage = ({ actionType }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const API_KEY = import.meta.env.VITE_API_KEY;
 
-  if (!movieData || !movieData.is_anime) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] text-slate-800 bg-[#eff3fb] font-sans">
-        <p className="text-lg font-bold">This content is not available.</p>
-      </div>
-    );
-  }
-
   const [selectedSeason, setSelectedSeason] = useState("");
   const [selectedEpisode, setSelectedEpisode] = useState("");
   const [selectedQuality, setSelectedQuality] = useState("");

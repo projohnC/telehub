@@ -33,7 +33,9 @@ const MovieCard = ({ movie }) => {
       <Link
         to={
           movie.is_anime
-            ? `/ani/${movie.tmdb_id}`
+            ? movie.media_type === "movie"
+              ? `/mov/${movie.tmdb_id}`
+              : `/ani/${movie.tmdb_id}`
             : movie.media_type === "movie"
             ? `/mov/${movie.tmdb_id}`
             : `/ser/${movie.tmdb_id}`
@@ -71,7 +73,9 @@ const MovieCard = ({ movie }) => {
           <Link
             to={
               movie.is_anime
-                ? `/ani/${movie.tmdb_id}`
+                ? movie.media_type === "movie"
+                  ? `/mov/${movie.tmdb_id}`
+                  : `/ani/${movie.tmdb_id}`
                 : movie.media_type === "movie"
                 ? `/mov/${movie.tmdb_id}`
                 : `/ser/${movie.tmdb_id}`

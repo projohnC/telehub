@@ -104,7 +104,9 @@ export default function HeroSlider({ movieData, isMovieDataLoading }) {
                           className="flex items-center gap-2 bg-white text-black font-bold text-xs py-2.5 px-8 rounded-full sm:text-sm transition-all duration-300 ease-in-out hover:scale-105"
                           to={
                             movie.is_anime
-                              ? `/ani/${movie.tmdb_id}`
+                              ? movie.media_type === "movie"
+                                ? `/mov/${movie.tmdb_id}`
+                                : `/ani/${movie.tmdb_id}`
                               : movie.media_type === "movie"
                               ? `/mov/${movie.tmdb_id}`
                               : `/ser/${movie.tmdb_id}`

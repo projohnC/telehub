@@ -59,13 +59,10 @@ export default function MovieDetails() {
           tmdb_id: seriesID,
           media_type: "tvshow",
           limit: 10,
-          is_anime: true,
         },
       })
       .then((response) => {
-        const rawSimilar = response.data.similar_media || [];
-        const animeSimilar = rawSimilar.filter((t) => t.is_anime);
-        setSimilarSeries(animeSimilar);
+        setSimilarSeries(response.data.similar_media);
         setIsSimilarLoading(false);
       })
       .catch((error) => {
@@ -93,14 +90,6 @@ export default function MovieDetails() {
         setIsEpisodesLoading(false);
       });
   }, [seasonNumber, seriesID, BASE]);
-
-  if (!isDetailsLoading && (!seriesDetail || !seriesDetail.is_anime)) {
-    return (
-      <div className="flex items-center justify-center h-[60vh] text-white">
-        <p className="text-lg font-bold">This content is not available.</p>
-      </div>
-    );
-  }
 
   return (
     <div>
