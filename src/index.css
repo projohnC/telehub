@@ -25,13 +25,6 @@ body {
   --plyr-color-main: #E50914;
 }
 
-/* Ensure inline plyr player fills its aspect-video container */
-.aspect-video .plyr,
-.aspect-video .plyr-react {
-  width: 100% !important;
-  height: 100% !important;
-}
-
 /* Custom Red Overlaid Play Button */
 .plyr--video .plyr__control--overlaid {
   background: rgba(229, 9, 20, 0.8) !important;

@@ -47,9 +47,11 @@ export default function Nav() {
       }
       setIsLoading(true);
       try {
-        const response = await fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1`);
+        const response = await fetch(`${BASE}/api/search/?query=${debouncedVal}&page=1&is_anime=true`);
         const search_data = await response.json();
-        setSearchResult(search_data.results || []);
+        const rawResults = search_data.results || [];
+        const animeResults = rawResults.filter((r) => r.is_anime);
+        setSearchResult(animeResults);
       } catch (error) {
         console.error("Search error:", error);
       } finally {

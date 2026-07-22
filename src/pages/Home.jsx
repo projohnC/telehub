@@ -32,10 +32,13 @@ export default function Home() {
           sort_by: "rating:desc",
           page: 1,
           page_size: 10,
+          is_anime: true,
         },
       })
       .then((response) => {
-        setHeroPopularMovies(response.data.movies);
+        const rawMovies = response.data.movies || [];
+        const animeMovies = rawMovies.filter((m) => m.is_anime);
+        setHeroPopularMovies(animeMovies);
         setIsHeroLoading(false);
       })
       .catch((error) => {
@@ -52,11 +55,14 @@ export default function Home() {
           sort_by: "updated_on:desc",
           page: currentPage,
           page_size: 20,
+          is_anime: true,
         },
       })
       .then((response) => {
-        setTrendingMovies(response.data.movies);
-        setTotalMoviesCount(response.data.total_count || 0);
+        const rawMovies = response.data.movies || [];
+        const animeMovies = rawMovies.filter((m) => m.is_anime);
+        setTrendingMovies(animeMovies);
+        setTotalMoviesCount(response.data.total_count || animeMovies.length);
         setIsTrendingMoviesLoading(false);
       })
       .catch((error) => {
@@ -73,11 +79,14 @@ export default function Home() {
           sort_by: "updated_on:desc",
           page: currentPage,
           page_size: 20,
+          is_anime: true,
         },
       })
       .then((response) => {
-        setTrendingTv(response.data.tv_shows);
-        setTotalTvShowsCount(response.data.total_count || 0);
+        const rawTv = response.data.tv_shows || [];
+        const animeTv = rawTv.filter((t) => t.is_anime);
+        setTrendingTv(animeTv);
+        setTotalTvShowsCount(response.data.total_count || animeTv.length);
         setIsTrendingTvLoading(false);
       })
       .catch((error) => {
@@ -109,8 +118,8 @@ export default function Home() {
       <ToastContainer style={{ fontSize: "0.8rem" }} />
       {/* SEO SECTION */}
       <SEO
-        title={`${SITENAME} Official - Watch Online Movies Webseries & Anime`}
-        description={`Discover a world of entertainment where every show, movie, and exclusive content takes you on a journey beyond the screen. ${SITENAME} offers endless options for every mood, helping you relax, escape, and imagine more. Stream your favorites, dream big, and repeat the experience, only with ${SITENAME}.`}
+        title={`${SITENAME} Official - Watch Anime Movies & Series Online`}
+        description={`Discover a world of anime entertainment where every series, movie, and exclusive animated content takes you on a journey. ${SITENAME} offers endless anime options for every mood, helping you relax, escape, and repeat. Stream your favorite anime in HD, only with ${SITENAME}.`}
         name={SITENAME}
         type="text/html"
         keywords="watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"

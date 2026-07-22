@@ -16,10 +16,10 @@ const Tg = () => {
 
   const [loading, setLoading] = useState({});
 
-  if (!movieData) {
+  if (!movieData || !movieData.is_anime) {
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        <p>No movie data found. Please go back.</p>
+      <div className="flex items-center justify-center h-screen text-slate-800 bg-[#eff3fb]">
+        <p className="text-lg font-bold">This content is not available.</p>
       </div>
     );
   }

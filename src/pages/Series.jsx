@@ -27,12 +27,15 @@ export default function Series() {
       params: {
         sort_by: `${seriesFilter}:desc`,
         page: currentPage,
-        page_size: 20
+        page_size: 20,
+        is_anime: true
       }
     })
     .then(response => {
-      setSeries(response.data.tv_shows);
-      setSeriesDataForPageCount(response.data.total_count);
+      const rawTv = response.data.tv_shows || [];
+      const animeTv = rawTv.filter((t) => t.is_anime);
+      setSeries(animeTv);
+      setSeriesDataForPageCount(response.data.total_count || animeTv.length);
       setIsSeriesDataLoading(false); 
     })
     .catch(error => {
@@ -45,8 +48,8 @@ export default function Series() {
     <div>
       {/* SEO SECTION */}
       <SEO
-        title={`${SITENAME} - Watch Latest Web Series & TV Shows in HD`}
-        description={`Hubstream brings you a huge collection of web series and TV shows in HD. Browse the latest OTT releases, popular Netflix series, Prime Video originals, Disney+ shows, Korean dramas, anime, and Hindi-dubbed series. Find trending episodes and complete seasons across multiple genres.`}
+        title={`${SITENAME} - Watch Latest Anime Series & TV Shows in HD`}
+        description={`Discover a huge collection of anime series, web series, and TV shows in HD on ${SITENAME}. Browse trending releases, popular dubbed & subbed anime shows, and complete seasons across multiple genres.`}
         name={SITENAME}
         type="text/html"
         keywords="hubstream, hubstream art, hubstream.site, hubstream site, hdmovies.in, hubstream in, hubstream south hindi dubbed, hubstream pro, hubstream apk, all hubstream, South movies, Hubstream.art, hubstream apk, hubstream app, hubstream movies, hubstream streaming, hubstream watch online, hubstream hd, hubstream premium, hubstream online streaming, hubstream fast streaming, movie streaming platform, best movie website, 720p movies, 1080p movies, full hd movies, free movie streaming, online movie streaming, watch movies online, watch hd movies, watch full movies, streaming movies online, free streaming movie, watch movies free, watch hd movies online, watch series online, watch hd series free, free tv series, free movies online, tv online, tv links, tv links movies, free tv shows, watch tv shows online, watch tv shows online free, free hd movies, New Movie Releases, Top Movies of the Year, Watch Movies Online, Streaming Services, Movie Reviews, Upcoming Films, Best Movie Scenes, Classic Movies, HD Movie Streaming, Film Trailers, Action Movies, Drama Films, Comedy Movies, Sci-Fi Films, Horror Movie Picks, Family-Friendly Movies, Award-Winning Films, Movie Recommendations, Cinematic Experiences, Behind-the-Scenes, Director Spotlights, Actor Interviews, Film Festivals, Cult Classics, Top Box Office Hits, Celebrity News, Movie Soundtracks, Oscar-Winning Movies, Movie Trivia, Exclusive Film Content, Best Cinematography, Must-Watch Movies, Film Industry News, Filmmaking Tips, Top Movie Blogs, Latest Movie Gossip, Interactive Movie Quizzes, Red Carpet Moments, IMDb Ratings, Movie Fan Communities, fmovies, fmovies.to, fmovies to, fmovies is, fmovie, free movies, online movie, movie online, free movies online, watch movies online free, free hd movies, watch movies online"
