@@ -1,26 +1,34 @@
 // src/components/AdManager.jsx
 import { useEffect, useRef } from "react";
 
-const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "https://forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
+// Ad-network script (Adsterra/PropellerAds-style). Injected as <script>.
+const POPUNDER_SCRIPT =
+  import.meta.env.VITE_POPUNDER_ADS ||
+  "//forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
+
+// Optional: a real landing-page URL you open yourself (manual popunder).
+// Leave empty if you're only using the network script above.
+const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "";
+
+// Optional: direct-link URL for click-triggered opens.
 const DIRECT_LINK_URL = import.meta.env.VITE_DIRECT_LINK_URL || "";
 
-const COOLDOWN_MS = 60 * 1000;         // 1 popunder per minute per user
-const MIN_CLICK_GAP_MS = 800;          // debounce accidental double clicks
+const COOLDOWN_MS = 60 * 1000;
+const MIN_CLICK_GAP_MS = 800;
 const STORAGE_KEY = "hs_pop_last";
 
-function now() { return Date.now(); }
-
-function getLastPop() {
+const now = () => Date.now();
+const getLastPop = () => {
   try { return parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10) || 0; }
   catch { return 0; }
-}
-function setLastPop(t) {
+};
+const setLastPop = (t) => {
   try { localStorage.setItem(STORAGE_KEY, String(t)); } catch {}
-}
+};
 
+// Reject anything that isn't a genuine primary click on a safe element.
 function isRealUserClick(e) {
-  if (!e.isTrusted) return false;
-  if (e.button !== 0) return false;                 // left click only
+  if (!e.isTrusted || e.button !== 0) return false;
   if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return false;
   const t = e.target;
   if (!(t instanceof Element)) return false;
@@ -29,36 +37,30 @@ function isRealUserClick(e) {
   return true;
 }
 
-/**
- * HDhub4u-style popunder using the tab-swap trick.
- * - Opens a new tab to your site URL.
- * - Redirects the CURRENT tab to the ad URL.
- * - Immediately swaps: current tab back to your site, new tab focuses ad.
- * Effect: user stays on your site, ad ends up in a background tab that
- * keeps running until they close it.
- */
-function firePopunder(adUrl) {
-  if (!adUrl) return false;
-
+// Guard: only accept real http(s) landing pages, never a .js asset.
+function isValidLandingUrl(url) {
   try {
-    const currentHref = window.location.href;
-    // Open a blank tab we control
-    const newTab = window.open("about:blank", "_blank");
-    if (!newTab) return false; // popup blocked
+    const u = new URL(url, window.location.origin);
+    if (!/^https?:$/.test(u.protocol)) return false;
+    if (/\.js(\?|$)/i.test(u.pathname)) return false;
+    return true;
+  } catch { return false; }
+}
 
-    // Put OUR site into the new tab
-    newTab.location.href = currentHref;
-
-    // Send THIS tab to the ad, then jump back — most browsers keep the
-    // ad tab in the background because focus never moved to it.
+// Tab-swap popunder: ad ends up in a background tab, user stays on your site.
+function firePopunder(adUrl) {
+  if (!isValidLandingUrl(adUrl)) {
+    console.warn("[AdManager] VITE_POPUNDER_URL must be a landing page, not a script:", adUrl);
+    return false;
+  }
+  try {
+    const here = window.location.href;
+    const decoy = window.open("about:blank", "_blank");
+    if (!decoy) return false; // popup blocked
+    decoy.location.href = here;
     const adWin = window.open(adUrl, "_blank");
-    if (adWin) {
-      try { adWin.blur(); } catch {}
-      try { window.focus(); } catch {}
-    } else {
-      // Fallback: swap via location if second open is blocked
-      window.location.href = adUrl;
-    }
+    if (adWin) { try { adWin.blur(); } catch {} try { window.focus(); } catch {} }
+    else { window.location.href = adUrl; }
     return true;
   } catch (err) {
     console.warn("[AdManager] popunder failed:", err);
@@ -67,7 +69,7 @@ function firePopunder(adUrl) {
 }
 
 function fireDirectLink(url) {
-  if (!url) return false;
+  if (!isValidLandingUrl(url)) return false;
   try {
     const w = window.open(url, "_blank", "noopener,noreferrer");
     if (w) { try { w.blur(); } catch {} try { window.focus(); } catch {} }
@@ -79,13 +81,25 @@ export default function AdManager() {
   const lastClickAt = useRef(0);
   const handledEvents = useRef(new WeakSet());
 
+  // 1) Inject the network's popunder script once. The network handles firing.
+  useEffect(() => {
+    if (!POPUNDER_SCRIPT) return;
+    const src = POPUNDER_SCRIPT.startsWith("//") ? `https:${POPUNDER_SCRIPT}` : POPUNDER_SCRIPT;
+    if (document.querySelector(`script[data-ad-popunder="1"]`)) return;
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    s.dataset.adPopunder = "1";
+    s.onerror = () => console.warn("[AdManager] popunder script blocked (ad-blocker or CSP):", src);
+    document.body.appendChild(s);
+    return () => { s.remove(); };
+  }, []);
+
+  // 2) Manual popunder / direct-link on real user clicks (only if URLs are set).
   useEffect(() => {
     if (!POPUNDER_URL && !DIRECT_LINK_URL) return;
-
     const onClick = (e) => {
-      if (handledEvents.current.has(e)) return;
-      if (!isRealUserClick(e)) return;
-
+      if (handledEvents.current.has(e) || !isRealUserClick(e)) return;
       const t = now();
       if (t - lastClickAt.current < MIN_CLICK_GAP_MS) return;
       lastClickAt.current = t;
@@ -97,13 +111,10 @@ export default function AdManager() {
           return;
         }
       }
-      if (DIRECT_LINK_URL) {
-        if (fireDirectLink(DIRECT_LINK_URL)) {
-          handledEvents.current.add(e);
-        }
+      if (DIRECT_LINK_URL && fireDirectLink(DIRECT_LINK_URL)) {
+        handledEvents.current.add(e);
       }
     };
-
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
   }, []);
