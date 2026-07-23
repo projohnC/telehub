@@ -2,41 +2,6 @@ import { useEffect } from "react";
 
 const AdManager = () => {
     useEffect(() => {
-        // Popunder-style opener: open about:blank first, then navigate that
-        // new tab to the ad URL. This lets the original tab keep rendering
-        // without getting stuck while the ad tab loads in parallel.
-        const openAdTab = (url) => {
-            try {
-                const adTab = window.open("about:blank", "_blank");
-                if (!adTab) {
-                    // Popup blocked — fall back to a normal new-tab open.
-                    window.open(url, "_blank", "noopener,noreferrer");
-                    return;
-                }
-
-                // Give the browser a tick to finish creating the blank tab,
-                // then hand it the real ad URL. Doing this asynchronously
-                // prevents the current tab from blocking on the navigation.
-                setTimeout(() => {
-                    try {
-                        adTab.location.href = url;
-                    } catch {
-                        // If we lose access (cross-origin), just retry via open.
-                        window.open(url, "_blank", "noopener,noreferrer");
-                    }
-                }, 0);
-
-                // Keep focus on the original tab so the user isn't yanked away.
-                try {
-                    window.focus();
-                } catch {
-                    /* ignore */
-                }
-            } catch {
-                window.open(url, "_blank", "noopener,noreferrer");
-            }
-        };
-
         const handleGlobalClick = (e) => {
             // Ignore clicks inside AdBlockDetector and DomainNotice modals
             if (e.target.closest(".adblock-detector-modal") || e.target.closest(".domain-notice-modal")) {
@@ -65,7 +30,7 @@ const AdManager = () => {
                 const directCooldown = 2 * 60 * 1000; // 2 minutes
 
                 if (!lastDirectAdTime || currentTime - parseInt(lastDirectAdTime) >= directCooldown) {
-                    openAdTab(directAdLink);
+                    window.open(directAdLink, "_blank");
                     localStorage.setItem("last_direct_ad_popup", currentTime.toString());
                     return; // Avoid triggering both at the same time if both are configured
                 }
@@ -92,7 +57,7 @@ const AdManager = () => {
                             }
                         }, 5000);
                     } else {
-                        openAdTab(popunderAdLink);
+                        window.open(popunderAdLink, "_blank");
                     }
                     localStorage.setItem("last_popunder_ad_popup", currentTime.toString());
                 }
@@ -112,3 +77,4 @@ const AdManager = () => {
 };
 
 export default AdManager;
+
