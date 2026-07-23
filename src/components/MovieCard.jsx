@@ -7,6 +7,8 @@ import { PiStarFill } from "react-icons/pi";
 
 import { BsPlayFill } from "react-icons/bs";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
+import { getYear } from "../utils/getYear";
+import { getMediaUrl } from "../utils/slug";
 
 const MovieCard = ({ movie }) => {
   const [showPlayBtn, setShowPlayBtn] = useState(false);
@@ -22,6 +24,9 @@ const MovieCard = ({ movie }) => {
     setShowPlayBtn(false);
   };
 
+  const year = getYear(movie);
+  const href = getMediaUrl(movie);
+
   return (
     <div className="relative">
       <div className="absolute top-2 left-2 z-10">
@@ -30,18 +35,7 @@ const MovieCard = ({ movie }) => {
         </div>
       </div>
 
-      <Link
-        to={
-          movie.is_anime
-            ? movie.media_type === "movie"
-              ? `/mov/${movie.tmdb_id}`
-              : `/ani/${movie.tmdb_id}`
-            : movie.media_type === "movie"
-            ? `/mov/${movie.tmdb_id}`
-            : `/ser/${movie.tmdb_id}`
-        }
-        className="rounded-t-2xl"
-      >
+      <Link to={href} className="rounded-t-2xl">
         <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl overflow-hidden">
           <LazyLoadImage
             src={movie.poster ? movie.poster : posterPlaceholder}
@@ -58,7 +52,7 @@ const MovieCard = ({ movie }) => {
       <div className="text-primaryTextColor mt-2">
         <p className="line-clamp-1 text-xs md:text-sm font-semibold">{movie.title}</p>
         <div className="flex items-center justify-between text-secondaryTextColor mt-1 text-[0.65rem]">
-          {movie.release_year && <p>{movie.release_year}</p>}
+          {year && <p>{year}</p>}
           {movie.rating && (
             <div className="flex items-center gap-1 text-yellow-500">
               <PiStarFill />
@@ -71,15 +65,7 @@ const MovieCard = ({ movie }) => {
       <AnimatePresence>
         {openId === movie.tmdb_id && showPlayBtn && (
           <Link
-            to={
-              movie.is_anime
-                ? movie.media_type === "movie"
-                  ? `/mov/${movie.tmdb_id}`
-                  : `/ani/${movie.tmdb_id}`
-                : movie.media_type === "movie"
-                ? `/mov/${movie.tmdb_id}`
-                : `/ser/${movie.tmdb_id}`
-            }
+            to={href}
             onMouseEnter={showPlay}
             onMouseLeave={hidePlay}
             className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primaryBtn sm:block"
@@ -88,10 +74,7 @@ const MovieCard = ({ movie }) => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: -20 }}
               exit={{ opacity: 0, y: -40 }}
-              transition={{
-                type: "tween",
-                duration: 0.3,
-              }}
+              transition={{ type: "tween", duration: 0.3 }}
               className="text-3xl p-1 rounded-full border-4 border-primaryBtn"
             >
               <BsPlayFill />
@@ -99,7 +82,7 @@ const MovieCard = ({ movie }) => {
           </Link>
         )}
       </AnimatePresence>
-    </div >
+    </div>
   );
 };
 
