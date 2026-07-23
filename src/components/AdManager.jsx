@@ -1,123 +1,114 @@
-// src/components/AdManager.jsx
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
-// Ad-network script (Adsterra/PropellerAds-style). Injected as <script>.
-const POPUNDER_SCRIPT =
-  import.meta.env.VITE_POPUNDER_ADS ||
-  "";
+const AdManager = () => {
+    useEffect(() => {
+        // Popunder-style opener: open about:blank first, then navigate that
+        // new tab to the ad URL. This lets the original tab keep rendering
+        // without getting stuck while the ad tab loads in parallel.
+        const openAdTab = (url) => {
+            try {
+                const adTab = window.open("about:blank", "_blank");
+                if (!adTab) {
+                    // Popup blocked — fall back to a normal new-tab open.
+                    window.open(url, "_blank", "noopener,noreferrer");
+                    return;
+                }
 
-// Optional: a real landing-page URL you open yourself (manual popunder).
-// Leave empty if you're only using the network script above.
-const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "";
+                // Give the browser a tick to finish creating the blank tab,
+                // then hand it the real ad URL. Doing this asynchronously
+                // prevents the current tab from blocking on the navigation.
+                setTimeout(() => {
+                    try {
+                        adTab.location.href = url;
+                    } catch {
+                        // If we lose access (cross-origin), just retry via open.
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }
+                }, 0);
 
-// Optional: direct-link URL for click-triggered opens.
-const DIRECT_LINK_URL = import.meta.env.VITE_DIRECT_LINK_URL || "https://omg10.com/4/11223473";
+                // Keep focus on the original tab so the user isn't yanked away.
+                try {
+                    window.focus();
+                } catch {
+                    /* ignore */
+                }
+            } catch {
+                window.open(url, "_blank", "noopener,noreferrer");
+            }
+        };
 
-const COOLDOWN_MS = 60 * 1000;
-const MIN_CLICK_GAP_MS = 800;
-const STORAGE_KEY = "hs_pop_last";
+        const handleGlobalClick = (e) => {
+            // Ignore clicks inside AdBlockDetector and DomainNotice modals
+            if (e.target.closest(".adblock-detector-modal") || e.target.closest(".domain-notice-modal")) {
+                return;
+            }
 
-const now = () => Date.now();
-const getLastPop = () => {
-  try { return parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10) || 0; }
-  catch { return 0; }
+            // Ignore clicks on action/verification pages (/tg, /dow, /plyr)
+            const isActionPage = ["/tg", "/dow", "/plyr"].includes(window.location.pathname);
+            if (isActionPage) {
+                return;
+            }
+
+            // Check if the clicked element is a button, link, or part of one
+            const target = e.target.closest("button, a, [role='button']");
+
+            // If the click is not on a relevant element, don't trigger ad
+            if (!target) return;
+
+            const directAdLink = import.meta.env.VITE_DIRECT_LINK_ADS;
+            const popunderAdLink = import.meta.env.VITE_POPUNDER_ADS;
+            const currentTime = Date.now();
+
+            // Handle Direct Link Ads (2-minute cooldown)
+            if (directAdLink) {
+                const lastDirectAdTime = localStorage.getItem("last_direct_ad_popup");
+                const directCooldown = 2 * 60 * 1000; // 2 minutes
+
+                if (!lastDirectAdTime || currentTime - parseInt(lastDirectAdTime) >= directCooldown) {
+                    openAdTab(directAdLink);
+                    localStorage.setItem("last_direct_ad_popup", currentTime.toString());
+                    return; // Avoid triggering both at the same time if both are configured
+                }
+            }
+
+            // Handle Popunder Ads (2-minute cooldown)
+            if (popunderAdLink) {
+                const lastPopunderTime = localStorage.getItem("last_popunder_ad_popup");
+                const popunderCooldown = 1 * 60 * 1000; // 1 minutes
+
+                if (!lastPopunderTime || currentTime - parseInt(lastPopunderTime) >= popunderCooldown) {
+                    if (popunderAdLink.endsWith(".js")) {
+                        // Inject script instead of window.open for script-based ads
+                        const script = document.createElement("script");
+                        script.src = popunderAdLink;
+                        script.async = true;
+                        document.body.appendChild(script);
+
+                        // Optional: remove the script after a delay to keep DOM clean
+                        // since these scripts usually execute once and trigger the popunder
+                        setTimeout(() => {
+                            if (script.parentNode) {
+                                script.parentNode.removeChild(script);
+                            }
+                        }, 5000);
+                    } else {
+                        openAdTab(popunderAdLink);
+                    }
+                    localStorage.setItem("last_popunder_ad_popup", currentTime.toString());
+                }
+            }
+        };
+
+        // Use capture: true to ensure the listener triggers even if propagation is stopped
+        window.addEventListener("click", handleGlobalClick, true);
+
+        // Cleanup listener on unmount
+        return () => {
+            window.removeEventListener("click", handleGlobalClick, true);
+        };
+    }, []);
+
+    return null; // This component doesn't render anything
 };
-const setLastPop = (t) => {
-  try { localStorage.setItem(STORAGE_KEY, String(t)); } catch {}
-};
 
-// Reject anything that isn't a genuine primary click on a safe element.
-function isRealUserClick(e) {
-  if (!e.isTrusted || e.button !== 0) return false;
-  if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return false;
-  const t = e.target;
-  if (!(t instanceof Element)) return false;
-  if (t.closest("[data-no-ad]")) return false;
-  if (t.closest("input, textarea, select, video, audio, [contenteditable='true']")) return false;
-  return true;
-}
-
-// Guard: only accept real http(s) landing pages, never a .js asset.
-function isValidLandingUrl(url) {
-  try {
-    const u = new URL(url, window.location.origin);
-    if (!/^https?:$/.test(u.protocol)) return false;
-    if (/\.js(\?|$)/i.test(u.pathname)) return false;
-    return true;
-  } catch { return false; }
-}
-
-// Tab-swap popunder: ad ends up in a background tab, user stays on your site.
-function firePopunder(adUrl) {
-  if (!isValidLandingUrl(adUrl)) {
-    console.warn("[AdManager] VITE_POPUNDER_URL must be a landing page, not a script:", adUrl);
-    return false;
-  }
-  try {
-    const here = window.location.href;
-    const decoy = window.open("about:blank", "_blank");
-    if (!decoy) return false; // popup blocked
-    decoy.location.href = here;
-    const adWin = window.open(adUrl, "_blank");
-    if (adWin) { try { adWin.blur(); } catch {} try { window.focus(); } catch {} }
-    else { window.location.href = adUrl; }
-    return true;
-  } catch (err) {
-    console.warn("[AdManager] popunder failed:", err);
-    return false;
-  }
-}
-
-function fireDirectLink(url) {
-  if (!isValidLandingUrl(url)) return false;
-  try {
-    const w = window.open(url, "_blank", "noopener,noreferrer");
-    if (w) { try { w.blur(); } catch {} try { window.focus(); } catch {} }
-    return !!w;
-  } catch { return false; }
-}
-
-export default function AdManager() {
-  const lastClickAt = useRef(0);
-  const handledEvents = useRef(new WeakSet());
-
-  // 1) Inject the network's popunder script once. The network handles firing.
-  useEffect(() => {
-    if (!POPUNDER_SCRIPT) return;
-    const src = POPUNDER_SCRIPT.startsWith("//") ? `https:${POPUNDER_SCRIPT}` : POPUNDER_SCRIPT;
-    if (document.querySelector(`script[data-ad-popunder="1"]`)) return;
-    const s = document.createElement("script");
-    s.src = src;
-    s.async = true;
-    s.dataset.adPopunder = "1";
-    s.onerror = () => console.warn("[AdManager] popunder script blocked (ad-blocker or CSP):", src);
-    document.body.appendChild(s);
-    return () => { s.remove(); };
-  }, []);
-
-  // 2) Manual popunder / direct-link on real user clicks (only if URLs are set).
-  useEffect(() => {
-    if (!POPUNDER_URL && !DIRECT_LINK_URL) return;
-    const onClick = (e) => {
-      if (handledEvents.current.has(e) || !isRealUserClick(e)) return;
-      const t = now();
-      if (t - lastClickAt.current < MIN_CLICK_GAP_MS) return;
-      lastClickAt.current = t;
-
-      if (POPUNDER_URL && t - getLastPop() >= COOLDOWN_MS) {
-        if (firePopunder(POPUNDER_URL)) {
-          setLastPop(t);
-          handledEvents.current.add(e);
-          return;
-        }
-      }
-      if (DIRECT_LINK_URL && fireDirectLink(DIRECT_LINK_URL)) {
-        handledEvents.current.add(e);
-      }
-    };
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, []);
-
-  return null;
-}
+export default AdManager;
