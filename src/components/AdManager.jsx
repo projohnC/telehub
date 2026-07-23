@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 // Ad-network script (Adsterra/PropellerAds-style). Injected as <script>.
 const POPUNDER_SCRIPT =
   import.meta.env.VITE_POPUNDER_ADS ||
-  "//forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
+  "https://forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
 
 // Optional: a real landing-page URL you open yourself (manual popunder).
 // Leave empty if you're only using the network script above.
