@@ -1,7 +1,7 @@
 // src/components/AdManager.jsx
 import { useEffect, useRef } from "react";
 
-const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "";
+const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "https://forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
 const DIRECT_LINK_URL = import.meta.env.VITE_DIRECT_LINK_URL || "";
 
 const COOLDOWN_MS = 60 * 1000;         // 1 popunder per minute per user
