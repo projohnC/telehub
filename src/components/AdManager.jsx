@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 // Ad-network script (Adsterra/PropellerAds-style). Injected as <script>.
 const POPUNDER_SCRIPT =
   import.meta.env.VITE_POPUNDER_ADS ||
-  "https://forbesresistread.com/3b/68/10/3b6810688b6e1daed598d22eab7e84d5.js";
+  "";
 
 // Optional: a real landing-page URL you open yourself (manual popunder).
 // Leave empty if you're only using the network script above.
 const POPUNDER_URL = import.meta.env.VITE_POPUNDER_URL || "";
 
 // Optional: direct-link URL for click-triggered opens.
-const DIRECT_LINK_URL = import.meta.env.VITE_DIRECT_LINK_URL || "";
+const DIRECT_LINK_URL = import.meta.env.VITE_DIRECT_LINK_URL || "https://omg10.com/4/11223473";
 
 const COOLDOWN_MS = 60 * 1000;
 const MIN_CLICK_GAP_MS = 800;
