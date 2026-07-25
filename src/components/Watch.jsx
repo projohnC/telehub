@@ -3,8 +3,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
-import axios from "axios";
+
+const resolveVideoType = (name = "") => {
+  const lower = name.toLowerCase();
+
+  if (lower.endsWith(".m3u8")) return "application/x-mpegURL";
+  if (lower.endsWith(".webm")) return "video/webm";
+  if (lower.endsWith(".ogg")) return "video/ogg";
+  return "video/mp4";
+};
+
+const buildSource = (BASE, q) => {
+  const parsedQuality = Number.parseInt(String(q?.quality ?? "").replace(/\D/g, ""), 10);
+
+  return {
+    src: `${BASE}/dl/${encodeURIComponent(q?.id ?? "")}/${encodeURIComponent(
+      q?.name ?? ""
+    )}`,
+    type: resolveVideoType(q?.name),
+    ...(Number.isFinite(parsedQuality) ? { size: parsedQuality } : {}),
+  };
+};
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
@@ -13,7 +32,6 @@ export default function WatchTrailer(props) {
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,11 +43,7 @@ export default function WatchTrailer(props) {
           let selectedPoster = "";
 
           if (props.popUpType === "movie") {
-            videoSources = props.id.telegram.map((q) => ({
-              src: `${BASE}/dl/${q.id}/${q.name}`,
-              type: "video/mp4",
-              size: parseInt(q.quality.replace("p", ""), 10),
-            }));
+            videoSources = (props.id.telegram ?? []).map((q) => buildSource(BASE, q));
             selectedPoster = props.id.backdrop;
           } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
@@ -42,11 +56,7 @@ export default function WatchTrailer(props) {
               );
 
               if (episode) {
-                videoSources = episode.telegram.map((q) => ({
-                  src: `${BASE}/dl/${q.id}/${q.name}`,
-                  type: "video/mp4",
-                  size: parseInt(q.quality.replace("p", ""), 10),
-                }));
+                videoSources = (episode.telegram ?? []).map((q) => buildSource(BASE, q));
                 selectedPoster = episode.episode_backdrop;
               }
             }
@@ -89,10 +99,12 @@ export default function WatchTrailer(props) {
   const plyrProps = {
     source: {
       type: "video",
-      sources: sources,
+      sources,
     },
     options: {
-      poster: poster,
+      poster,
+      autoplay: false,
+      playsinline: true,
       settings: ["captions", "quality", "speed"],
       controls: [
         "play-large",
@@ -174,9 +186,20 @@ export default function WatchTrailer(props) {
             animate={{ scale: 1 }}
             exit={{ scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+            className="netflix-player-shell w-[94vw] max-w-6xl rounded-xl overflow-hidden shadow-2xl relative"
           >
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            {sources.length > 0 ? (
+              <Plyr
+                ref={playerRef}
+                {...plyrProps}
+                id="player"
+                className="netflix-player"
+              />
+            ) : (
+              <div className="aspect-video w-full flex items-center justify-center text-zinc-300 text-sm sm:text-base px-6 text-center">
+                Video source unavailable for this title right now.
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
