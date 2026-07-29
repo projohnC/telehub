@@ -185,7 +185,7 @@ export default function WatchTrailer(props) {
     source: {
       type: "video",
       sources,
-      tracks, // <-- Plyr enables the CC button when tracks are present
+      ...(tracks.length > 0 ? { tracks } : {}),
     },
     options: {
       poster,
@@ -246,7 +246,7 @@ export default function WatchTrailer(props) {
   // captions menu is rebuilt with the newly-loaded <track>.
   const playerKey = `${subQuery?.tmdbId || "x"}-${subQuery?.type || "x"}-${
     subQuery?.season ?? "x"
-  }-${subQuery?.episode ?? "x"}-${tracks.length}`;
+  }-${subQuery?.episode ?? "x"}`;
 
   const SubtitleBar = () => {
     // Only hide the bar for content that has no subtitle support at all
