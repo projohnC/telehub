@@ -1,90 +1,126 @@
-// Subtitle (caption) helpers: SRT -> WebVTT conversion and track building.
+// Subtitle helpers: IMDb lookup, OpenSubtitles listing, VTT parsing & storage.
 
-const TIME_RE = /(\d{1,2}:\d{2}:\d{2})[,.](\d{1,3})/g;
+const SERIES_QIDS = ["tvSeries", "tvMiniSeries", "tvSpecial", "tvShort"];
 
-/** Convert an SRT string to a valid WebVTT string. */
-export function srtToVtt(srtText) {
-  const body = String(srtText)
-    .replace(/\r\n|\r/g, "\n")
-    .replace(/^\uFEFF/, "")
-    .replace(TIME_RE, (_m, hms, ms) => `${hms}.${ms.padEnd(3, "0")}`);
+export const isSeriesItem = (item) =>
+  !!item &&
+  (SERIES_QIDS.includes(item.qid) ||
+    (typeof item.q === "string" && item.q.toLowerCase().includes("series")));
 
-  return `WEBVTT\n\n${body.trim()}\n`;
-}
+export const cleanTitleForSearch = (title = "") =>
+  title
+    .replace(/\.(mkv|mp4|avi|mov|m4v|webm|flv|wmv|ts|m3u8|srt|vtt)$/i, " ")
+    .replace(/[._]+/g, " ")
+    .replace(/\b(1080p|720p|480p|2160p|4k|hdrip|webrip|web-dl|bluray|brrip|dvdrip|x264|x265|hevc|aac|hindi|dual audio)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-/** True when the text already looks like WebVTT. */
-export function isVtt(text) {
-  return /^\uFEFF?WEBVTT/.test(String(text).trim());
-}
+export const searchTitles = async (query) => {
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Title search failed");
+  const data = await res.json();
+  return Array.isArray(data.d) ? data.d : [];
+};
 
-/** Turn raw subtitle text (SRT or VTT) into an object URL usable by <track>. */
-export function subtitleTextToUrl(text) {
-  const vtt = isVtt(text) ? String(text) : srtToVtt(text);
-  return URL.createObjectURL(new Blob([vtt], { type: "text/vtt" }));
-}
-
-/** Read a File/Blob picked by the user and return a VTT object URL. */
-export function fileToSubtitleUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        resolve(subtitleTextToUrl(reader.result));
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsText(file);
-  });
-}
-
-/**
- * Fetch a remote subtitle file and return a VTT object URL.
- * Falls back to the original URL if it is already .vtt and cannot be fetched.
- */
-export async function remoteSubtitleToUrl(url) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return subtitleTextToUrl(await res.text());
-  } catch {
-    return url;
+export const fetchSubtitlesList = async (imdbId, season, episode) => {
+  let url = `/api/subtitles?imdbId=${encodeURIComponent(imdbId)}`;
+  if (season && episode) {
+    url += `&season=${encodeURIComponent(season)}&episode=${encodeURIComponent(episode)}`;
   }
-}
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Subtitle lookup failed");
+  const data = await res.json();
+  return Array.isArray(data.subtitles) ? data.subtitles : [];
+};
 
-/**
- * Normalize a subtitle entry coming from the API into a Plyr track object.
- * Accepts { url|src|file, label|name|title, language|lang|srclang, default }.
- */
-export function toTrack(entry, index = 0) {
-  if (!entry) return null;
-  const src = entry.url || entry.src || entry.file;
-  if (!src) return null;
+export const proxiedSubtitleUrl = (url) =>
+  `/api/subtitles/download?url=${encodeURIComponent(url)}`;
 
-  return {
-    kind: "captions",
-    label: entry.label || entry.name || entry.title || `Subtitle ${index + 1}`,
-    srcLang: entry.language || entry.lang || entry.srclang || "en",
-    src,
-    default: Boolean(entry.default) || index === 0,
-  };
-}
+// ---- VTT parsing -----------------------------------------------------------
 
-/** Build Plyr tracks from an API subtitle list, converting SRT files as needed. */
-export async function buildTracks(list) {
-  if (!Array.isArray(list) || list.length === 0) return [];
+const timeToSeconds = (value) => {
+  const parts = value.trim().replace(",", ".").split(":");
+  if (parts.length === 3) {
+    return (
+      parseInt(parts[0], 10) * 3600 +
+      parseInt(parts[1], 10) * 60 +
+      parseFloat(parts[2])
+    );
+  }
+  if (parts.length === 2) {
+    return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+  }
+  return parseFloat(parts[0]) || 0;
+};
 
-  const tracks = await Promise.all(
-    list.map(async (entry, index) => {
-      const track = toTrack(entry, index);
-      if (!track) return null;
-      if (/\.srt(\?|$)/i.test(track.src)) {
-        track.src = await remoteSubtitleToUrl(track.src);
-      }
-      return track;
-    })
-  );
+const stripTags = (text) =>
+  text
+    .replace(/<[^>]+>/g, "")
+    .replace(/\{\\[^}]*\}/g, "")
+    .trim();
 
-  return tracks.filter(Boolean);
-}
+export const parseVtt = (raw = "") => {
+  const normalized = raw
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/^\uFEFF/, "");
+
+  const blocks = normalized.split(/\n{2,}/);
+  const cues = [];
+
+  blocks.forEach((block) => {
+    const lines = block.split("\n").filter((line) => line.trim() !== "");
+    if (!lines.length) return;
+
+    const timeLineIndex = lines.findIndex((line) => line.includes("-->"));
+    if (timeLineIndex === -1) return;
+
+    const [startRaw, endRaw] = lines[timeLineIndex].split("-->");
+    if (!startRaw || !endRaw) return;
+
+    const text = stripTags(lines.slice(timeLineIndex + 1).join("\n"));
+    if (!text) return;
+
+    cues.push({
+      start: timeToSeconds(startRaw),
+      end: timeToSeconds(endRaw.trim().split(/\s+/)[0]),
+      text,
+    });
+  });
+
+  return cues.sort((a, b) => a.start - b.start);
+};
+
+export const loadSubtitleCues = async (src) => {
+  const res = await fetch(src);
+  if (!res.ok) throw new Error("Could not load subtitle file");
+  return parseVtt(await res.text());
+};
+
+export const findCueText = (cues, time) => {
+  if (!cues || !cues.length) return "";
+  const cue = cues.find((c) => time >= c.start && time <= c.end);
+  return cue ? cue.text : "";
+};
+
+// ---- Preference persistence ------------------------------------------------
+
+const STORAGE_KEY = "subtitlePreference";
+
+export const savePreference = (pref) => {
+  try {
+    if (!pref) localStorage.removeItem(STORAGE_KEY);
+    else localStorage.setItem(STORAGE_KEY, JSON.stringify(pref));
+  } catch (e) {
+    /* storage unavailable */
+  }
+};
+
+export const readPreference = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+};

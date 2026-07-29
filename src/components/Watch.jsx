@@ -1,27 +1,36 @@
 import { AiOutlineClose } from "react-icons/ai";
-import { MdClosedCaption, MdClosedCaptionOff } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { buildTracks, fileToSubtitleUrl } from "../utils/subtitles";
-import { autoSubtitlesForMedia } from "../utils/autoSubtitles";
+import { MdSubtitles } from "react-icons/md";
+import { toast } from "react-toastify";
+
+import SubtitlesModal from "./SubtitlesModal";
+import {
+  findCueText,
+  loadSubtitleCues,
+  readPreference,
+  savePreference,
+} from "../utils/subtitles";
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
   const [poster, setPoster] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tracks, setTracks] = useState([]);
-  const [captionsOn, setCaptionsOn] = useState(true);
-  const [captionError, setCaptionError] = useState("");
-  const [autoLoading, setAutoLoading] = useState(false);
-  const fileInputRef = useRef(null);
   const BASE = import.meta.env.VITE_BASE_URL;
 
   const playerRef = useRef(null);
+  const containerRef = useRef(null);
+  const overlayRef = useRef(null);
+  const cuesRef = useRef([]);
   const location = useLocation();
+
+  // Subtitle state
+  const [isSubtitlesModalOpen, setIsSubtitlesModalOpen] = useState(false);
+  const [activeSubtitleName, setActiveSubtitleName] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +39,6 @@ export default function WatchTrailer(props) {
       if (props.isWatchMoviePopupOpen || props.isWatchEpisodePopupOpen || props.isInline) {
         try {
           let videoSources = [];
-          let videoTracks = [];
           let selectedPoster = "";
 
           if (props.popUpType === "movie") {
@@ -40,16 +48,6 @@ export default function WatchTrailer(props) {
               size: parseInt(q.quality.replace("p", ""), 10),
             }));
             selectedPoster = props.id.backdrop;
-            videoTracks = await buildTracks(
-              props.id.subtitles || props.id.captions
-            );
-            if (videoTracks.length === 0) {
-              setAutoLoading(true);
-              videoTracks = await autoSubtitlesForMedia(props.id, {
-                mediaType: "movie",
-              });
-              setAutoLoading(false);
-            }
           } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
               (season) => season.season_number === props.seasonNumber
@@ -67,24 +65,11 @@ export default function WatchTrailer(props) {
                   size: parseInt(q.quality.replace("p", ""), 10),
                 }));
                 selectedPoster = episode.episode_backdrop;
-                videoTracks = await buildTracks(
-                  episode.subtitles || episode.captions
-                );
-                if (videoTracks.length === 0) {
-                  setAutoLoading(true);
-                  videoTracks = await autoSubtitlesForMedia(props.id, {
-                    mediaType: "episode",
-                    season: props.seasonNumber,
-                    episode: props.episodeNumber,
-                  });
-                  setAutoLoading(false);
-                }
               }
             }
           }
 
           setSources(videoSources);
-          setTracks(videoTracks);
           setPoster(selectedPoster);
           if (!props.isInline) {
             setIsModalOpen(true);
@@ -107,94 +92,6 @@ export default function WatchTrailer(props) {
     BASE,
   ]);
 
-  // Load a user-provided .srt/.vtt subtitle file and attach it as a caption track.
-  const handleSubtitleUpload = async (event) => {
-    const file = event.target.files && event.target.files[0];
-    event.target.value = "";
-    if (!file) return;
-
-    if (!/\.(srt|vtt)$/i.test(file.name)) {
-      setCaptionError("Please select a .srt or .vtt subtitle file");
-      return;
-    }
-
-    try {
-      const src = await fileToSubtitleUrl(file);
-      setCaptionError("");
-      setTracks((prev) => [
-        ...prev.map((t) => ({ ...t, default: false })),
-        {
-          kind: "captions",
-          label: file.name.replace(/\.(srt|vtt)$/i, ""),
-          srcLang: "en",
-          src,
-          default: true,
-        },
-      ]);
-      setCaptionsOn(true);
-    } catch (error) {
-      console.error("Error loading subtitle file:", error);
-      setCaptionError("Could not read that subtitle file");
-    }
-  };
-
-  const toggleCaptions = () => {
-    const player = playerRef.current && playerRef.current.plyr;
-    const next = !captionsOn;
-    setCaptionsOn(next);
-    if (player && player.captions) {
-      try {
-        player.toggleCaptions(next);
-      } catch (error) {
-        console.warn("Caption toggle failed:", error);
-      }
-    }
-  };
-
-  const captionControls = (
-    <div className="flex flex-wrap items-center gap-3 px-3 py-2 bg-black/60 text-white text-sm">
-      <button
-        type="button"
-        onClick={toggleCaptions}
-        disabled={tracks.length === 0}
-        className="flex items-center gap-1 disabled:opacity-40"
-        aria-label="Toggle captions"
-      >
-        {captionsOn && tracks.length > 0 ? (
-          <MdClosedCaption className="text-xl" />
-        ) : (
-          <MdClosedCaptionOff className="text-xl" />
-        )}
-        <span>{captionsOn && tracks.length > 0 ? "Captions On" : "Captions Off"}</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        className="underline underline-offset-2 opacity-90 hover:opacity-100"
-      >
-        Add subtitle (.srt / .vtt)
-      </button>
-
-      {autoLoading && <span className="opacity-70">Finding English subtitles…</span>}
-
-      {tracks.length > 0 && (
-        <span className="opacity-70">
-          {tracks.length} track{tracks.length > 1 ? "s" : ""} available
-        </span>
-      )}
-      {captionError && <span className="text-red-400">{captionError}</span>}
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".srt,.vtt,text/vtt"
-        onChange={handleSubtitleUpload}
-        className="hidden"
-      />
-    </div>
-  );
-
   const closeModal = () => {
     setIsModalOpen(false);
     if (props.popUpType === "trailer") {
@@ -206,11 +103,145 @@ export default function WatchTrailer(props) {
     }
   };
 
+
+  // ---- Subtitles -----------------------------------------------------------
+
+  const getVideoEl = useCallback(
+    () => containerRef.current?.querySelector("video") || null,
+    []
+  );
+
+  // Caption overlay lives inside the Plyr container so it stays visible in fullscreen.
+  const ensureOverlay = useCallback(() => {
+    const host =
+      containerRef.current?.querySelector(".plyr") || containerRef.current;
+    if (!host) return null;
+    if (overlayRef.current && host.contains(overlayRef.current)) {
+      return overlayRef.current;
+    }
+    const el = document.createElement("div");
+    el.className = "custom-subtitle-overlay";
+    host.appendChild(el);
+    overlayRef.current = el;
+    return el;
+  }, []);
+
+  const renderCue = useCallback(
+    (time) => {
+      const overlay = overlayRef.current;
+      if (!overlay) return;
+      const text = findCueText(cuesRef.current, time);
+      if (overlay.dataset.text === text) return;
+      overlay.dataset.text = text;
+      overlay.innerHTML = text
+        ? text
+            .split("\n")
+            .map((line) => `<span>${line}</span>`)
+            .join("")
+        : "";
+      overlay.style.opacity = text ? "1" : "0";
+    },
+    []
+  );
+
+  useEffect(() => {
+    const video = getVideoEl();
+    if (!video) return undefined;
+    const onTimeUpdate = () => renderCue(video.currentTime);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("seeked", onTimeUpdate);
+    return () => {
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("seeked", onTimeUpdate);
+    };
+  }, [sources, getVideoEl, renderCue]);
+
+  const clearSubtitles = useCallback(() => {
+    cuesRef.current = [];
+    setActiveSubtitleName("");
+    if (overlayRef.current) {
+      overlayRef.current.innerHTML = "";
+      overlayRef.current.dataset.text = "";
+      overlayRef.current.style.opacity = "0";
+    }
+    savePreference(null);
+    setIsSubtitlesModalOpen(false);
+  }, []);
+
+  const applySubtitle = useCallback(
+    async ({ src, label, lang, persist = true, silent = false }) => {
+      try {
+        const cues = await loadSubtitleCues(src);
+        if (!cues.length) {
+          toast.error("Subtitle file is empty or unsupported");
+          return;
+        }
+        cuesRef.current = cues;
+        ensureOverlay();
+        const video = getVideoEl();
+        renderCue(video ? video.currentTime : 0);
+        setActiveSubtitleName(`${label} (${(lang || "en").toUpperCase()})`);
+        setIsSubtitlesModalOpen(false);
+        if (persist) savePreference({ src, label, lang: lang || "en" });
+        if (!silent) toast.success(`Subtitle loaded: ${label}`);
+      } catch (e) {
+        console.error("Subtitle load error:", e);
+        toast.error("Could not load that subtitle");
+      }
+    },
+    [ensureOverlay, getVideoEl, renderCue]
+  );
+
+  // Restore the last used subtitle once a video is ready.
+  useEffect(() => {
+    if (!sources.length) return;
+    const pref = readPreference();
+    if (!pref?.src || pref.src.startsWith("blob:")) return;
+    applySubtitle({ ...pref, silent: true, persist: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sources.length]);
+
+  const subtitleTitle =
+    props.popUpType === "episode"
+      ? props.id?.name || props.id?.title || ""
+      : props.id?.title || props.id?.name || "";
+
+  const subtitlesButton = (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        setIsSubtitlesModalOpen(true);
+      }}
+      title="Subtitles"
+      className={`absolute z-40 top-3 left-3 flex items-center gap-2 rounded-full px-3 py-2 text-xs text-white backdrop-blur-md transition hover:bg-black/80 ${
+        activeSubtitleName ? "bg-primaryBtn/90" : "bg-black/60"
+      }`}
+    >
+      <MdSubtitles className="text-lg" />
+      <span className="hidden sm:inline">
+        {activeSubtitleName ? "Subtitles on" : "Subtitles"}
+      </span>
+    </button>
+  );
+
+  const subtitlesModal = (
+    <SubtitlesModal
+      isOpen={isSubtitlesModalOpen}
+      onClose={() => setIsSubtitlesModalOpen(false)}
+      onSelect={applySubtitle}
+      onClear={clearSubtitles}
+      activeSubtitleName={activeSubtitleName}
+      autoQuery={subtitleTitle}
+      seasonNumber={props.seasonNumber}
+      episodeNumber={props.episodeNumber}
+    />
+  );
+
   const plyrProps = {
     source: {
       type: "video",
       sources: sources,
-      tracks: tracks,
     },
     options: {
       poster: poster,
@@ -227,7 +258,6 @@ export default function WatchTrailer(props) {
         "fullscreen",
       ],
       seekTime: 10,
-      captions: { active: captionsOn && tracks.length > 0, update: true, language: "auto" },
       autoplay: props.isInline && sources.length > 0,
     },
   };
@@ -264,19 +294,19 @@ export default function WatchTrailer(props) {
 
   if (props.isInline) {
     return (
-      <div className="w-full h-full bg-black flex flex-col rounded-3xl overflow-hidden shadow-2xl">
+      <div
+        ref={containerRef}
+        className="w-full h-full bg-black flex items-center justify-center rounded-3xl overflow-hidden shadow-2xl relative"
+      >
         {sources.length > 0 ? (
           <>
-            <div className="flex-1 flex items-center justify-center">
-              <Plyr ref={playerRef} {...plyrProps} id="player" />
-            </div>
-            {captionControls}
+            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            {subtitlesButton}
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="loader"></div>
-          </div>
+          <div className="loader"></div>
         )}
+        {subtitlesModal}
       </div>
     );
   }
@@ -304,9 +334,11 @@ export default function WatchTrailer(props) {
             exit={{ scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
+            ref={containerRef}
           >
             <Plyr ref={playerRef} {...plyrProps} id="player" />
-            {captionControls}
+            {sources.length > 0 && subtitlesButton}
+            {subtitlesModal}
           </motion.div>
         </motion.div>
       )}
