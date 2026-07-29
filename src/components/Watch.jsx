@@ -129,7 +129,27 @@ export default function WatchTrailer(props) {
           languages: DEFAULT_LANGS,
         });
         if (cancelled) return;
-        setSubGroups(groupByLanguage(subs));
+        const groups = groupByLanguage(subs);
+        setSubGroups(groups);
+        // Auto-select the first available language so the CC option is
+        // immediately visible after an episode change.
+        if (groups.length > 0) {
+          const preferred =
+            groups.find((g) => g.code === "EN") || groups[0];
+          const vttUrl = await getSubtitleVttUrl(preferred.items[0]);
+          if (!cancelled && vttUrl) {
+            setActiveLang(preferred.code);
+            setTracks([
+              {
+                kind: "captions",
+                label: preferred.name || preferred.code,
+                srclang: preferred.code.toLowerCase(),
+                src: vttUrl,
+                default: true,
+              },
+            ]);
+          }
+        }
       } catch (e) {
         console.error("[subdl] fetch failed", e);
       } finally {
@@ -222,11 +242,24 @@ export default function WatchTrailer(props) {
     else props.setIsWatchEpisodePopupOpen(false);
   };
 
-  const SubtitleBar = () =>
-    subGroups.length === 0 ? null : (
+  // Force Plyr to remount when the episode/season changes so that the
+  // captions menu is rebuilt with the newly-loaded <track>.
+  const playerKey = `${subQuery?.tmdbId || "x"}-${subQuery?.type || "x"}-${
+    subQuery?.season ?? "x"
+  }-${subQuery?.episode ?? "x"}-${tracks.length}`;
+
+  const SubtitleBar = () => {
+    // Only hide the bar for content that has no subtitle support at all
+    // (e.g. trailers where subQuery is null).
+    if (!subQuery) return null;
+    return (
       <div className="flex flex-wrap items-center gap-2 p-2 bg-black/60 text-white text-xs">
         <span className="opacity-70 mr-1">
-          {subsLoading ? "Loading subtitles…" : "Subtitles:"}
+          {subsLoading
+            ? "Loading subtitles…"
+            : subGroups.length === 0
+            ? "No subtitles found"
+            : "Subtitles:"}
         </span>
         <button
           onClick={() => {
@@ -253,13 +286,14 @@ export default function WatchTrailer(props) {
         ))}
       </div>
     );
+  };
 
   if (props.isInline) {
     return (
       <div className="w-full h-full bg-black flex flex-col rounded-3xl overflow-hidden shadow-2xl">
         <div className="flex-1 flex items-center justify-center">
           {sources.length > 0 ? (
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            <Plyr key={playerKey} ref={playerRef} {...plyrProps} id="player" />
           ) : (
             <div className="loader"></div>
           )}
@@ -293,7 +327,7 @@ export default function WatchTrailer(props) {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
           >
-            <Plyr ref={playerRef} {...plyrProps} id="player" />
+            <Plyr key={playerKey} ref={playerRef} {...plyrProps} id="player" />
             <SubtitleBar />
           </motion.div>
         </motion.div>
