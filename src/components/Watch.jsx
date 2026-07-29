@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { MdSubtitles } from "react-icons/md";
@@ -210,7 +211,53 @@ export default function WatchTrailer(props) {
       ? props.id?.name || props.id?.title || ""
       : props.id?.title || props.id?.name || "";
 
-  const subtitlesButton = (
+  // Track Plyr host + auto-hide the subtitle button with the player controls.
+  const [plyrHost, setPlyrHost] = useState(null);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const hideTimerRef = useRef(null);
+
+  useEffect(() => {
+    let raf = 0;
+    const find = () => {
+      const host = containerRef.current?.querySelector(".plyr");
+      if (host && host !== plyrHost) setPlyrHost(host);
+      raf = requestAnimationFrame(find);
+    };
+    raf = requestAnimationFrame(find);
+    return () => cancelAnimationFrame(raf);
+  }, [plyrHost]);
+
+  useEffect(() => {
+    if (!plyrHost) return;
+
+    const show = () => {
+      setControlsVisible(true);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = setTimeout(() => setControlsVisible(false), 2500);
+    };
+    const hideNow = () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      setControlsVisible(false);
+    };
+
+    show();
+    plyrHost.addEventListener("mousemove", show);
+    plyrHost.addEventListener("mousedown", show);
+    plyrHost.addEventListener("touchstart", show);
+    plyrHost.addEventListener("mouseleave", hideNow);
+    window.addEventListener("keydown", show);
+
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      plyrHost.removeEventListener("mousemove", show);
+      plyrHost.removeEventListener("mousedown", show);
+      plyrHost.removeEventListener("touchstart", show);
+      plyrHost.removeEventListener("mouseleave", hideNow);
+      window.removeEventListener("keydown", show);
+    };
+  }, [plyrHost]);
+
+  const subtitlesButtonEl = (
     <button
       type="button"
       onClick={(e) => {
@@ -218,9 +265,9 @@ export default function WatchTrailer(props) {
         setIsSubtitlesModalOpen(true);
       }}
       title="Subtitles"
-      className={`absolute z-40 top-3 left-3 flex items-center gap-2 rounded-full px-3 py-2 text-xs text-white backdrop-blur-md transition hover:bg-black/80 ${
+      className={`absolute z-40 top-3 left-3 flex items-center gap-2 rounded-full px-3 py-2 text-xs text-white backdrop-blur-md transition-opacity duration-300 hover:bg-black/80 ${
         activeSubtitleName ? "bg-primaryBtn/90" : "bg-black/60"
-      }`}
+      } ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <MdSubtitles className="text-lg" />
       <span className="hidden sm:inline">
@@ -228,6 +275,10 @@ export default function WatchTrailer(props) {
       </span>
     </button>
   );
+
+  // Render inside the Plyr host so it stays visible when the player enters
+  // native fullscreen (fullscreen only elevates the .plyr element).
+  const subtitlesButton = plyrHost ? createPortal(subtitlesButtonEl, plyrHost) : null;
 
   const subtitlesModal = (
     <SubtitlesModal
