@@ -1,7 +1,8 @@
 // src/utils/subdl.js
 // SubDL subtitle fetcher: TMDB ID -> subtitles list -> download SRT -> VTT blob URL
 // Docs: https://subdl.com/apidoc
-import JSZip from "jszip";
+// No external deps: ZIPs are parsed with a tiny inline reader that uses the
+// browser-native DecompressionStream('deflate-raw') for DEFLATE entries.
 
 const API_BASE = "https://api.subdl.com/api/v1/subtitles";
 const DL_HOST = "https://dl.subdl.com";
@@ -17,6 +18,50 @@ const vttCache = new Map(); // subtitle url -> object URL (blob:)
 
 const cacheKey = ({ tmdbId, type, season, episode, languages }) =>
   [tmdbId, type || "movie", season ?? "", episode ?? "", (languages || []).join(",")].join("|");
+
+/**
+ * Minimal ZIP reader: scans local file headers, finds the first .srt/.vtt
+ * entry, and decompresses it. Supports stored (0) and deflate (8) methods
+ * using the browser-native DecompressionStream('deflate-raw').
+ * @param {ArrayBuffer} buf
+ * @returns {Promise<{name:string,text:string}|null>}
+ */
+async function extractSubtitleFromZip(buf) {
+  const bytes = new Uint8Array(buf);
+  const dv = new DataView(buf);
+  const td = new TextDecoder("utf-8");
+  let off = 0;
+  while (off + 30 <= bytes.length) {
+    const sig = dv.getUint32(off, true);
+    if (sig !== 0x04034b50) break; // not a local file header -> done
+    const method = dv.getUint16(off + 8, true);
+    const compSize = dv.getUint32(off + 18, true);
+    const nameLen = dv.getUint16(off + 26, true);
+    const extraLen = dv.getUint16(off + 28, true);
+    const nameStart = off + 30;
+    const dataStart = nameStart + nameLen + extraLen;
+    const name = td.decode(bytes.subarray(nameStart, nameStart + nameLen));
+    const dataEnd = dataStart + compSize;
+    if (/\.(srt|vtt)$/i.test(name) && !name.endsWith("/")) {
+      const chunk = bytes.subarray(dataStart, dataEnd);
+      let outBuf;
+      if (method === 0) {
+        outBuf = chunk;
+      } else if (method === 8) {
+        // deflate-raw: no zlib header, matches ZIP's raw DEFLATE stream
+        const ds = new DecompressionStream("deflate-raw");
+        const stream = new Blob([chunk]).stream().pipeThrough(ds);
+        outBuf = new Uint8Array(await new Response(stream).arrayBuffer());
+      } else {
+        off = dataEnd;
+        continue;
+      }
+      return { name, text: td.decode(outBuf) };
+    }
+    off = dataEnd;
+  }
+  return null;
+}
 
 /**
  * List subtitles from SubDL for a given TMDB id.
@@ -109,12 +154,9 @@ export async function getSubtitleVttUrl(subtitle) {
     // Sniff zip magic "PK"
     const head = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
     if (head[0] === 0x50 && head[1] === 0x4b) {
-      const zip = await JSZip.loadAsync(buf);
-      const entry = Object.values(zip.files).find(
-        (f) => !f.dir && /\.(srt|vtt)$/i.test(f.name)
-      );
+      const entry = await extractSubtitleFromZip(buf);
       if (!entry) throw new Error("No .srt/.vtt file inside archive");
-      srtText = await entry.async("string");
+      srtText = entry.text;
       if (/\.vtt$/i.test(entry.name)) {
         const blob = new Blob([srtText], { type: "text/vtt" });
         const url = URL.createObjectURL(blob);
