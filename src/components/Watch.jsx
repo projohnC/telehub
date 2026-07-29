@@ -144,17 +144,21 @@ export default function WatchTrailer(props) {
     []
   );
 
+  // Plyr rebuilds its DOM (and the <video> element) whenever the source or
+  // quality changes, which detaches any listener/overlay we attached earlier.
+  // A rAF loop re-resolves both every frame, so cues keep rendering.
   useEffect(() => {
-    const video = getVideoEl();
-    if (!video) return undefined;
-    const onTimeUpdate = () => renderCue(video.currentTime);
-    video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("seeked", onTimeUpdate);
-    return () => {
-      video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("seeked", onTimeUpdate);
+    let frame = 0;
+    const tick = () => {
+      const overlay = ensureOverlay();
+      const video = getVideoEl();
+      if (overlay && video) renderCue(video.currentTime);
+      frame = requestAnimationFrame(tick);
     };
-  }, [sources, getVideoEl, renderCue]);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [ensureOverlay, getVideoEl, renderCue]);
+
 
   const clearSubtitles = useCallback(() => {
     cuesRef.current = [];
