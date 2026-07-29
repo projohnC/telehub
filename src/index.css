@@ -218,3 +218,16 @@ body {
 :fullscreen .custom-subtitle-overlay {
   bottom: 10%;
 }
+
+/* Overlay UI layer rendered inside the Plyr container so custom controls
+   (e.g. the subtitles button) remain visible in fullscreen. */
+.custom-ui-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.custom-ui-layer > * {
+  pointer-events: auto;
+}

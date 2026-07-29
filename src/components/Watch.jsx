@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Plyr from "plyr-react";
 import "plyr-react/plyr.css";
 import { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { MdSubtitles } from "react-icons/md";
@@ -25,16 +26,33 @@ export default function WatchTrailer(props) {
   const playerRef = useRef(null);
   const containerRef = useRef(null);
   const overlayRef = useRef(null);
+  const uiLayerRef = useRef(null);
   const cuesRef = useRef([]);
   const location = useLocation();
 
   // Subtitle state
   const [isSubtitlesModalOpen, setIsSubtitlesModalOpen] = useState(false);
   const [activeSubtitleName, setActiveSubtitleName] = useState("");
+  // Host element (inside .plyr) for custom controls, so they survive fullscreen.
+  const [uiLayer, setUiLayer] = useState(null);
+  const [uiVisible, setUiVisible] = useState(true);
+
+  const subtitleTitle =
+    props.popUpType === "episode"
+      ? props.id?.name || props.id?.title || ""
+      : props.id?.title || props.id?.name || "";
+
+  // Identifies exactly what is playing right now. Changing it must reset subs.
+  const contentKey = [
+    props.popUpType || "",
+    props.id?._id || props.id?.id || props.id?.imdb_id || subtitleTitle,
+    props.seasonNumber ?? "",
+    props.episodeNumber ?? "",
+  ].join("|");
 
   useEffect(() => {
     const fetchData = async () => {
-      // For inline usage, we might already have sources if they are passed down, 
+      // For inline usage, we might already have sources if they are passed down,
       // but let's keep the logic consistent for now.
       if (props.isWatchMoviePopupOpen || props.isWatchEpisodePopupOpen || props.isInline) {
         try {
@@ -126,23 +144,35 @@ export default function WatchTrailer(props) {
     return el;
   }, []);
 
-  const renderCue = useCallback(
-    (time) => {
-      const overlay = overlayRef.current;
-      if (!overlay) return;
-      const text = findCueText(cuesRef.current, time);
-      if (overlay.dataset.text === text) return;
-      overlay.dataset.text = text;
-      overlay.innerHTML = text
-        ? text
-            .split("\n")
-            .map((line) => `<span>${line}</span>`)
-            .join("")
-        : "";
-      overlay.style.opacity = text ? "1" : "0";
-    },
-    []
-  );
+  // Same idea for the custom control layer (subtitles button).
+  const ensureUiLayer = useCallback(() => {
+    const host = containerRef.current?.querySelector(".plyr");
+    if (!host) return null;
+    if (uiLayerRef.current && host.contains(uiLayerRef.current)) {
+      return uiLayerRef.current;
+    }
+    const el = document.createElement("div");
+    el.className = "custom-ui-layer";
+    host.appendChild(el);
+    uiLayerRef.current = el;
+    setUiLayer(el);
+    return el;
+  }, []);
+
+  const renderCue = useCallback((time) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const text = findCueText(cuesRef.current, time);
+    if (overlay.dataset.text === text) return;
+    overlay.dataset.text = text;
+    overlay.innerHTML = text
+      ? text
+          .split("\n")
+          .map((line) => `<span>${line}</span>`)
+          .join("")
+      : "";
+    overlay.style.opacity = text ? "1" : "0";
+  }, []);
 
   // Plyr rebuilds its DOM (and the <video> element) whenever the source or
   // quality changes, which detaches any listener/overlay we attached earlier.
@@ -151,16 +181,16 @@ export default function WatchTrailer(props) {
     let frame = 0;
     const tick = () => {
       const overlay = ensureOverlay();
+      ensureUiLayer();
       const video = getVideoEl();
       if (overlay && video) renderCue(video.currentTime);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [ensureOverlay, getVideoEl, renderCue]);
+  }, [ensureOverlay, ensureUiLayer, getVideoEl, renderCue]);
 
-
-  const clearSubtitles = useCallback(() => {
+  const clearSubtitles = useCallback((persist = true) => {
     cuesRef.current = [];
     setActiveSubtitleName("");
     if (overlayRef.current) {
@@ -168,9 +198,15 @@ export default function WatchTrailer(props) {
       overlayRef.current.dataset.text = "";
       overlayRef.current.style.opacity = "0";
     }
-    savePreference(null);
+    if (persist) savePreference(null);
     setIsSubtitlesModalOpen(false);
   }, []);
+
+  // Switching to another movie / series / anime / episode must drop the
+  // previously loaded cues instead of keeping them on screen.
+  useEffect(() => {
+    clearSubtitles(false);
+  }, [contentKey, clearSubtitles]);
 
   const applySubtitle = useCallback(
     async ({ src, label, lang, persist = true, silent = false }) => {
@@ -186,41 +222,86 @@ export default function WatchTrailer(props) {
         renderCue(video ? video.currentTime : 0);
         setActiveSubtitleName(`${label} (${(lang || "en").toUpperCase()})`);
         setIsSubtitlesModalOpen(false);
-        if (persist) savePreference({ src, label, lang: lang || "en" });
+        if (persist)
+          savePreference({ key: contentKey, src, label, lang: lang || "en" });
         if (!silent) toast.success(`Subtitle loaded: ${label}`);
       } catch (e) {
         console.error("Subtitle load error:", e);
         toast.error("Could not load that subtitle");
       }
     },
-    [ensureOverlay, getVideoEl, renderCue]
+    [contentKey, ensureOverlay, getVideoEl, renderCue]
   );
 
-  // Restore the last used subtitle once a video is ready.
+  // Restore the last used subtitle only for the SAME title/episode.
   useEffect(() => {
     if (!sources.length) return;
     const pref = readPreference();
     if (!pref?.src || pref.src.startsWith("blob:")) return;
+    if (pref.key !== contentKey) return;
     applySubtitle({ ...pref, silent: true, persist: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sources.length]);
+  }, [sources.length, contentKey]);
 
-  const subtitleTitle =
-    props.popUpType === "episode"
-      ? props.id?.name || props.id?.title || ""
-      : props.id?.title || props.id?.name || "";
+  // ---- Auto-hiding custom controls ----------------------------------------
 
-  const subtitlesButton = (
+  const hideTimerRef = useRef(null);
+
+  const bumpUi = useCallback(() => {
+    setUiVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setUiVisible(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    const host = containerRef.current;
+    if (!host) return;
+    const events = ["pointermove", "pointerdown", "touchstart", "mousemove"];
+    events.forEach((ev) => host.addEventListener(ev, bumpUi, { passive: true }));
+    document.addEventListener("keydown", bumpUi);
+    bumpUi();
+    return () => {
+      events.forEach((ev) => host.removeEventListener(ev, bumpUi));
+      document.removeEventListener("keydown", bumpUi);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [bumpUi, sources.length, isModalOpen, props.isInline]);
+
+  // Keep it on screen while the subtitle picker is open.
+  useEffect(() => {
+    if (isSubtitlesModalOpen) {
+      setUiVisible(true);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    } else {
+      bumpUi();
+    }
+  }, [isSubtitlesModalOpen, bumpUi]);
+
+  const subtitlesModalEl = (
+    <SubtitlesModal
+      isOpen={isSubtitlesModalOpen}
+      onClose={() => setIsSubtitlesModalOpen(false)}
+      onSelect={applySubtitle}
+      onClear={() => clearSubtitles(true)}
+      activeSubtitleName={activeSubtitleName}
+      autoQuery={subtitleTitle}
+      seasonNumber={props.seasonNumber}
+      episodeNumber={props.episodeNumber}
+    />
+  );
+
+  const subtitlesButtonEl = (
     <button
       type="button"
       onClick={(e) => {
         e.stopPropagation();
+        bumpUi();
         setIsSubtitlesModalOpen(true);
       }}
       title="Subtitles"
-      className={`absolute z-40 top-3 left-3 flex items-center gap-2 rounded-full px-3 py-2 text-xs text-white backdrop-blur-md transition hover:bg-black/80 ${
+      className={`absolute z-40 top-3 left-3 flex items-center gap-2 rounded-full px-3 py-2 text-xs text-white backdrop-blur-md transition-opacity duration-300 hover:bg-black/80 ${
         activeSubtitleName ? "bg-primaryBtn/90" : "bg-black/60"
-      }`}
+      } ${uiVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <MdSubtitles className="text-lg" />
       <span className="hidden sm:inline">
@@ -229,18 +310,16 @@ export default function WatchTrailer(props) {
     </button>
   );
 
-  const subtitlesModal = (
-    <SubtitlesModal
-      isOpen={isSubtitlesModalOpen}
-      onClose={() => setIsSubtitlesModalOpen(false)}
-      onSelect={applySubtitle}
-      onClear={clearSubtitles}
-      activeSubtitleName={activeSubtitleName}
-      autoQuery={subtitleTitle}
-      seasonNumber={props.seasonNumber}
-      episodeNumber={props.episodeNumber}
-    />
-  );
+  // Rendered inside the .plyr element (portal) so it also shows in fullscreen.
+  const subtitlesButton = uiLayer
+    ? createPortal(
+        <>
+          {subtitlesButtonEl}
+          {subtitlesModalEl}
+        </>,
+        uiLayer
+      )
+    : null;
 
   const plyrProps = {
     source: {
@@ -268,6 +347,7 @@ export default function WatchTrailer(props) {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
+      bumpUi();
       if (document.fullscreenElement) {
         // Entered fullscreen
         if (window.screen.orientation && window.screen.orientation.lock) {
@@ -294,7 +374,7 @@ export default function WatchTrailer(props) {
       document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
       document.removeEventListener("msfullscreenchange", handleFullscreenChange);
     };
-  }, []);
+  }, [bumpUi]);
 
   if (props.isInline) {
     return (
@@ -310,7 +390,6 @@ export default function WatchTrailer(props) {
         ) : (
           <div className="loader"></div>
         )}
-        {subtitlesModal}
       </div>
     );
   }
@@ -342,7 +421,6 @@ export default function WatchTrailer(props) {
           >
             <Plyr ref={playerRef} {...plyrProps} id="player" />
             {sources.length > 0 && subtitlesButton}
-            {subtitlesModal}
           </motion.div>
         </motion.div>
       )}
