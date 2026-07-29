@@ -7,6 +7,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { buildTracks, fileToSubtitleUrl } from "../utils/subtitles";
+import { autoSubtitlesForMedia } from "../utils/autoSubtitles";
 
 export default function WatchTrailer(props) {
   const [sources, setSources] = useState([]);
@@ -15,6 +16,7 @@ export default function WatchTrailer(props) {
   const [tracks, setTracks] = useState([]);
   const [captionsOn, setCaptionsOn] = useState(true);
   const [captionError, setCaptionError] = useState("");
+  const [autoLoading, setAutoLoading] = useState(false);
   const fileInputRef = useRef(null);
   const BASE = import.meta.env.VITE_BASE_URL;
 
@@ -41,6 +43,13 @@ export default function WatchTrailer(props) {
             videoTracks = await buildTracks(
               props.id.subtitles || props.id.captions
             );
+            if (videoTracks.length === 0) {
+              setAutoLoading(true);
+              videoTracks = await autoSubtitlesForMedia(props.id, {
+                mediaType: "movie",
+              });
+              setAutoLoading(false);
+            }
           } else if (props.popUpType === "episode") {
             const season = props.id.seasons.find(
               (season) => season.season_number === props.seasonNumber
@@ -61,6 +70,15 @@ export default function WatchTrailer(props) {
                 videoTracks = await buildTracks(
                   episode.subtitles || episode.captions
                 );
+                if (videoTracks.length === 0) {
+                  setAutoLoading(true);
+                  videoTracks = await autoSubtitlesForMedia(props.id, {
+                    mediaType: "episode",
+                    season: props.seasonNumber,
+                    episode: props.episodeNumber,
+                  });
+                  setAutoLoading(false);
+                }
               }
             }
           }
@@ -157,6 +175,8 @@ export default function WatchTrailer(props) {
       >
         Add subtitle (.srt / .vtt)
       </button>
+
+      {autoLoading && <span className="opacity-70">Finding English subtitles…</span>}
 
       {tracks.length > 0 && (
         <span className="opacity-70">
