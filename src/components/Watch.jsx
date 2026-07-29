@@ -242,12 +242,6 @@ export default function WatchTrailer(props) {
     else props.setIsWatchEpisodePopupOpen(false);
   };
 
-  // Force Plyr to remount when the episode/season changes so that the
-  // captions menu is rebuilt with the newly-loaded <track>.
-  const playerKey = `${subQuery?.tmdbId || "x"}-${subQuery?.type || "x"}-${
-    subQuery?.season ?? "x"
-  }-${subQuery?.episode ?? "x"}`;
-
   const SubtitleBar = () => {
     // Only hide the bar for content that has no subtitle support at all
     // (e.g. trailers where subQuery is null).
@@ -293,7 +287,7 @@ export default function WatchTrailer(props) {
       <div className="w-full h-full bg-black flex flex-col rounded-3xl overflow-hidden shadow-2xl">
         <div className="flex-1 flex items-center justify-center">
           {sources.length > 0 ? (
-            <Plyr key={playerKey} ref={playerRef} {...plyrProps} id="player" />
+            <Plyr ref={playerRef} {...plyrProps} id="player" />
           ) : (
             <div className="loader"></div>
           )}
@@ -327,7 +321,11 @@ export default function WatchTrailer(props) {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="w-full max-w-4xl rounded-lg overflow-hidden shadow-lg relative"
           >
-            <Plyr key={playerKey} ref={playerRef} {...plyrProps} id="player" />
+            {sources.length > 0 ? (
+              <Plyr ref={playerRef} {...plyrProps} id="player" />
+            ) : (
+              <div className="w-full aspect-video flex items-center justify-center bg-black"><div className="loader"></div></div>
+            )}
             <SubtitleBar />
           </motion.div>
         </motion.div>
