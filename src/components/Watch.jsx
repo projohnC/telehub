@@ -36,6 +36,8 @@ export default function WatchTrailer(props) {
   // Host element (inside .plyr) for custom controls, so they survive fullscreen.
   const [uiLayer, setUiLayer] = useState(null);
   const [uiVisible, setUiVisible] = useState(true);
+  // True until the video element actually has enough data to play.
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
 
   const subtitleTitle =
     props.popUpType === "episode"
@@ -184,6 +186,14 @@ export default function WatchTrailer(props) {
       ensureUiLayer();
       const video = getVideoEl();
       if (overlay && video) renderCue(video.currentTime);
+      // Plyr recreates the <video> on source/quality change, so poll readiness.
+      // Loading while metadata is missing, or while playback is stalled/buffering.
+      const ready =
+        !!video &&
+        video.readyState >= 1 &&
+        (video.paused || video.readyState >= 3) &&
+        !video.seeking;
+      setIsVideoLoading((prev) => (prev === !ready ? prev : !ready));
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -207,6 +217,11 @@ export default function WatchTrailer(props) {
   useEffect(() => {
     clearSubtitles(false);
   }, [contentKey, clearSubtitles]);
+
+  // Show the loading screen again whenever the content changes.
+  useEffect(() => {
+    setIsVideoLoading(true);
+  }, [contentKey, sources.length]);
 
   const applySubtitle = useCallback(
     async ({ src, label, lang, persist = true, silent = false }) => {
@@ -321,6 +336,16 @@ export default function WatchTrailer(props) {
       )
     : null;
 
+  const loadingScreen = (
+    <div className="player-loading-screen">
+      <div className="player-loading-screen__ring" />
+      <div className="player-loading-screen__label">Loading player</div>
+      <div className="player-loading-screen__bar">
+        <span />
+      </div>
+    </div>
+  );
+
   const plyrProps = {
     source: {
       type: "video",
@@ -382,14 +407,13 @@ export default function WatchTrailer(props) {
         ref={containerRef}
         className="w-full h-full bg-black flex items-center justify-center rounded-3xl overflow-hidden shadow-2xl relative"
       >
-        {sources.length > 0 ? (
+        {sources.length > 0 && (
           <>
             <Plyr ref={playerRef} {...plyrProps} id="player" />
             {subtitlesButton}
           </>
-        ) : (
-          <div className="loader"></div>
         )}
+        {(sources.length === 0 || isVideoLoading) && loadingScreen}
       </div>
     );
   }
@@ -421,6 +445,7 @@ export default function WatchTrailer(props) {
           >
             <Plyr ref={playerRef} {...plyrProps} id="player" />
             {sources.length > 0 && subtitlesButton}
+            {(sources.length === 0 || isVideoLoading) && loadingScreen}
           </motion.div>
         </motion.div>
       )}
