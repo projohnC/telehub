@@ -1,80 +1,294 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const AdManager = () => {
+    const location = useLocation();
     useEffect(() => {
-        const handleGlobalClick = (e) => {
-            // Ignore clicks inside AdBlockDetector and DomainNotice modals
-            if (e.target.closest(".adblock-detector-modal") || e.target.closest(".domain-notice-modal")) {
-                return;
-            }
+        const popunderAdLink = import.meta.env.VITE_POPUNDER_ADS;
+        const directAdLink = import.meta.env.VITE_DIRECT_LINK_ADS;
 
-            // Ignore clicks on action/verification pages (/tg, /dow, /plyr)
-            const isActionPage = ["/tg", "/dow", "/plyr"].includes(window.location.pathname);
-            if (isActionPage) {
-                return;
-            }
+        const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent
+            ) ||
+            window.innerWidth <= 768 ||
+            window.matchMedia("(max-width: 768px)").matches;
 
-            // Check if the clicked element is a button, link, or part of one
-            const target = e.target.closest("button, a, [role='button']");
+        // Customizable interval (seconds) between popunders. Defaults to 30s.
+        // Set VITE_POPUNDER_INTERVAL=60 in .env to change (value in seconds).
+        const popunderIntervalSec = Number(
+            import.meta.env.VITE_POPUNDER_INTERVAL
+        ) || 30;
+        const popunderCooldownMs = Math.max(1, popunderIntervalSec) * 1000;
 
-            // If the click is not on a relevant element, don't trigger ad
-            if (!target) return;
+        const directIntervalSec = Number(
+            import.meta.env.VITE_DIRECT_LINK_INTERVAL
+        ) || 60;
+        const directCooldownMs = Math.max(1, directIntervalSec) * 1000;
 
-            const directAdLink = import.meta.env.VITE_DIRECT_LINK_ADS;
-            const popunderAdLink = import.meta.env.VITE_POPUNDER_ADS;
-            const currentTime = Date.now();
+        // ------------------------------------------------------------------
+        // about:blank redirect helper.
+        // Important: never fall back to window.open(url), because that opens
+        // the ad URL directly and skips the about:blank step.
+        // ------------------------------------------------------------------
+        const escapeHtmlAttr = (value) =>
+            String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
 
-            // Handle Direct Link Ads (2-minute cooldown)
-            if (directAdLink) {
-                const lastDirectAdTime = localStorage.getItem("last_direct_ad_popup");
-                const directCooldown = 2 * 60 * 1000; // 2 minutes
+        const normalizeAdUrl = (value) => {
+            const url = String(value || "").trim();
+            if (!url) return "";
+            if (url.startsWith("//")) return `${window.location.protocol}${url}`;
+            return url;
+        };
 
-                if (!lastDirectAdTime || currentTime - parseInt(lastDirectAdTime) >= directCooldown) {
-                    window.open(directAdLink, "_blank");
-                    localStorage.setItem("last_direct_ad_popup", currentTime.toString());
-                    return; // Avoid triggering both at the same time if both are configured
-                }
-            }
+        const originalWindowOpen =
+            window.__adManagerOriginalOpen || window.open.bind(window);
 
-            // Handle Popunder Ads (2-minute cooldown)
-            if (popunderAdLink) {
-                const lastPopunderTime = localStorage.getItem("last_popunder_ad_popup");
-                const popunderCooldown = 1 * 60 * 1000; // 1 minutes
+        if (!window.__adManagerOriginalOpen) {
+            window.__adManagerOriginalOpen = originalWindowOpen;
+        }
 
-                if (!lastPopunderTime || currentTime - parseInt(lastPopunderTime) >= popunderCooldown) {
-                    if (popunderAdLink.endsWith(".js")) {
-                        // Inject script instead of window.open for script-based ads
-                        const script = document.createElement("script");
-                        script.src = popunderAdLink;
-                        script.async = true;
-                        document.body.appendChild(script);
+        const openAboutBlankThenRedirect = (value) => {
+            const url = normalizeAdUrl(value);
+            if (!/^https?:\/\//i.test(url)) return null;
 
-                        // Optional: remove the script after a delay to keep DOM clean
-                        // since these scripts usually execute once and trigger the popunder
-                        setTimeout(() => {
-                            if (script.parentNode) {
-                                script.parentNode.removeChild(script);
-                            }
-                        }, 5000);
-                    } else {
-                        window.open(popunderAdLink, "_blank");
-                    }
-                    localStorage.setItem("last_popunder_ad_popup", currentTime.toString());
-                }
+            const redirectDelayMs = Math.max(
+                0,
+                Number(import.meta.env.VITE_POPUNDER_REDIRECT_DELAY_MS ?? 250) || 250
+            );
+
+            try {
+                const newTab = originalWindowOpen("about:blank", "_blank");
+                if (!newTab || newTab.closed) return false;
+
+                try { window.focus(); } catch (_) {}
+                try { newTab.blur(); } catch (_) {}
+                // Detach the popup from its opener so if the user hits "back"
+                // on the main tab before the ad URL loads, the about:blank
+                // tab keeps running in the background instead of being closed.
+                try { newTab.opener = null; } catch (_) {}
+
+                const htmlUrl = escapeHtmlAttr(url);
+                const scriptUrl = JSON.stringify(url);
+                const scriptDelay = JSON.stringify(redirectDelayMs);
+
+                newTab.document.open();
+                newTab.document.write(
+                    `<!doctype html><html><head><meta charset="utf-8">` +
+                    `<meta name="referrer" content="no-referrer">` +
+                    `<title>Loading…</title></head>` +
+                    `<body style="margin:0;background:#fff">` +
+                    `<a href="${htmlUrl}" rel="noreferrer" style="display:none">Continue</a>` +
+                    `<script>` +
+                    `var target=${scriptUrl};` +
+                    `setTimeout(function(){window.location.replace(target);},${scriptDelay});` +
+                    `<\/script></body></html>`
+                );
+                newTab.document.close();
+                return newTab;
+            } catch (_) {
+                return null;
             }
         };
 
-        // Use capture: true to ensure the listener triggers even if propagation is stopped
+        // Some .js popunder ad networks call window.open(adUrl) themselves.
+        // Patch window.open before loading their script so those popups also
+        // open about:blank first, then redirect from inside that blank tab.
+        if (!window.__adManagerAboutBlankPatched) {
+            window.open = function patchedWindowOpen(url, target, features) {
+                const normalizedUrl = normalizeAdUrl(url);
+
+                if (
+                    normalizedUrl &&
+                    normalizedUrl !== "about:blank" &&
+                    /^https?:\/\//i.test(normalizedUrl)
+                ) {
+                    return openAboutBlankThenRedirect(normalizedUrl);
+                }
+
+                return originalWindowOpen(url, target, features);
+            };
+
+            window.__adManagerAboutBlankPatched = true;
+        }
+
+        // ------------------------------------------------------------------
+        // Script-based popunder networks (Adsterra / Propeller / etc.)
+        // These scripts install their OWN listeners and use their OWN
+        // frequency capping. We inject once after patching window.open so the
+        // script's own popup is forced through about:blank first.
+        // ------------------------------------------------------------------
+        const isScriptPopunder = popunderAdLink && (
+            popunderAdLink.toLowerCase().includes(".js") ||
+            popunderAdLink.toLowerCase().includes("/js/")
+        );
+        const isActionPage = () =>
+            ["/tg", "/dow", "/plyr"].includes(window.location.pathname);
+
+        if (isScriptPopunder && !isActionPage()) {
+            const already = document.querySelector(
+                `script[data-popunder-src="${popunderAdLink}"]`
+            );
+            if (!already) {
+                const s = document.createElement("script");
+                s.src = popunderAdLink;
+                s.async = true;
+                s.setAttribute("data-popunder-src", popunderAdLink);
+                document.body.appendChild(s);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Interval-based trigger. Browsers require a user gesture to open a
+        // new tab, so we can't call window.open() from a bare setInterval —
+        // it will be blocked. Instead we mark the ad as "ready" every N
+        // seconds, and the very next user click fires the popunder. This
+        // gives the "one popup every 30s" behaviour without triggering on
+        // every click.
+        // ------------------------------------------------------------------
+        let popunderReady = false;
+        let directReady = false;
+
+        // Prime the first popup: ready on the first click after mount.
+        popunderReady = true;
+        directReady = true;
+
+        const popunderTimer = setInterval(() => {
+            popunderReady = true;
+        }, popunderCooldownMs);
+
+        const directTimer = setInterval(() => {
+            directReady = true;
+        }, directCooldownMs);
+
+        const handleGlobalClick = (e) => {
+            if (isMobile) {
+                return;
+            }
+
+            if (
+                e.target.closest(".adblock-detector-modal") ||
+                e.target.closest(".domain-notice-modal")
+            ) return;
+
+            if (isActionPage()) return;
+
+            const target = e.target.closest("button, a, [role='button']");
+            if (!target) return;
+
+            // Direct Link Ads — also route through about:blank first.
+            if (directAdLink && directReady) {
+                openAboutBlankThenRedirect(directAdLink);
+                directReady = false;
+                return;
+            }
+
+            // URL-based popunder (non-.js). Script-based popunders manage
+            // their own frequency and are handled by the injected script.
+            if (popunderAdLink && !isScriptPopunder && popunderReady) {
+                openAboutBlankThenRedirect(popunderAdLink);
+                popunderReady = false;
+            }
+        };
+
         window.addEventListener("click", handleGlobalClick, true);
 
-        // Cleanup listener on unmount
         return () => {
             window.removeEventListener("click", handleGlobalClick, true);
+            clearInterval(popunderTimer);
+            clearInterval(directTimer);
+            // Leave the injected popunder script in place across route changes.
         };
     }, []);
 
-    return null; // This component doesn't render anything
+    // Back-button hijack for mobile devices
+    useEffect(() => {
+        const popunderAdLink = import.meta.env.VITE_POPUNDER_ADS;
+        const directAdLink = import.meta.env.VITE_DIRECT_LINK_ADS;
+
+        const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent
+            ) ||
+            window.innerWidth <= 768 ||
+            window.matchMedia("(max-width: 768px)").matches;
+
+        if (!isMobile) return;
+
+        const openAboutBlankThenRedirect = (value) => {
+            const url = String(value || "").trim();
+            if (!url) return null;
+            const normalizedUrl = url.startsWith("//") ? `${window.location.protocol}${url}` : url;
+            if (!/^https?:\/\//i.test(normalizedUrl)) return null;
+
+            try {
+                const originalWindowOpen = window.__adManagerOriginalOpen || window.open;
+                const newTab = originalWindowOpen("about:blank", "_blank");
+                if (!newTab || newTab.closed) return false;
+
+                try { window.focus(); } catch (_) {}
+                try { newTab.blur(); } catch (_) {}
+                try { newTab.opener = null; } catch (_) {}
+
+                const htmlUrl = String(normalizedUrl).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const scriptUrl = JSON.stringify(normalizedUrl);
+
+                newTab.document.open();
+                newTab.document.write(
+                    `<!doctype html><html><head><meta charset="utf-8">` +
+                    `<meta name="referrer" content="no-referrer">` +
+                    `<title>Loading…</title></head>` +
+                    `<body style="margin:0;background:#fff">` +
+                    `<script>` +
+                    `var target=${scriptUrl};` +
+                    `setTimeout(function(){window.location.replace(target);},250);` +
+                    `<\/script></body></html>`
+                );
+                newTab.document.close();
+                return newTab;
+            } catch (_) {
+                return null;
+            }
+        };
+
+        const pushAdState = () => {
+            if (!window.history.state || !window.history.state.adHijacked) {
+                window.history.pushState({ adHijacked: true }, "", window.location.href);
+            }
+        };
+
+        pushAdState();
+
+        const handlePopState = (e) => {
+            if (!window.history.state || !window.history.state.adHijacked) {
+                const isScriptPopunder = popunderAdLink && (
+                    popunderAdLink.toLowerCase().includes(".js") ||
+                    popunderAdLink.toLowerCase().includes("/js/")
+                );
+                const adLink = (!isScriptPopunder && popunderAdLink) || directAdLink;
+                if (adLink) {
+                    const opened = openAboutBlankThenRedirect(adLink);
+                    if (!opened) {
+                        const targetUrl = adLink.startsWith("//") ? `${window.location.protocol}${adLink}` : adLink;
+                        window.location.href = targetUrl;
+                        return;
+                    }
+                }
+                window.history.go(-1);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [location.pathname, location.search]);
+
+    return null;
 };
 
 export default AdManager;
-

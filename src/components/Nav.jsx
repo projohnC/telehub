@@ -12,6 +12,7 @@ import { BiHomeAlt2, BiSolidMovie, BiStar } from "react-icons/bi";
 import { BsTv } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
+import { getMediaSlug } from "../utils/slugify";
 
 export default function Nav() {
   const BASE = import.meta.env.VITE_BASE_URL;
@@ -210,48 +211,47 @@ export default function Nav() {
             >
               <div className="max-h-[60vh] md:max-h-[65vh] overflow-y-auto custom-scrollbar p-3">
                 {searcResult.length > 0 && !isLoading ? (
-                  searcResult.map((result) => (
-                    <Link
-                      key={result.tmdb_id}
-                      to={
-                        result.is_anime
-                          ? result.media_type === "movie"
-                            ? `/mov/${result.tmdb_id}`
-                            : `/ani/${result.tmdb_id}`
-                          : result.media_type === "movie"
-                          ? `/mov/${result.tmdb_id}`
-                          : `/ser/${result.tmdb_id}`
-                      }
-                      className="flex items-center gap-4 p-3 rounded-[1.5rem] hover:bg-white/5 transition-all duration-300 group"
-                      onClick={() => {
-                        setQuery("");
-                        setIsSearchOpen(false);
-                      }}
-                    >
-                      <div className="w-12 md:w-14 aspect-[2/3] bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/5 shadow-lg">
-                        <LazyLoadImage
-                          alt={result.title}
-                          src={result.poster || posterPlaceholder}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-black truncate group-hover:text-red-500 transition-colors duration-300">{result.title}</p>
-                        <div className="flex items-center gap-3 mt-1 md:mt-2">
-                          <span className="text-[8px] md:text-[9px] text-white/40 uppercase font-black tracking-[0.15em] bg-white/5 px-2 py-0.5 rounded-lg border border-white/5">
-                            {result.media_type === "tv" ? "TV" : "Movie"}
-                          </span>
-                          {result.release_year && (
-                            <span className="text-[9px] md:text-10px text-white/30 font-bold">{result.release_year}</span>
-                          )}
-                          <div className="flex items-center gap-1 text-[9px] md:text-[10px] text-yellow-500/70 font-black bg-yellow-500/5 px-2 py-0.5 rounded-lg border border-yellow-500/10">
-                            <BiStar className="text-xs" />
-                            {result.rating?.toFixed(1)}
+                  searcResult.map((result) => {
+                    const prefix = result.is_anime
+                      ? result.media_type === "movie" ? "mov" : "ani"
+                      : result.media_type === "movie" ? "mov" : "ser";
+                    const slug = getMediaSlug(result, result.media_type);
+                    const linkPath = `/${prefix}/${result.tmdb_id}/${slug}`;
+                    return (
+                      <Link
+                        key={result.tmdb_id}
+                        to={linkPath}
+                        className="flex items-center gap-4 p-3 rounded-[1.5rem] hover:bg-white/5 transition-all duration-300 group"
+                        onClick={() => {
+                          setQuery("");
+                          setIsSearchOpen(false);
+                        }}
+                      >
+                        <div className="w-12 md:w-14 aspect-[2/3] bg-white/5 rounded-xl overflow-hidden shrink-0 border border-white/5 shadow-lg">
+                          <LazyLoadImage
+                            alt={result.title}
+                            src={result.poster || posterPlaceholder}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-black truncate group-hover:text-red-500 transition-colors duration-300">{result.title}</p>
+                          <div className="flex items-center gap-3 mt-1 md:mt-2">
+                            <span className="text-[8px] md:text-[9px] text-white/40 uppercase font-black tracking-[0.15em] bg-white/5 px-2 py-0.5 rounded-lg border border-white/5">
+                              {result.media_type === "tv" ? "TV" : "Movie"}
+                            </span>
+                            {result.release_year && (
+                              <span className="text-[9px] md:text-10px text-white/30 font-bold">{result.release_year}</span>
+                            )}
+                            <div className="flex items-center gap-1 text-[9px] md:text-[10px] text-yellow-500/70 font-black bg-yellow-500/5 px-2 py-0.5 rounded-lg border border-yellow-500/10">
+                              <BiStar className="text-xs" />
+                              {result.rating?.toFixed(1)}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))
+                      </Link>
+                    );
+                  })
                 ) : !isLoading && (
                   <div className="p-12 md:p-16 text-center">
                     <div className="w-12 h-12 md:w-16 md:h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-5 border border-white/5">

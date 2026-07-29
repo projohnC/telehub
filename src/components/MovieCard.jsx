@@ -7,6 +7,7 @@ import { PiStarFill } from "react-icons/pi";
 
 import { BsPlayFill } from "react-icons/bs";
 import posterPlaceholder from "../assets/images/poster-placeholder.png";
+import { getMediaSlug } from "../utils/slugify";
 
 const MovieCard = ({ movie }) => {
   const [showPlayBtn, setShowPlayBtn] = useState(false);
@@ -22,6 +23,16 @@ const MovieCard = ({ movie }) => {
     setShowPlayBtn(false);
   };
 
+  const prefix = movie.is_anime
+    ? movie.media_type === "movie"
+      ? "mov"
+      : "ani"
+    : movie.media_type === "movie"
+    ? "mov"
+    : "ser";
+  const slug = getMediaSlug(movie, movie.media_type);
+  const linkPath = `/${prefix}/${movie.tmdb_id}/${slug}`;
+
   return (
     <div className="relative">
       <div className="absolute top-2 left-2 z-10">
@@ -31,15 +42,7 @@ const MovieCard = ({ movie }) => {
       </div>
 
       <Link
-        to={
-          movie.is_anime
-            ? movie.media_type === "movie"
-              ? `/mov/${movie.tmdb_id}`
-              : `/ani/${movie.tmdb_id}`
-            : movie.media_type === "movie"
-            ? `/mov/${movie.tmdb_id}`
-            : `/ser/${movie.tmdb_id}`
-        }
+        to={linkPath}
         className="rounded-t-2xl"
       >
         <div className="flex items-center justify-center aspect-[9/13.5] w-full object-cover rounded-2xl overflow-hidden">
@@ -61,8 +64,8 @@ const MovieCard = ({ movie }) => {
           {movie.release_year && <p>{movie.release_year}</p>}
           {movie.rating && (
             <div className="flex items-center gap-1 text-yellow-500">
-              <PiStarFill />
-              <p>{movie.rating.toFixed(1)}</p>
+               <PiStarFill />
+               <p>{movie.rating.toFixed(1)}</p>
             </div>
           )}
         </div>
@@ -71,15 +74,7 @@ const MovieCard = ({ movie }) => {
       <AnimatePresence>
         {openId === movie.tmdb_id && showPlayBtn && (
           <Link
-            to={
-              movie.is_anime
-                ? movie.media_type === "movie"
-                  ? `/mov/${movie.tmdb_id}`
-                  : `/ani/${movie.tmdb_id}`
-                : movie.media_type === "movie"
-                ? `/mov/${movie.tmdb_id}`
-                : `/ser/${movie.tmdb_id}`
-            }
+            to={linkPath}
             onMouseEnter={showPlay}
             onMouseLeave={hidePlay}
             className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primaryBtn sm:block"

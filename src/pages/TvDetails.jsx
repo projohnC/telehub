@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import MoviesAndSeriesDetailsSections from "../components/MoviesAndSeriesDetailsSections";
 import Similars from "../components/Similars";
 import SEO from "../components/SEO"; // import SEO
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getMediaSlug } from "../utils/slugify";
+
 export default function MovieDetails() {
   const BASE = import.meta.env.VITE_BASE_URL; // Base URL for backend
   const SITENAME = import.meta.env.VITE_SITENAME;
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isAnimePath = pathname.startsWith("/ani");
 
-  let { seriesID } = useParams();
+  let { seriesID, slug } = useParams();
 
   // States
   const [seriesDetail, setSeriesDetail] = useState({});
@@ -22,6 +27,19 @@ export default function MovieDetails() {
   const [seasonNumber, setSeasonNumber] = useState(1);
   const [isEpisodesLoading, setIsEpisodesLoading] = useState(true);
   const [episodes, setEpisodes] = useState([]);
+
+  // Sync slug URL when details are loaded or season changes
+  useEffect(() => {
+    if (seriesDetail && seriesDetail.title && !isDetailsLoading) {
+      const type = isAnimePath ? "anime" : "series";
+      const expectedSlug = getMediaSlug(seriesDetail, type, seasonNumber);
+      const prefix = isAnimePath ? "ani" : "ser";
+
+      if (slug !== expectedSlug) {
+        navigate(`/${prefix}/${seriesID}/${expectedSlug}`, { replace: true });
+      }
+    }
+  }, [seriesDetail, isDetailsLoading, seriesID, slug, seasonNumber, isAnimePath, navigate]);
 
   // Fetch Series Details Data
   useEffect(() => {
@@ -37,10 +55,19 @@ export default function MovieDetails() {
 
         setSeriesDetail({ ...response.data, seasons: sortedSeasons });
 
-        if (sortedSeasons.length > 0) {
-          setSeasonNumber(sortedSeasons[0].season_number);
+        // Parse season number from slug if present
+        let initialSeason = sortedSeasons.length > 0 ? sortedSeasons[0].season_number : 1;
+        if (slug) {
+          const match = slug.match(/season-(\d+)/i) || slug.match(/s(\d+)/i);
+          if (match) {
+            const parsedSeason = parseInt(match[1], 10);
+            if (sortedSeasons.some(s => s.season_number === parsedSeason)) {
+              initialSeason = parsedSeason;
+            }
+          }
         }
 
+        setSeasonNumber(initialSeason);
         setDetailsIsLoading(false);
       })
       .catch((error) => {

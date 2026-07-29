@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import MoviesAndSeriesDetailsSections from "../components/MoviesAndSeriesDetailsSections";
 import Similars from "../components/Similars";
 import SEO from "../components/SEO"; // import SEO
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getMediaSlug } from "../utils/slugify";
+
 export default function MovieDetails() {
   const BASE = import.meta.env.VITE_BASE_URL; // Base URL for backend
   const SITENAME = import.meta.env.VITE_SITENAME;
+  const navigate = useNavigate();
 
-  let { movieID } = useParams();
+  let { movieID, slug } = useParams();
 
   // States
   const [movieDetail, setMovieDetail] = useState({});
   const [similarMovies, setSimilarMovies] = useState([]);
   const [isDetailsLoading, setDetailsIsLoading] = useState(true);
   const [isSimilarLoading, setIsSimilarLoading] = useState(true);
+
+  // Sync slug URL
+  useEffect(() => {
+    if (movieDetail && movieDetail.title && !isDetailsLoading) {
+      const expectedSlug = getMediaSlug(movieDetail, "movie");
+      if (slug !== expectedSlug) {
+        navigate(`/mov/${movieID}/${expectedSlug}`, { replace: true });
+      }
+    }
+  }, [movieDetail, isDetailsLoading, movieID, slug, navigate]);
 
   // Fetch Movie Details Data
   useEffect(() => {
