@@ -1,33 +1,23 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  MONETAG_ZONES,
-  isExcludedPath,
-  loadMonetagInPagePush,
-  loadMonetagOnClick,
-  loadMonetagPush,
-  loadMonetagVignette,
-} from "../utils/monetag";
+import { isExcludedPath, loadAllMonetag } from "../utils/monetag";
 
 /**
- * Mounts every Monetag format that has a zone id configured in .env:
- *  - OnClick (Popunder)   VITE_MONETAG_ONCLICK_ZONE
- *  - Vignette Banner      VITE_MONETAG_VIGNETTE_ZONE
- *  - Push Notifications   VITE_MONETAG_PUSH_ZONE
- *  - In-Page Push         VITE_MONETAG_INPAGE_PUSH_ZONE
+ * Mounts every Monetag format once:
+ *  - OnClick (Popunder)
+ *  - Vignette Banner
+ *  - Push Notifications
+ *  - In-Page Push
  *
  * Scripts are injected once and left in place across route changes.
+ * Paths listed in VITE_MONETAG_EXCLUDE_PATHS are skipped.
  */
 const MonetagAds = () => {
   const location = useLocation();
 
   useEffect(() => {
     if (isExcludedPath(location.pathname)) return;
-
-    if (MONETAG_ZONES.onclick) loadMonetagOnClick();
-    if (MONETAG_ZONES.vignette) loadMonetagVignette();
-    if (MONETAG_ZONES.inPagePush) loadMonetagInPagePush();
-    if (MONETAG_ZONES.push) loadMonetagPush();
+    loadAllMonetag();
   }, [location.pathname]);
 
   return null;
