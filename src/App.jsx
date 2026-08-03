@@ -11,12 +11,12 @@ import ActionPage from "./pages/ActionPage";
 import Anime from "./pages/Anime";
 // import Token from "./pages/Token";
 import NotFoundPage from "./pages/NotFound";
+import RedirectPage from "./pages/RedirectPage";
 // import Login from "./pages/Login";
 
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import AdManager from "./components/AdManager";
-import MonetagAds from "./components/MonetagAds";
 import AdBlockDetector from "./components/AdBlockDetector";
 import DomainNotice from "./components/DomainNotice";
 // import PrivateRoute from "./components/PrivateRoute";
@@ -41,7 +41,6 @@ function App() {
   return (
     <div className={isVerificationPage ? "bg-[#eff3fb] min-h-screen" : ""}>
       <AdManager />
-      <MonetagAds />
       <AdBlockDetector />
       <DomainNotice />
       <Nav />
@@ -112,6 +111,10 @@ function App() {
           <Route
             path="/plyr"
             element={<ActionPage actionType="Player" />}
+          />
+          <Route
+            path="/redirect"
+            element={<RedirectPage />}
           />
         </Routes>
       </div>

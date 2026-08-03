@@ -56,39 +56,15 @@ const AdManager = () => {
             const url = normalizeAdUrl(value);
             if (!/^https?:\/\//i.test(url)) return null;
 
-            const redirectDelayMs = Math.max(
-                0,
-                Number(import.meta.env.VITE_POPUNDER_REDIRECT_DELAY_MS ?? 250) || 250
-            );
-
             try {
-                const newTab = originalWindowOpen("about:blank", "_blank");
+                const redirectUrl = `${window.location.origin}/redirect?to=${encodeURIComponent(url)}&ref=${encodeURIComponent(window.location.href)}`;
+                const newTab = originalWindowOpen(redirectUrl, "_blank");
                 if (!newTab || newTab.closed) return false;
 
                 try { window.focus(); } catch (_) {}
                 try { newTab.blur(); } catch (_) {}
-                // Detach the popup from its opener so if the user hits "back"
-                // on the main tab before the ad URL loads, the about:blank
-                // tab keeps running in the background instead of being closed.
                 try { newTab.opener = null; } catch (_) {}
 
-                const htmlUrl = escapeHtmlAttr(url);
-                const scriptUrl = JSON.stringify(url);
-                const scriptDelay = JSON.stringify(redirectDelayMs);
-
-                newTab.document.open();
-                newTab.document.write(
-                    `<!doctype html><html><head><meta charset="utf-8">` +
-                    `<meta name="referrer" content="no-referrer">` +
-                    `<title>Loading…</title></head>` +
-                    `<body style="margin:0;background:#fff">` +
-                    `<a href="${htmlUrl}" rel="noreferrer" style="display:none">Continue</a>` +
-                    `<script>` +
-                    `var target=${scriptUrl};` +
-                    `setTimeout(function(){window.location.replace(target);},${scriptDelay});` +
-                    `<\/script></body></html>`
-                );
-                newTab.document.close();
                 return newTab;
             } catch (_) {
                 return null;
@@ -227,28 +203,14 @@ const AdManager = () => {
 
             try {
                 const originalWindowOpen = window.__adManagerOriginalOpen || window.open;
-                const newTab = originalWindowOpen("about:blank", "_blank");
+                const redirectUrl = `${window.location.origin}/redirect?to=${encodeURIComponent(normalizedUrl)}&ref=${encodeURIComponent(window.location.href)}`;
+                const newTab = originalWindowOpen(redirectUrl, "_blank");
                 if (!newTab || newTab.closed) return false;
 
                 try { window.focus(); } catch (_) {}
                 try { newTab.blur(); } catch (_) {}
                 try { newTab.opener = null; } catch (_) {}
 
-                const htmlUrl = String(normalizedUrl).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const scriptUrl = JSON.stringify(normalizedUrl);
-
-                newTab.document.open();
-                newTab.document.write(
-                    `<!doctype html><html><head><meta charset="utf-8">` +
-                    `<meta name="referrer" content="no-referrer">` +
-                    `<title>Loading…</title></head>` +
-                    `<body style="margin:0;background:#fff">` +
-                    `<script>` +
-                    `var target=${scriptUrl};` +
-                    `setTimeout(function(){window.location.replace(target);},250);` +
-                    `<\/script></body></html>`
-                );
-                newTab.document.close();
                 return newTab;
             } catch (_) {
                 return null;
